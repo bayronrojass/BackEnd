@@ -1,8 +1,8 @@
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/usuarios")
-class UsuarioController(private val service: UsuarioService) {
+@RequestMapping("/tareas")
+class TareaController(private val service: TareaService) {
     @GetMapping
     fun getAll() = service.findAll()
 }

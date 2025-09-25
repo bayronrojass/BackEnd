@@ -1,6 +1,6 @@
 import org.springframework.stereotype.Service
 
 @Service
-class UsuarioService(private val repo: UsuarioRepository) {
+class TareaService(private val repo: TareaRepository) {
     fun findAll() = repo.findAll()
 }

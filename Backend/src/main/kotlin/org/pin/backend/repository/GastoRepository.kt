@@ -1,3 +1,3 @@
 import org.springframework.data.jpa.repository.JpaRepository
 
-interface UsuarioRepository : JpaRepository<Usuario, Long>
+interface GastoRepository : JpaRepository<Gasto, Long>

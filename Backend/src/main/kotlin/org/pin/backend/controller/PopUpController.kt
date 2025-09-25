@@ -1,8 +1,8 @@
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/usuarios")
-class UsuarioController(private val service: UsuarioService) {
+@RequestMapping("/popups")
+class PopUpController(private val service: PopUpService) {
     @GetMapping
     fun getAll() = service.findAll()
 }
