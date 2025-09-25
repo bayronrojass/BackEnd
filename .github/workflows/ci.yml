@@ -24,7 +24,7 @@ jobs:
         run: chmod +x mvnw || true
 
       - name: Compile
-        run: mvn -f backend/pom.xml clean compile
+        run: mvn -f Backend/pom.xml clean compile
 
       - name: Run tests
-        run: mvn -f backend/pom.xml test
+        run: mvn -f Backend/pom.xml test
