@@ -4,5 +4,5 @@ import jakarta.persistence.*
 data class Gasto(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-    val nombre: String
+    val nombre: String,
 )

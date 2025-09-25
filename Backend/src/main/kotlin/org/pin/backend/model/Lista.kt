@@ -8,5 +8,5 @@ data class Lista(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-    val nombre: String
+    val nombre: String,
 )
