@@ -1,0 +1,28 @@
+services:
+  backend:
+    build: ./Backend
+    container_name: PIN_backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/mi_db
+      - SPRING_DATASOURCE_USERNAME=usuario
+      - SPRING_DATASOURCE_PASSWORD=clave
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - MULTIMEDIA_DIR=/app/multimedia
+    volumes:
+      - ./multimedia:/app/multimedia
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: PIN_db
+    environment:
+      POSTGRES_DB: mi_db
+      POSTGRES_USER: usuario
+      POSTGRES_PASSWORD: clave
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
