@@ -43,4 +43,4 @@ jobs:
           done
 
       - name: Run tests
-        run: mvn test
+        run: cd Backend && mvn test
