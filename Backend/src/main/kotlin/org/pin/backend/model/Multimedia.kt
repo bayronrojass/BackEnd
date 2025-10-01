@@ -1,8 +1,24 @@
 import jakarta.persistence.*
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.PositiveOrZero
 
 @Entity
-data class Multimedia(
+@Inheritance(strategy = InheritanceType.JOINED)
+class Multimedia(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-    val nombre: String,
+
+    @Column(nullable = false)
+    @field:PositiveOrZero
+    var posicionX: Int = 0,
+
+    @Column(nullable = false)
+    @field:PositiveOrZero
+    var posicionY: Int = 0,
+
+    @Column(nullable = true)
+    var ruta: String? = null,
+
+    @ManyToOne()
+    val usuario : Usuario? = null,
 )

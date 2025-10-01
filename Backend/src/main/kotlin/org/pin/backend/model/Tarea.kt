@@ -1,8 +1,16 @@
 import jakarta.persistence.*
+import org.jetbrains.annotations.NotNull
+import java.time.LocalDateTime
 
 @Entity
-data class Tarea(
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
-    val nombre: String,
-)
+class Tarea(
+    @Column(nullable = false)
+    @field:NotNull
+    val periodica: Boolean,
+
+    @Column(nullable = true)
+    val frecuencia: LocalDateTime? = null,
+
+    @Column(nullable = true)
+    val fechaFin: LocalDateTime? = null,
+) : Elemento()

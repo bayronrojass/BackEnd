@@ -1,8 +1,20 @@
+import aj.org.objectweb.asm.ByteVector
 import jakarta.persistence.*
+import jakarta.validation.constraints.Size
 
 @Entity
-data class Lienzo(
+class Lienzo(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-    val nombre: String,
+
+    @Column(nullable = false)
+    var bytes: String,
+
+    @Column(nullable = false)
+    @field:Size(min = 1)
+    var pixelsX: Short,
+
+    @Column(nullable = false)
+    @field:Size(min = 1)
+    var pixelsY: Short,
 )

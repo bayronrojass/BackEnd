@@ -1,8 +1,10 @@
 import jakarta.persistence.*
 
 @Entity
-data class Voto(
+class Voto(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-    val nombre: String,
+
+    @OneToOne
+    val votante : Usuario,
 )
