@@ -1,4 +1,4 @@
-import aj.org.objectweb.asm.ByteVector
+package org.pin.backend.model
 import jakarta.persistence.*
 import jakarta.validation.constraints.Size
 

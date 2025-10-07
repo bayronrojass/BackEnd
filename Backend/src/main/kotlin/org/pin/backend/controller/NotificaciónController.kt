@@ -1,3 +1,5 @@
+package org.pin.backend.controller
+import org.pin.backend.service.NotificaciónService
 import org.springframework.web.bind.annotation.*
 
 @RestController

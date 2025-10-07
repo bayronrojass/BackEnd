@@ -1,3 +1,4 @@
+package org.pin.backend.model
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
@@ -25,11 +26,9 @@ class Evento(
     @Column(nullable = true)
     var fechaFin: LocalDateTime? = null,
 
-    @Column(nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     val creadoPor: Usuario,
 
-    @Column(nullable = false)
     @OneToMany
     var asistentes: MutableList<Usuario> = mutableListOf(),
 )

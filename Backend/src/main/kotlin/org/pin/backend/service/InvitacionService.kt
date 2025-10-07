@@ -1,10 +1,9 @@
 package org.pin.backend.service
-import org.pin.backend.repository.ResumenRepository
+
+import org.pin.backend.repository.InvitacionRepository
 import org.springframework.stereotype.Service
 
 @Service
-class ResumenService(
-    private val repo: ResumenRepository,
-) {
+class InvitacionService(private val repo: InvitacionRepository) {
     fun findAll() = repo.findAll()
 }

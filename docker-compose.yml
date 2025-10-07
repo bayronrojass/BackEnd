@@ -16,7 +16,7 @@ services:
       - db
 
   db:
-    image: postgres:15
+    image: postgres:16
     container_name: PIN_db
     environment:
       POSTGRES_DB: mi_db

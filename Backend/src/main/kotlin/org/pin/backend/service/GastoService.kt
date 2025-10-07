@@ -1,3 +1,5 @@
+package org.pin.backend.service
+import org.pin.backend.repository.GastoRepository
 import org.springframework.stereotype.Service
 
 @Service
