@@ -5,7 +5,6 @@ import jakarta.persistence.*
 class Voto(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-
     @OneToOne
-    val votante : Usuario,
+    val votante: Usuario,
 )

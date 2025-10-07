@@ -6,13 +6,10 @@ import jakarta.persistence.*
 class Invitacion(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-
     @OneToOne
-    val anfitrion : Usuario,
-
+    val anfitrion: Usuario,
     @OneToOne
-    val miembro : Usuario,
-
+    val miembro: Usuario,
     @OneToOne
     val casa: Casa,
 )

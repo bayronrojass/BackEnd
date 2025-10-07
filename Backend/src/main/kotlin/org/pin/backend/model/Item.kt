@@ -2,4 +2,4 @@ package org.pin.backend.model
 import jakarta.persistence.*
 
 @Entity
-class Item() : Elemento()
+class Item : Elemento()

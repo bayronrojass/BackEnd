@@ -7,18 +7,14 @@ import jakarta.validation.constraints.PositiveOrZero
 class Multimedia(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-
     @Column(nullable = false)
     @field:PositiveOrZero
     var posicionX: Int = 0,
-
     @Column(nullable = false)
     @field:PositiveOrZero
     var posicionY: Int = 0,
-
     @Column(nullable = true)
     var ruta: String? = null,
-
     @ManyToOne()
-    val usuario : Usuario? = null,
+    val usuario: Usuario? = null,
 )

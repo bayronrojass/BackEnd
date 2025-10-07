@@ -6,14 +6,12 @@ import jakarta.validation.constraints.Size
 class Lienzo(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-
-    @Column(nullable = false)
-    var bytes: String,
-
+    @Lob
+    @Column(nullable = false, columnDefinition = "BYTEA")
+    val bytes: ByteArray,
     @Column(nullable = false)
     @field:Size(min = 1)
     var pixelsX: Short,
-
     @Column(nullable = false)
     @field:Size(min = 1)
     var pixelsY: Short,

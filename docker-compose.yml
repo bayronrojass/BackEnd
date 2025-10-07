@@ -8,10 +8,10 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/mi_db
       - SPRING_DATASOURCE_USERNAME=usuario
       - SPRING_DATASOURCE_PASSWORD=clave
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - MULTIMEDIA_DIR=/app/multimedia
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+      - MULTIMEDIA_DIR=./multimedia
     volumes:
-      - ./multimedia:/app/multimedia
+      - ./multimedia:./multimedia
     depends_on:
       - db
 

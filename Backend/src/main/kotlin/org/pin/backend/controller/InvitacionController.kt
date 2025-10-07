@@ -6,7 +6,9 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/invitacions")
-class InvitacionController(private val service: InvitacionService) {
+class InvitacionController(
+    private val service: InvitacionService,
+) {
     @GetMapping
     fun getAll() = service.findAll()
 }
