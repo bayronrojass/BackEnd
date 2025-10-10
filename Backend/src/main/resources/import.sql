@@ -8,7 +8,7 @@ INSERT INTO public.elemento (completado, descripcion, nombre) VALUES (TRUE, 'Ele
 INSERT INTO public.gasto (descripcion, fecha_inicio, nombre) VALUES ('Gasto 1', now(), 'Gasto1'),('Gasto 2', now(), 'Gasto2'),('Gasto 3', now(), 'Gasto3');
 INSERT INTO public.lienzo (id, bytes, pixelsx, pixelsy) VALUES (1,decode('6461746131', 'hex'), 100, 200),(2,decode('6461746132', 'hex'), 150, 250),(3,decode('6461746133', 'hex'), 200, 300);
 INSERT INTO public.lista (descripcion, nombre) VALUES ('Lista 1', 'Lista1'),('Lista 2', 'Lista2'),('Lista 3', 'Lista3');
-INSERT INTO public.notificacion (dtype, cuerpo, titulo) VALUES ('Push', 'Cuerpo 1', 'Titulo1'),('Push', 'Cuerpo 2', 'Titulo2'),('PopUp', 'Cuerpo 3', 'Titulo3');
+INSERT INTO public.notificacion (id, dtype, cuerpo, titulo) VALUES (1, 'Push', 'Cuerpo 1', 'Titulo1'),(2, 'Push', 'Cuerpo 2', 'Titulo2'),(3, 'PopUp', 'Cuerpo 3', 'Titulo3');
 INSERT INTO public.opcion (nombre) VALUES ('Opcion1'),('Opcion2'),('Opcion3');
 INSERT INTO public.resumen DEFAULT VALUES;
 INSERT INTO public.resumen DEFAULT VALUES;
@@ -45,3 +45,4 @@ INSERT INTO public.post_it (id, lienzo_id) VALUES (1, 1),(2, 2),(3, 3);
 INSERT INTO public.invitacion (anfitrion_id, miembro_id, casa_id) VALUES (1, 2, 1),(2, 3, 2),(3, 1, 3);
 INSERT INTO public.audio (id) VALUES (1),(2),(3);
 INSERT INTO public.imagen (id) VALUES (1),(2),(3);
+INSERT INTO public.notificacion_receptor (notificacion_id, receptor_id) VALUES (1, 1), (1, 2), (3, 3)

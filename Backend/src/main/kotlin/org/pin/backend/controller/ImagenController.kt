@@ -3,7 +3,7 @@ import org.pin.backend.service.ImagenService
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/imagens")
+@RequestMapping("/imagenes")
 class ImagenController(
     private val service: ImagenService,
 ) {

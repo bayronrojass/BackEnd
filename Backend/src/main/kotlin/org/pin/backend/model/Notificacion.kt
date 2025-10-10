@@ -15,4 +15,6 @@ class Notificacion(
     @Column(length = 1024, nullable = false)
     @field:Size(min = 0, max = 1024, message = "Body length must be between 0 and 255")
     var cuerpo: String = "",
+    @ManyToMany(fetch = FetchType.LAZY)
+    var receptor: MutableList<Usuario> = mutableListOf(),
 )

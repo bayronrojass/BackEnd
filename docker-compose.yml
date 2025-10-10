@@ -9,11 +9,13 @@ services:
       - SPRING_DATASOURCE_USERNAME=usuario
       - SPRING_DATASOURCE_PASSWORD=clave
       - SPRING_JPA_HIBERNATE_DDL_AUTO=none
-      - MULTIMEDIA_DIR=./multimedia
+      - MULTIMEDIA_DIR=/multimedia
+      - MQTT_BROKER=tcp://mqtt:1883
     volumes:
-      - ./multimedia:./multimedia
+      - ./multimedia:/multimedia
     depends_on:
       - db
+      - mqtt
 
   db:
     image: postgres:16
@@ -26,3 +28,15 @@ services:
       - ./db-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+
+  mqtt:
+    image: eclipse-mosquitto:2.0.22
+    container_name: PIN_MQTT
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config:rw
+      - ./mosquitto/data:/mosquitto/data:rw
+      - ./mosquitto/logs:/mosquitto/logs:rw

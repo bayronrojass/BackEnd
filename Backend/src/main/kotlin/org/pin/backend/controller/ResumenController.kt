@@ -3,7 +3,7 @@ import org.pin.backend.service.ResumenService
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/resumens")
+@RequestMapping("/resumenes")
 class ResumenController(
     private val service: ResumenService,
 ) {

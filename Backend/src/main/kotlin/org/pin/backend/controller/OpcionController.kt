@@ -3,7 +3,7 @@ import org.pin.backend.service.OpcionService
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/opcions")
+@RequestMapping("/opciones")
 class OpcionController(
     private val service: OpcionService,
 ) {

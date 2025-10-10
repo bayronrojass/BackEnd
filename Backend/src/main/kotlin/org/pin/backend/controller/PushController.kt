@@ -3,7 +3,7 @@ import org.pin.backend.service.PushService
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/pushs")
+@RequestMapping("/pushes")
 class PushController(
     private val service: PushService,
 ) {
