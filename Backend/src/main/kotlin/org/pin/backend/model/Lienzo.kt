@@ -6,13 +6,20 @@ import jakarta.validation.constraints.Min
 class Lienzo(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-    @Lob
     @Column(nullable = false, columnDefinition = "BYTEA")
     var bytes: ByteArray,
     @Column(nullable = false)
     @field:Min(1)
-    var pixelsX: Short,
+    var width: Short,
     @Column(nullable = false)
     @field:Min(1)
-    var pixelsY: Short,
-)
+    var height: Short,
+) {
+    @PostLoad
+    fun initBytes() {
+        if (bytes.isEmpty()) {
+            bytes = ByteArray(width * height)
+            bytes.fill("11".hexToByte(), 0, width * height)
+        }
+    }
+}

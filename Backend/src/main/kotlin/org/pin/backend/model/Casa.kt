@@ -23,12 +23,7 @@ class Casa(
     val fechaCreacion: LocalDateTime,
 
     @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
-    @JoinColumn(name = "lienzo_id", referencedColumnName = "id")
-    var lienzo: Lienzo = Lienzo(
-        bytes = ByteArray(0),
-        pixelsX = 2000,
-        pixelsY = 2000
-    ),
+    var lienzo: Lienzo,
 
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var notifaciones: MutableList<Notificacion> = mutableListOf(),
