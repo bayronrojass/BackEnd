@@ -34,4 +34,3 @@ build/
 secrets/
 db-data/
 db-data/*
-mosquitto/data/mosquitto.db
