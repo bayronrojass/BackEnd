@@ -1,9 +1,9 @@
 package org.pin.backend.service
+import jakarta.transaction.Transactional
 import org.pin.backend.dto.PointDeltaDTO
 import org.pin.backend.repository.LienzoRepository
+import org.pin.backend.utils.Lienzo4bpp
 import org.springframework.stereotype.Service
-import java.awt.BasicStroke
-import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -17,24 +17,20 @@ class LienzoService(
 
     fun findById(id: Long) = repo.findById(id)
 
+    @Transactional
     fun applyDelta(id: Long, puntos: List<PointDeltaDTO>) {
         val lienzo = repo.findById(id).orElseThrow()
-        val currentBitmap = decodeImage(lienzo.bytes)
+        val canvas = Lienzo4bpp(lienzo.width, lienzo.height, lienzo.bytes)
 
-        val g = currentBitmap.createGraphics()
-        g.color = Color.BLACK
-        g.stroke = BasicStroke(10f)
+        if (puntos.isEmpty()) return
 
-        if (puntos.size >= 2) {
-            for (i in 0 until puntos.size - 1) {
-                val p1 = puntos[i]
-                val p2 = puntos[i + 1]
-                g.drawLine(p1.x.toInt(), p1.y.toInt(), p2.x.toInt(), p2.y.toInt())
-            }
+        var last = puntos[0]
+        for (i in 1 until puntos.size) {
+            val current = puntos[i]
+            canvas.drawLine(last, current)
+            last = current
         }
-        g.dispose()
-
-        lienzo.bytes = encodeImage(currentBitmap)
+        
         repo.save(lienzo)
     }
 
