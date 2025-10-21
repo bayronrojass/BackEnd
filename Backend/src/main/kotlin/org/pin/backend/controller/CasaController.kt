@@ -14,12 +14,12 @@ class CasaController(
     fun getAll() = service.findAll()
 
     @PostMapping
-    fun crearPiso(@RequestBody casa: Casa): Casa {
+    fun crearCasa(@RequestBody casa: Casa): Casa {
         return service.save(casa)
     }
 
     @GetMapping
-    fun listarPisos(): MutableList<Casa?> {
+    fun listarCasa(): MutableList<Casa?> {
         return service.findAll()
     }
 }
