@@ -1,4 +1,4 @@
-package org.pin.backend.utils
+package org.pin.backend
 
 import jakarta.annotation.PostConstruct
 import org.eclipse.paho.client.mqttv3.MqttException

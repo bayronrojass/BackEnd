@@ -11,8 +11,8 @@ class Lienzo(
     var bytes: ByteArray,
     @Column(nullable = false)
     @field:Min(1)
-    var pixelsX: Short,
+    var width: Short,
     @Column(nullable = false)
     @field:Min(1)
-    var pixelsY: Short,
+    var height: Short,
 )
