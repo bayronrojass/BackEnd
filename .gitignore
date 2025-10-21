@@ -32,3 +32,5 @@ build/
 .vscode/
 
 secrets/
+db-data/
+db-data/*
