@@ -21,17 +21,24 @@ class Casa(
     @field:PastOrPresent("Creation date cannot be in the future")
     @field:NotNull(message = "Date cannot be empty")
     val fechaCreacion: LocalDateTime,
-    @OneToMany
+
+    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @JoinColumn(name = "lienzo_id", referencedColumnName = "id")
+    var lienzo: Lienzo = Lienzo(
+        bytes = ByteArray(0),
+        pixelsX = 2000,
+        pixelsY = 2000
+    ),
+
+    @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var notifaciones: MutableList<Notificacion> = mutableListOf(),
-    @OneToMany
+    @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var gastos: MutableList<Gasto> = mutableListOf(),
-    @OneToMany
+    @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var multimedia: MutableList<Multimedia> = mutableListOf(),
-    @OneToMany
-    var lienzos: MutableList<Lienzo> = mutableListOf(),
-    @OneToMany
+    @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var listas: MutableList<Lista> = mutableListOf(),
-    @OneToMany
+    @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var eventos: MutableList<Evento> = mutableListOf(),
     @OneToMany
     var usuarios: MutableList<Usuario> = mutableListOf(),

@@ -3,6 +3,6 @@ import jakarta.persistence.*
 
 @Entity
 class PostIt(
-    @OneToOne
+    @OneToOne(orphanRemoval = true, cascade = [CascadeType.ALL])
     var lienzo: Lienzo? = null,
 ) : Multimedia()

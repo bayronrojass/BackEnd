@@ -1,4 +1,5 @@
 package org.pin.backend.model
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -21,6 +22,6 @@ class Lista(
     @field:Size(min = 0, max = 255, message = "Description length must be between 0 and 255")
     var descripcion: String? = null,
     @Column(nullable = false)
-    @OneToMany
+    @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var elementos: MutableList<Elemento> = mutableListOf(),
 )

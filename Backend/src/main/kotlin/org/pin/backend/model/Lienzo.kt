@@ -1,6 +1,6 @@
 package org.pin.backend.model
 import jakarta.persistence.*
-import jakarta.validation.constraints.Size
+import jakarta.validation.constraints.Min
 
 @Entity
 class Lienzo(
@@ -8,11 +8,11 @@ class Lienzo(
     val id: Long? = null,
     @Lob
     @Column(nullable = false, columnDefinition = "BYTEA")
-    val bytes: ByteArray,
+    var bytes: ByteArray,
     @Column(nullable = false)
-    @field:Size(min = 1)
+    @field:Min(1)
     var pixelsX: Short,
     @Column(nullable = false)
-    @field:Size(min = 1)
+    @field:Min(1)
     var pixelsY: Short,
 )

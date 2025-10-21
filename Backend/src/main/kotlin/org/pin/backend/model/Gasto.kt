@@ -19,6 +19,6 @@ class Gasto(
     @Column(nullable = false)
     @field:NotNull(message = "Start date cant be null")
     val fechaInicio: LocalDateTime,
-    @OneToMany
+    @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var pagos: MutableList<Pago> = mutableListOf(),
 )

@@ -12,6 +12,6 @@ class Opcion(
     @field:Size(min = 1, max = 50, message = "Name length must be between 1 and 255")
     @field:NotBlank(message = "Name cannot be blank")
     var nombre: String,
-    @OneToMany
+    @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var votos: MutableSet<Voto> = mutableSetOf(),
 )
