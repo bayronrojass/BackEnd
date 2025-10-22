@@ -16,4 +16,11 @@ class Usuario(
     @field:Email(message = "Email must be correct")
     @field:Size(min = 0, max = 255, message = "Email length must be between 0 and 255")
     var correo: String,
-)
+    @Column(nullable = false)
+    var contrasena: String = "", // Campo para la contraseña
+
+    // Relaciones
+    @ManyToMany(mappedBy = "usuarios")
+    var casas: MutableSet<Casa> = mutableSetOf()
+    )
+
