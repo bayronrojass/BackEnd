@@ -1,20 +1,15 @@
-package org.pin.backend.configs
+package org.pin.backend.config
 
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.web.SecurityFilterChain
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
-class SecurityConfig {
-    @Bean
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
-        http
-            .csrf { it.disable() } // Solo para desarrollo, cuidado en producción
-            .authorizeHttpRequests { auth ->
-                auth.anyRequest().permitAll()
-            }
+class WebConfig : WebMvcConfigurer {
 
-        return http.build()
+    // Esto hace que http://tu-servidor:8080/uploads/archivo.jpg funcione
+    override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
+        registry.addResourceHandler("/uploads/**")
+            .addResourceLocations("file:./uploads/")
     }
 }
