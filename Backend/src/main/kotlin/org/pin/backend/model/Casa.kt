@@ -22,8 +22,8 @@ class Casa(
     @field:NotNull(message = "Date cannot be empty")
     val fechaCreacion: LocalDateTime,
 
-    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
-    var lienzo: Lienzo,
+    //@OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
+    //var lienzo: Lienzo,
 
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var notifaciones: MutableList<Notificacion> = mutableListOf(),
