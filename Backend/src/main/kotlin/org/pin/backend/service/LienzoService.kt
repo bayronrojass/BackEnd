@@ -17,7 +17,10 @@ class LienzoService(
 
     fun findById(id: Long) = repo.findById(id)
 
-    fun applyDelta(id: Long, puntos: List<PointDeltaDTO>) {
+    fun applyDelta(
+        id: Long,
+        puntos: List<PointDeltaDTO>,
+    ) {
         val lienzo = repo.findById(id).orElseThrow()
         val currentBitmap = decodeImage(lienzo.bytes)
 

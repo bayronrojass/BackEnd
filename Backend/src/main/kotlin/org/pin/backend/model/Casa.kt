@@ -21,10 +21,8 @@ class Casa(
     @field:PastOrPresent("Creation date cannot be in the future")
     @field:NotNull(message = "Date cannot be empty")
     val fechaCreacion: LocalDateTime,
-
     @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
     var lienzo: Lienzo,
-
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var notifaciones: MutableList<Notificacion> = mutableListOf(),
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
