@@ -1,5 +1,6 @@
 package org.pin.backend.controller
 
+import org.pin.backend.dto.CasaDTO
 import org.pin.backend.dto.LoginRequest
 import org.pin.backend.dto.LoginResponse
 import org.pin.backend.dto.PisoDTO
@@ -8,6 +9,7 @@ import org.pin.backend.model.Usuario
 import org.pin.backend.repository.UsuarioRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -17,6 +19,7 @@ class AuthController(
 ) {
 
     @PostMapping("/login") // Endpoint que busca el frontend
+    @Transactional(readOnly = true)
     fun login(@RequestBody request: LoginRequest): ResponseEntity<LoginResponse> {
 
         // 1. Buscar usuario por correo
@@ -36,9 +39,14 @@ class AuthController(
             correo = usuario.correo
         )
 
-        // Mapea las 'casas' del usuario a 'PisoDTO'
-        val pisosDTO = usuario.casas.map { casa ->
-            PisoDTO(id = casa.id!!) // Necesitamos el ID de la casa
+        val casasDTO = usuario.casas.map { casa ->
+            CasaDTO(
+                id = casa.id!!,
+                nombre = casa.nombre,
+                descripcion = casa.descripcion,
+                rutaImagen = casa.rutaImagen,
+                fechaCreacion = casa.fechaCreacion
+            )
         }
 
         // 4. Generar Token (!! USAR JWT EN PRODUCCIÓN !!)
@@ -47,7 +55,7 @@ class AuthController(
         // 5. Construir la respuesta
         val response = LoginResponse(
             authToken = token,
-            flats = pisosDTO,
+            flats = casasDTO,
             user = usuarioDTO
         )
 

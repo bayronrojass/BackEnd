@@ -18,8 +18,8 @@ class CasaController(
         return service.save(casa)
     }
 
-    @GetMapping
-    fun listarCasa(): MutableList<Casa?> {
-        return service.findAll()
-    }
+    //@GetMapping
+    //fun listarCasa(): MutableList<Casa?> {
+        //return service.findAll()
+    //}
 }
