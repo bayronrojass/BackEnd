@@ -1,5 +1,6 @@
 package org.pin.backend.service
 import org.pin.backend.dto.PointDeltaDTO
+import org.pin.backend.model.Lienzo
 import org.pin.backend.repository.LienzoRepository
 import org.springframework.stereotype.Service
 import java.awt.BasicStroke
@@ -17,7 +18,17 @@ class LienzoService(
 
     fun findById(id: Long) = repo.findById(id)
 
-    fun applyDelta(id: Long, puntos: List<PointDeltaDTO>) {
+    fun createDefault() : Lienzo {
+        val bytes = ByteArray(1000 * 1000)
+        bytes.fill(11)
+
+        return repo.save(Lienzo(0, bytes, 2000, 2000))
+    }
+
+    fun applyDelta(
+        id: Long,
+        puntos: List<PointDeltaDTO>,
+    ) {
         val lienzo = repo.findById(id).orElseThrow()
         val currentBitmap = decodeImage(lienzo.bytes)
 

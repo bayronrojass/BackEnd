@@ -34,3 +34,5 @@ build/
 secrets/
 db-data/
 db-data/*
+mosquitto/
+mosquitto/*
