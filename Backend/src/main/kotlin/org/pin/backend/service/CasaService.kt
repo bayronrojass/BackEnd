@@ -1,7 +1,7 @@
 package org.pin.backend.service
 
+import org.pin.backend.dto.CasaRequestDTO
 import org.pin.backend.model.Casa
-import org.pin.backend.model.CasaRequest
 import org.pin.backend.model.Lienzo
 import org.pin.backend.repository.CasaRepository
 import org.springframework.stereotype.Service
@@ -11,13 +11,12 @@ import java.time.LocalDateTime
 @Service
 class CasaService(
     private val repo: CasaRepository,
+    private val lienzoService: LienzoService,
     private val fileStorageService: FileStorageService
 ) {
     fun findAll(): MutableList<Casa> = repo.findAll()
 
-    fun crearNuevaCasa(request: CasaRequest, file: MultipartFile): Casa {
-
-
+    fun crearNuevaCasa(request: CasaRequestDTO, file: MultipartFile): Casa {
         val filename = fileStorageService.save(file)
 
         val nuevaCasa = Casa(
@@ -25,9 +24,9 @@ class CasaService(
             descripcion = request.descripcion,
             rutaImagen = filename,
             fechaCreacion = LocalDateTime.now(),
-            lienzo = Lienzo()
+            lienzo = lienzoService.createDefault()
         )
-        
+
         return repo.save(nuevaCasa)
     }
 }

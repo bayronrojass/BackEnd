@@ -8,14 +8,15 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/mi_db
       - SPRING_DATASOURCE_USERNAME=usuario
       - SPRING_DATASOURCE_PASSWORD=clave
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
       - MULTIMEDIA_DIR=/multimedia
       - MQTT_BROKER=tcp://mqtt:1883
     volumes:
       - ./multimedia:/multimedia
     depends_on:
-      - db
-      - mqtt
+      db:
+        condition: service_healthy
+      mqtt:
+        condition: service_started
 
   db:
     image: postgres:16
@@ -24,10 +25,16 @@ services:
       POSTGRES_DB: mi_db
       POSTGRES_USER: usuario
       POSTGRES_PASSWORD: clave
-    volumes:
-      - ./db-data:/var/lib/postgresql/data
+    #volumes:
+    #  - ./db-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U usuario -d mi_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
 
   mqtt:
     image: eclipse-mosquitto:2.0.22

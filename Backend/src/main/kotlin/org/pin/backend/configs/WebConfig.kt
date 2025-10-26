@@ -6,10 +6,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
 class WebConfig : WebMvcConfigurer {
-
     // Esto hace que http://tu-servidor:8080/uploads/archivo.jpg funcione
     override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
-        registry.addResourceHandler("/uploads/**")
+        registry
+            .addResourceHandler("/uploads/**")
             .addResourceLocations("file:./uploads/")
     }
 }

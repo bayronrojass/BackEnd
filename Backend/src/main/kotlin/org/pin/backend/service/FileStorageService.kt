@@ -9,7 +9,6 @@ import java.util.UUID
 
 @Service
 class FileStorageService {
-
     // Define el directorio donde se guardarán las subidas
     private val uploadDir = Paths.get("./uploads")
 

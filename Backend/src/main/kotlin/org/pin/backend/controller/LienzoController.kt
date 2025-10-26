@@ -16,10 +16,14 @@ class LienzoController(
     fun getAll() = service.findAll()
 
     @GetMapping("/{id}")
-    fun getById(@PathVariable id: Long) = service.findById(id)
+    fun getById(
+        @PathVariable id: Long,
+    ) = service.findById(id)
 
     @GetMapping("/{id}/png", produces = [MediaType.IMAGE_PNG_VALUE])
-    fun getLienzoPng(@PathVariable id: Long): ByteArray {
+    fun getLienzoPng(
+        @PathVariable id: Long,
+    ): ByteArray {
         val lienzo = service.findById(id).orElseThrow()
         val l4 = Lienzo4bpp(lienzo.width, lienzo.height, lienzo!!.bytes)
         val bmp = l4.toBufferedImage()
@@ -30,5 +34,8 @@ class LienzoController(
     }
 
     @PostMapping("/{id}/deltas")
-    fun postDeltas(@PathVariable id: Long, @RequestBody delta: List<PointDeltaDTO>) = service.applyDelta(id, delta)
+    fun postDeltas(
+        @PathVariable id: Long,
+        @RequestBody delta: List<PointDeltaDTO>,
+    ) = service.applyDelta(id, delta)
 }
