@@ -1,7 +1,10 @@
 package org.pin.backend.controller
-import org.pin.backend.model.Casa
+
+import org.pin.backend.model.CasaRequest
+import org.pin.backend.model.CasaResponse
 import org.pin.backend.service.CasaService
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/casas")
@@ -11,8 +14,19 @@ class CasaController(
     @GetMapping
     fun getAll() = service.findAll()
 
-    @PostMapping
+    @PostMapping(consumes = ["multipart/form-data"])
     fun crearCasa(
-        @RequestBody casa: Casa,
-    ): Casa = service.save(casa)
+        @RequestPart("casa") request: CasaRequest,
+        @RequestPart("file") file: MultipartFile
+    ): CasaResponse {
+
+        val casaGuardada = service.crearNuevaCasa(request, file)
+
+        return CasaResponse(
+            id = casaGuardada.id!!,
+            nombre = casaGuardada.nombre,
+            descripcion = casaGuardada.descripcion,
+            fechaCreacion = casaGuardada.fechaCreacion
+        )
+    }
 }
