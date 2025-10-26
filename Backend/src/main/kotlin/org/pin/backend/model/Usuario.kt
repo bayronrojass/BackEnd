@@ -17,10 +17,9 @@ class Usuario(
     @field:Size(min = 0, max = 255, message = "Email length must be between 0 and 255")
     var correo: String,
     @Column(nullable = false)
-    var contrasena: String = "", // Campo para la contraseña
+    var contrasena: String = "",
 
     // Relaciones
     @ManyToMany(mappedBy = "usuarios")
-    var casas: MutableSet<Casa> = mutableSetOf()
-    )
+    var casas: MutableSet<Casa> = mutableSetOf())
 
