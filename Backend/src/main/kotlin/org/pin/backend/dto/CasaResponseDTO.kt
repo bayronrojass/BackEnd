@@ -7,5 +7,5 @@ data class CasaResponseDTO(
     val id: Long,
     val nombre: String,
     val descripcion: String?,
-    val fechaCreacion: LocalDateTime
+    val fechaCreacion: LocalDateTime,
 )
