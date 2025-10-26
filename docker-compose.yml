@@ -25,8 +25,8 @@ services:
       POSTGRES_DB: mi_db
       POSTGRES_USER: usuario
       POSTGRES_PASSWORD: clave
-    volumes:
-      - ./db-data:/var/lib/postgresql/data
+    #volumes:
+    #  - ./db-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
