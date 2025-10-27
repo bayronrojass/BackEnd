@@ -19,7 +19,6 @@ class Usuario(
     @Column(nullable = false)
     var contrasena: String = "",
 
-    // Relaciones
     @ManyToMany(mappedBy = "usuarios")
     var casas: MutableSet<Casa> = mutableSetOf())
 

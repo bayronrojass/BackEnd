@@ -3,6 +3,7 @@ import org.pin.backend.dto.PointDeltaDTO
 import org.pin.backend.service.LienzoService
 import org.pin.backend.utils.Lienzo4bpp
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
@@ -34,8 +35,8 @@ class LienzoController(
     }
 
     @PostMapping("/{id}/deltas")
-    fun postDeltas(
+    fun postDeltas (
         @PathVariable id: Long,
-        @RequestBody delta: List<PointDeltaDTO>,
-    ) = service.applyDelta(id, delta)
+        @RequestBody delta: List<PointDeltaDTO>
+    )  : ResponseEntity<Boolean> = service.applyDelta(id, delta)
 }

@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Min
 class Lienzo(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-    @Lob
     @Column(nullable = false, columnDefinition = "BYTEA")
     var bytes: ByteArray,
     @Column(nullable = false)
