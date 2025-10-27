@@ -24,7 +24,19 @@ class CasaService(
             descripcion = request.descripcion,
             rutaImagen = filename,
             fechaCreacion = LocalDateTime.now(),
-            lienzo = lienzoService.createDefault()
+            //lienzo = lienzoService.createDefault()
+        )
+
+        return repo.save(nuevaCasa)
+    }
+
+    fun crearNuevaCasaSinImagen(request: CasaRequestDTO): Casa {
+
+        val nuevaCasa = Casa(
+            nombre = request.nombre,
+            descripcion = request.descripcion,
+            rutaImagen = null,
+            fechaCreacion = LocalDateTime.now()
         )
 
         return repo.save(nuevaCasa)
