@@ -1,8 +1,6 @@
 package org.pin.backend.utils
 
-import org.pin.backend.dto.PointDeltaDTO
 import java.awt.image.BufferedImage
-import kotlin.math.sqrt
 import kotlin.text.get
 
 class Lienzo4bpp(
