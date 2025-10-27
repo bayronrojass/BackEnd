@@ -36,3 +36,4 @@ db-data/
 db-data/*
 mosquitto/
 mosquitto/*
+mosquitto/data/mosquitto.db

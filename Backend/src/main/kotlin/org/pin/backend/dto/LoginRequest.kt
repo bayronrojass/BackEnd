@@ -6,5 +6,5 @@ package org.pin.backend.dto
  */
 data class LoginRequest(
     val correo: String,
-    val contrasena: String
+    val contrasena: String,
 )

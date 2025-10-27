@@ -21,10 +21,8 @@ class Casa(
     @field:PastOrPresent("Creation date cannot be in the future")
     @field:NotNull(message = "Date cannot be empty")
     val fechaCreacion: LocalDateTime,
-
     @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
     var lienzo: Lienzo,
-
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var notifaciones: MutableList<Notificacion> = mutableListOf(),
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
@@ -35,15 +33,13 @@ class Casa(
     var listas: MutableList<Lista> = mutableListOf(),
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var eventos: MutableList<Evento> = mutableListOf(),
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "casa_usuarios", // Nombre exacto de la tabla intermedia
         joinColumns = [JoinColumn(name = "casa_id")], // Nombre exacto de la columna FK a Casa
-        inverseJoinColumns = [JoinColumn(name = "usuarios_id")] // Nombre exacto de la columna FK a Usuario
+        inverseJoinColumns = [JoinColumn(name = "usuarios_id")], // Nombre exacto de la columna FK a Usuario
     )
-    var usuarios: MutableList<Usuario> =  mutableListOf(),
-
+    var usuarios: MutableList<Usuario> = mutableListOf(),
     @OneToMany
     var administradores: MutableList<Usuario> = mutableListOf(),
 )

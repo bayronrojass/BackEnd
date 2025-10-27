@@ -7,5 +7,5 @@ data class CasaDTO(
     val nombre: String,
     val descripcion: String?,
     val rutaImagen: String?,
-    val fechaCreacion: LocalDateTime
+    val fechaCreacion: LocalDateTime,
 )

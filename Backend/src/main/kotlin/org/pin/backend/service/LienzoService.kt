@@ -1,6 +1,4 @@
 package org.pin.backend.service
-import org.apache.commons.logging.Log
-import org.apache.coyote.Response
 import org.pin.backend.dto.PointDeltaDTO
 import org.pin.backend.model.Lienzo
 import org.pin.backend.repository.LienzoRepository
@@ -11,6 +9,8 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.awt.BasicStroke
 import java.awt.Color
+import java.awt.RenderingHints
+import java.awt.geom.GeneralPath
 
 @Service
 class LienzoService(
@@ -22,7 +22,7 @@ class LienzoService(
 
     fun findById(id: Long) = repo.findById(id)
 
-    fun createDefault() : Lienzo {
+    fun createDefault(): Lienzo {
         val bytes = ByteArray(1000 * 1000)
         bytes.fill(11)
 
@@ -40,17 +40,49 @@ class LienzoService(
 
         val g = currentBitmap.createGraphics()
 
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+        g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE)
+
         if (puntos.size >= 2) {
-            for (i in 0 until puntos.size - 1) {
-                if (puntos[i].size > 0) {
-                    val color = Lienzo4bpp.palette[puntos[i].color.toInt()]
+            val path = GeneralPath()
+            val firstPoint = puntos.first()
+            path.moveTo(firstPoint.x, firstPoint.y)
+
+            for (i in 1 until puntos.size - 1) {
+                if (puntos[i-1].size > 0f) {
+                    val color = Lienzo4bpp.palette[puntos[i-1].color.toInt()]
                     g.color = Color(color)
-                    g.stroke = BasicStroke(puntos[i].size)
-                    val p1 = puntos[i]
-                    val p2 = puntos[i + 1]
-                    g.drawLine(p1.x.toInt(), p1.y.toInt(), p2.x.toInt(), p2.y.toInt())
+                    g.stroke = BasicStroke(
+                        puntos[i-1].size,
+                        BasicStroke.CAP_BUTT,
+                        BasicStroke.JOIN_ROUND,
+                    )
+
+                    val p1 = puntos[i - 1]
+                    val p2 = puntos[i]
+                    val midX = (p1.x + p2.x) / 2
+                    val midY = (p1.y + p2.y) / 2
+                    path.quadTo(
+                        p1.x, p1.y,
+                        midX, midY
+                    )
+                }
+                else{
+                    path.moveTo(puntos[i].x, puntos[i].y)
                 }
             }
+
+            g.draw(path)
+        }
+        else if (puntos.size == 1) {
+            val point = puntos.first()
+            val radius = puntos[0].size / 2
+            g.fillOval(
+                (point.x - radius).toInt(),
+                (point.y - radius).toInt(),
+                puntos[0].size.toInt(),
+                puntos[0].size.toInt()
+            )
         }
         g.dispose()
 

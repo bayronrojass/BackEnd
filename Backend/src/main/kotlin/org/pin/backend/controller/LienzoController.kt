@@ -24,19 +24,19 @@ class LienzoController(
     @GetMapping("/{id}/png", produces = [MediaType.IMAGE_PNG_VALUE])
     fun getLienzoPng(
         @PathVariable id: Long,
-    ): ByteArray {
+    ): ResponseEntity<ByteArray> {
         val lienzo = service.findById(id).orElseThrow()
         val l4 = Lienzo4bpp(lienzo.width, lienzo.height, lienzo!!.bytes)
         val bmp = l4.toBufferedImage()
-        return ByteArrayOutputStream().use {
+        return ResponseEntity.ok(ByteArrayOutputStream().use {
             ImageIO.write(bmp, "png", it)
             it.toByteArray()
-        }
+        })
     }
 
     @PostMapping("/{id}/deltas")
-    fun postDeltas (
+    fun postDeltas(
         @PathVariable id: Long,
-        @RequestBody delta: List<PointDeltaDTO>
-    )  : ResponseEntity<Boolean> = service.applyDelta(id, delta)
+        @RequestBody delta: List<PointDeltaDTO>,
+    ): ResponseEntity<Boolean> = service.applyDelta(id, delta)
 }
