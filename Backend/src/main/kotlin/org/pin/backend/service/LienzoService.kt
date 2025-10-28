@@ -23,22 +23,17 @@ class LienzoService(
 
     fun findById(id: Long): Lienzo? =
         repo.findById(id).orElseThrow().let { lienzo ->
-            if (LZ4Compression.isCompressed(lienzo.bytes)) {
-                lienzo.bytes = lienzo.getBytesDescomprimidos()
-                lienzo
-            } else {
-                lienzo
-            }
+            lienzo
         }
 
-    fun save(lienzo: Lienzo): Lienzo = repo.save(lienzo.comprimirYGuardar())
+    fun save(lienzo: Lienzo): Lienzo = repo.save(lienzo)
 
     @OptIn(ExperimentalTime::class)
     fun createDefault(): Lienzo {
         val bytes = ByteArray(1000 * 1000)
         bytes.fill(11)
 
-        return save(Lienzo(0, LZ4Compression.compress(bytes), 2000, 2000, LocalDateTime.now()))
+        return save(Lienzo(0, bytes, 2000, 2000, LocalDateTime.now()))
     }
 
     @OptIn(ExperimentalTime::class)
