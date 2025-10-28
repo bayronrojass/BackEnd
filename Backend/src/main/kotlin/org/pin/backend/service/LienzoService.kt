@@ -43,7 +43,7 @@ class LienzoService(
     ): ResponseEntity<Boolean> {
         logger.info("Se están aplicando deltas")
         val lienzo = repo.findById(id).orElseThrow()
-        val l4 = Lienzo4bpp(lienzo.width, lienzo.height, lienzo!!.bytes)
+        val l4 = Lienzo4bpp(lienzo.width, lienzo.height, lienzo!!.getBytesDescomprimidos())
         val currentBitmap = l4.toBufferedImage()
 
         val g = currentBitmap.createGraphics()

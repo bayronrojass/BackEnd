@@ -1,5 +1,4 @@
 package org.pin.backend.controller
-import org.pin.backend.dto.DateDTO
 import org.pin.backend.dto.PointDeltaDTO
 import org.pin.backend.service.LienzoService
 import org.pin.backend.utils.Lienzo4bpp
@@ -7,8 +6,11 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.io.ByteArrayOutputStream
+import java.time.LocalDateTime
+import java.time.ZoneId
 import javax.imageio.ImageIO
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 @RestController
 @RequestMapping("/lienzos")
@@ -44,7 +46,7 @@ class LienzoController(
     @GetMapping("/{id}/isUpdated")
     fun isUpdated(
         @PathVariable id: Long,
-        @RequestBody time: DateDTO,
+        @RequestParam time: Long,
     ): ResponseEntity<Boolean> {
         val lienzo = service.findById(id)
 
@@ -52,7 +54,12 @@ class LienzoController(
             ResponseEntity.notFound()
         }
 
-        return ResponseEntity.ok(lienzo!!.lastEdited > time.time)
+        val lastEditedMillis = lienzo!!.lastEdited
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+
+        return ResponseEntity.ok(lastEditedMillis > time)
     }
 
     @PostMapping("/{id}/deltas")
