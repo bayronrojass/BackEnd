@@ -38,12 +38,17 @@ class Casa(
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-        name = "casa_usuarios", // Nombre exacto de la tabla intermedia
-        joinColumns = [JoinColumn(name = "casa_id")], // Nombre exacto de la columna FK a Casa
-        inverseJoinColumns = [JoinColumn(name = "usuarios_id")] // Nombre exacto de la columna FK a Usuario
+        name = "casa_usuarios", // Tabla para miembros
+        joinColumns = [JoinColumn(name = "casa_id")],
+        inverseJoinColumns = [JoinColumn(name = "usuarios_id")]
     )
-    var usuarios: MutableList<Usuario> =  mutableListOf(),
+    var miembros: MutableSet<Usuario> = mutableSetOf(),
 
-    @OneToMany
-    var administradores: MutableList<Usuario> = mutableListOf(),
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "casa_administradores", // Tabla separada para admins
+        joinColumns = [JoinColumn(name = "casa_id")],
+        inverseJoinColumns = [JoinColumn(name = "admin_id")] // Columna FK al usuario admin
+    )
+    var administradores: MutableSet<Usuario> = mutableSetOf() // Cambiado a Set y @ManyToMany
 )
