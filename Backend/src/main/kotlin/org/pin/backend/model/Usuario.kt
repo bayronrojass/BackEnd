@@ -20,7 +20,7 @@ class Usuario(
     var contrasena: String = "",
 
     // Relaciones
-    @ManyToMany(mappedBy = "usuarios", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "miembros", fetch = FetchType.LAZY)
     var casas: MutableSet<Casa> = mutableSetOf(), // Cambiado a Set
 
     // Define las casas de las que este usuario es ADMIN
