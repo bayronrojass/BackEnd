@@ -8,20 +8,22 @@ class Invitacion(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @ManyToOne
-    @JoinColumn(name = "remitente_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "remitente_id", nullable = false)
     val remitente: Usuario,
 
-    @ManyToOne
-    @JoinColumn(name = "destinatario_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "destinatario_id", nullable = false)
     val destinatario: Usuario,
 
-    @ManyToOne
-    @JoinColumn(name = "casa_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "casa_id", nullable = false)
     val casa: Casa,
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     var estado: EstadoInvitacion = EstadoInvitacion.PENDIENTE,
 
+    @Column(nullable = false)
     val fechaCreacion: LocalDateTime = LocalDateTime.now()
 )

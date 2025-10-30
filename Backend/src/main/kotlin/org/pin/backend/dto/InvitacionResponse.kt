@@ -1,4 +1,3 @@
-
 package org.pin.backend.dto
 
 import org.pin.backend.model.EstadoInvitacion

@@ -9,32 +9,37 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional // Importante para manejar múltiples operaciones de BD
+@Transactional
 class InvitacionService(
     private val invitacionRepository: InvitacionRepository,
     private val usuarioRepository: UsuarioRepository,
     private val casaRepository: CasaRepository
-    // TODO: Inyectar el MqttService para notificaciones en tiempo real
 ) {
 
-
+    /**
+     * Crea una nueva invitación.
+     * @param remitenteId El ID del usuario autenticado (quien envía).
+     */
     fun crearInvitacion(casaId: Long, emailDestinatario: String, remitenteId: Long): Invitacion {
         val remitente = usuarioRepository.findById(remitenteId)
             .orElseThrow { Exception("Usuario remitente no encontrado") }
 
         val destinatario = usuarioRepository.findByCorreo(emailDestinatario)
-            ?: throw Exception("No existe un usuario con el email: $emailDestinatario")
+            .orElseThrow { Exception("No existe un usuario con el email: $emailDestinatario") }
 
         val casa = casaRepository.findById(casaId)
             .orElseThrow { Exception("Casa no encontrada") }
 
-        // --- Validaciones de negocio ---
+        if (casa.miembros.none { it.id == remitente.id }) {
+            throw Exception("No tienes permiso para invitar a esta casa (no eres miembro)")
+        }
+
         if (casa.miembros.any { it.id == destinatario.id }) {
             throw Exception("El usuario ya es miembro de esta casa")
         }
 
         if (invitacionRepository.existsByCasaIdAndDestinatarioIdAndEstado(casaId, destinatario.id!!, EstadoInvitacion.PENDIENTE)) {
-            throw Exception("Ya existe una invitación pendiente para este usuario")
+            throw Exception("Ya existe una invitación pendiente para este usuario en esta casa")
         }
 
         val nuevaInvitacion = Invitacion(
@@ -44,8 +49,6 @@ class InvitacionService(
         )
 
         val invitacionGuardada = invitacionRepository.save(nuevaInvitacion)
-
-        // mqttService.publicarInvitacion(destinatario.id, "¡Nueva invitación!")
 
         return invitacionGuardada
     }
@@ -58,6 +61,7 @@ class InvitacionService(
         val invitacion = invitacionRepository.findById(invitacionId)
             .orElseThrow { Exception("Invitación no encontrada") }
 
+        // Validar que el usuario actual es el destinatario
         if (invitacion.destinatario.id != usuarioId) {
             throw Exception("No tienes permiso para aceptar esta invitación")
         }
@@ -67,12 +71,15 @@ class InvitacionService(
         }
 
         val casa = invitacion.casa
+
         casa.miembros.add(invitacion.destinatario)
-        casaRepository.save(casa) // Guardamos la casa actualizada
+        casaRepository.save(casa)
+
 
         invitacion.estado = EstadoInvitacion.ACEPTADA
         return invitacionRepository.save(invitacion)
     }
+
 
     fun rechazarInvitacion(invitacionId: Long, usuarioId: Long): Invitacion {
         val invitacion = invitacionRepository.findById(invitacionId)
