@@ -3,11 +3,13 @@ package org.pin.backend.controller
 import org.pin.backend.dto.CasaRequestDTO
 import org.pin.backend.dto.CasaResponseDTO
 import org.pin.backend.dto.CasaDetailsResponseDTO // <-- Importar DTO nuevo
+import org.pin.backend.dto.ListaRequestDTO
 import org.pin.backend.model.Casa
 import org.pin.backend.model.Lista
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.UsuarioRepository // <-- Importar Repo nuevo
 import org.pin.backend.service.CasaService
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
@@ -15,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile
 import java.util.*
 
 @RestController
-@RequestMapping("/casas")
+@RequestMapping("/api/casas")
 class CasaController(
     private val service: CasaService,
     private val casaRepository: CasaRepository,
@@ -95,5 +97,37 @@ class CasaController(
 
         casaRepository.save(casa)
         return ResponseEntity.ok().build()
+    }
+
+    @PostMapping("/{casaId}/listas")
+    @Transactional
+    fun crearListaEnCasa(
+        @PathVariable casaId: Long,
+        @RequestBody request: ListaRequestDTO
+    ): ResponseEntity<Lista> {
+        val casaOptional: Optional<Casa> = casaRepository.findById(casaId)
+        if (casaOptional.isEmpty) {
+            return ResponseEntity.notFound().build()
+        }
+
+        val casa = casaOptional.get()
+
+        // Crea la nueva entidad Lista
+        val nuevaLista = Lista(
+            nombre = request.nombre,
+            descripcion = request.descripcion
+            // 'elementos' se inicializa vacío por defecto
+        )
+
+        // Añade la nueva lista a la colección de la casa
+        // Como 'listas' en Casa es @OneToMany con CascadeType.ALL,
+        // al guardar la casa, la lista también se guardará.
+        casa.listas.add(nuevaLista)
+
+        // Guarda la casa (esto persistirá la nueva lista gracias a la cascada)
+        casaRepository.save(casa)
+
+        // Devuelve la lista recién creada (con su ID)
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevaLista)
     }
 }
