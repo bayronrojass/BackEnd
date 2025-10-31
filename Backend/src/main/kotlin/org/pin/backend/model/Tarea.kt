@@ -12,4 +12,4 @@ class Tarea(
     val frecuencia: LocalDateTime? = null,
     @Column(nullable = true)
     val fechaFin: LocalDateTime? = null,
-) : Elemento()
+) : Item()
