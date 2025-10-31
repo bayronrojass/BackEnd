@@ -7,6 +7,7 @@ import org.pin.backend.dto.ListaRequestDTO
 import org.pin.backend.model.Casa
 import org.pin.backend.model.Lista
 import org.pin.backend.repository.CasaRepository
+import org.pin.backend.repository.ListaRepository
 import org.pin.backend.repository.UsuarioRepository // <-- Importar Repo nuevo
 import org.pin.backend.service.CasaService
 import org.springframework.http.HttpStatus
@@ -21,7 +22,8 @@ import java.util.*
 class CasaController(
     private val service: CasaService,
     private val casaRepository: CasaRepository,
-    private val usuarioRepository: UsuarioRepository
+    private val usuarioRepository: UsuarioRepository,
+    private val listaRepository: ListaRepository
 ) {
     @GetMapping
     fun getAll() = service.findAll()
@@ -112,22 +114,22 @@ class CasaController(
 
         val casa = casaOptional.get()
 
-        // Crea la nueva entidad Lista
+        // 1. Crea la nueva entidad Lista
         val nuevaLista = Lista(
             nombre = request.nombre,
             descripcion = request.descripcion
-            // 'elementos' se inicializa vacío por defecto
         )
 
-        // Añade la nueva lista a la colección de la casa
-        // Como 'listas' en Casa es @OneToMany con CascadeType.ALL,
-        // al guardar la casa, la lista también se guardará.
-        casa.listas.add(nuevaLista)
+        // 2. Guarda la Lista PRIMERO para obtener su ID
+        val listaGuardada = listaRepository.save(nuevaLista)
 
-        // Guarda la casa (esto persistirá la nueva lista gracias a la cascada)
+        // 3. Añade la lista (ya con ID) a la casa
+        casa.listas.add(listaGuardada)
+
+        // 4. Guarda la casa para actualizar la relación
         casaRepository.save(casa)
 
-        // Devuelve la lista recién creada (con su ID)
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevaLista)
+        // 5. Devuelve la lista CON ID
+        return ResponseEntity.status(HttpStatus.CREATED).body(listaGuardada)
     }
 }
