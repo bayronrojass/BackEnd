@@ -1,6 +1,8 @@
 package org.pin.backend.model
 import jakarta.persistence.*
 import jakarta.validation.constraints.*
+import org.hibernate.annotations.OnDelete
+import org.hibernate.annotations.OnDeleteAction
 import java.time.LocalDateTime
 
 @Entity
@@ -18,7 +20,6 @@ class Casa(
     @Column(nullable = true)
     var rutaImagen: String? = null,
     @Column(nullable = false)
-    @field:PastOrPresent("Creation date cannot be in the future")
     @field:NotNull(message = "Date cannot be empty")
     val fechaCreacion: LocalDateTime,
     @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
@@ -27,7 +28,7 @@ class Casa(
     var notifaciones: MutableList<Notificacion> = mutableListOf(),
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var gastos: MutableList<Gasto> = mutableListOf(),
-    @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
+    @OneToMany(mappedBy = "casa", cascade = [CascadeType.ALL], orphanRemoval = true)
     var multimedia: MutableList<Multimedia> = mutableListOf(),
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var listas: MutableList<Lista> = mutableListOf(),

@@ -5,4 +5,6 @@ import jakarta.persistence.*
 class PostIt(
     @OneToOne(orphanRemoval = true, cascade = [CascadeType.ALL])
     var lienzo: Lienzo? = null,
+
+    var plegado: Boolean? = false
 ) : Multimedia()

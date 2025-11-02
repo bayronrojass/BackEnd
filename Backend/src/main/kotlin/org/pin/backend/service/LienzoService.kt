@@ -12,7 +12,9 @@ import java.awt.BasicStroke
 import java.awt.Color
 import java.awt.RenderingHints
 import java.awt.geom.GeneralPath
+import java.time.Instant
 import java.time.LocalDateTime
+import kotlin.jvm.optionals.getOrElse
 import kotlin.time.ExperimentalTime
 
 @Service
@@ -22,18 +24,26 @@ class LienzoService(
     private val logger: Logger = LoggerFactory.getLogger(LienzoService::class.java)
 
     fun findById(id: Long): Lienzo? =
-        repo.findById(id).orElseThrow().let { lienzo ->
-            lienzo
-        }
+        repo.findById(id).getOrElse { logger.error("{}", id); null }
 
     fun save(lienzo: Lienzo): Lienzo = repo.save(lienzo)
 
     @OptIn(ExperimentalTime::class)
     fun createDefault(): Lienzo {
-        val bytes = ByteArray(1000 * 1000)
+        val bytes = ByteArray(1875000)
         bytes.fill(11)
 
-        return save(Lienzo(0, bytes, 2000, 2000, LocalDateTime.now()))
+        val lienzo = Lienzo(null, bytes, 2500, 1500, Instant.now())
+        lienzo.comprimirBytes()
+        return save(lienzo)
+    }
+    @OptIn(ExperimentalTime::class)
+    fun createDefaultPostIt(): Lienzo {
+        val bytes = ByteArray(1000 * 1000)
+        bytes.fill(55)
+        val lienzo = Lienzo(null, bytes, 1000, 1000, Instant.now())
+        lienzo.comprimirBytes()
+        return save(lienzo)
     }
 
     @OptIn(ExperimentalTime::class)
