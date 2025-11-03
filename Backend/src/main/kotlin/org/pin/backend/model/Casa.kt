@@ -52,7 +52,11 @@ class Casa(
     )
     var administradores: MutableSet<Usuario> = mutableSetOf(),
 
-    @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    @JoinTable(name = "casa_tareas")
+    @OneToMany(
+        mappedBy = "casa",
+        cascade = [CascadeType.ALL],
+        orphanRemoval = true,
+        fetch = FetchType.LAZY
+    )
     var tareas: MutableList<Tarea> = mutableListOf()
 )

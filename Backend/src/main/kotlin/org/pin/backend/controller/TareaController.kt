@@ -13,6 +13,8 @@ import org.pin.backend.repository.UsuarioRepository
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @RestController
 @RequestMapping("/api/tareas")
@@ -37,7 +39,11 @@ class TareaController(
         request.nombre?.let { tarea.nombre = it }
         request.descripcion?.let { tarea.descripcion = it }
         request.completado?.let { tarea.completado = it }
-        request.fechaFin?.let { tarea.fechaFin = it }
+        tarea.fechaFin = when {
+            request.fechaFin == null -> tarea.fechaFin // No se actualiza si es null
+            request.fechaFin.isBlank() -> null // Se pone a null si es un string vacío
+            else -> LocalDateTime.parse(request.fechaFin, DateTimeFormatter.ISO_LOCAL_DATE_TIME) // Se parsea
+        }
         request.frecuencia?.let { tarea.frecuencia = it }
         request.periodica?.let { tarea.periodica = it }
 
@@ -54,7 +60,7 @@ class TareaController(
             nombre = tareaGuardada.nombre,
             descripcion = tareaGuardada.descripcion,
             completado = tareaGuardada.completado,
-            fechaFin = tareaGuardada.fechaFin,
+            fechaFin = tareaGuardada.fechaFin?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             frecuencia = tareaGuardada.frecuencia,
             periodica = tareaGuardada.periodica,
             asignadoA = tareaGuardada.asignadoA?.let {

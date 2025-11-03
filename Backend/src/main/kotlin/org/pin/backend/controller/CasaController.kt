@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.util.*
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @RestController
 @RequestMapping("/api/casas")
@@ -152,7 +154,7 @@ class CasaController(
                 nombre = tarea.nombre,
                 descripcion = tarea.descripcion,
                 completado = tarea.completado,
-                fechaFin = tarea.fechaFin,
+                fechaFin = tarea.fechaFin?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 frecuencia = tarea.frecuencia,
                 periodica = tarea.periodica,
                 asignadoA = tarea.asignadoA?.let {
@@ -181,10 +183,11 @@ class CasaController(
             nombre = request.nombre,
             descripcion = request.descripcion,
             completado = request.completado ?: false,
-            fechaFin = request.fechaFin,
+            fechaFin = if (request.fechaFin.isNullOrBlank()) null else LocalDateTime.parse(request.fechaFin, DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             frecuencia = request.frecuencia,
             periodica = request.periodica ?: false,
-            asignadoA = usuarioAsignado
+            asignadoA = usuarioAsignado,
+            casa = casa
         )
 
         val tareaGuardada = tareaRepository.save(nuevaTarea)
@@ -196,7 +199,7 @@ class CasaController(
             nombre = tareaGuardada.nombre,
             descripcion = tareaGuardada.descripcion,
             completado = tareaGuardada.completado,
-            fechaFin = tareaGuardada.fechaFin,
+            fechaFin = tareaGuardada.fechaFin?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             frecuencia = tareaGuardada.frecuencia,
             periodica = tareaGuardada.periodica,
             asignadoA = tareaGuardada.asignadoA?.let {

@@ -3,6 +3,7 @@ package org.pin.backend.model
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
+import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import java.time.LocalDateTime
 
@@ -22,6 +23,10 @@ class Tarea(
     var periodica: Boolean = false,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    var asignadoA: Usuario? = null
+    var asignadoA: Usuario? = null,
 
-) : Item()
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "casa_id")
+    var casa: Casa
+
+) : Elemento()
