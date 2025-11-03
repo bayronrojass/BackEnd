@@ -24,9 +24,15 @@ class CasaController(
     @PostMapping(consumes = ["multipart/form-data"])
     fun crearCasa(
         @RequestPart("casa") request: CasaRequestDTO,
-        @RequestPart("file") file: MultipartFile,
+        @RequestPart("file", required = false) file: MultipartFile?
     ): CasaResponseDTO {
-        val casaGuardada = service.crearNuevaCasa(request, file)
+
+        val casaGuardada = if(file != null && !file.isEmpty) {
+            service.crearNuevaCasa(request,file)
+        }
+        else{
+            service.crearNuevaCasaSinImagen(request)
+        }
 
         return CasaResponseDTO(
             id = casaGuardada.id!!,
