@@ -3,7 +3,7 @@ import org.pin.backend.model.Casa
 import org.pin.backend.model.Lista
 import org.pin.backend.model.Tarea
 import org.springframework.data.jpa.repository.JpaRepository
-import java.util.Optional
+import java.util.*
 
 
 interface CasaRepository : JpaRepository<Casa, Long>{

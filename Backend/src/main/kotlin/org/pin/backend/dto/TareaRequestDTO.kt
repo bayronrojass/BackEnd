@@ -1,7 +1,5 @@
 package org.pin.backend.dto
 
-import java.time.LocalDateTime
-
 data class TareaRequestDTO(
     val nombre: String,
     val descripcion: String?,
