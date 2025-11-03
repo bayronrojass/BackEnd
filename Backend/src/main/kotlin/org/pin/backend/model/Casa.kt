@@ -48,7 +48,11 @@ class Casa(
     @JoinTable(
         name = "casa_administradores", // Tabla separada para admins
         joinColumns = [JoinColumn(name = "casa_id")],
-        inverseJoinColumns = [JoinColumn(name = "admin_id")] // Columna FK al usuario admin
+        inverseJoinColumns = [JoinColumn(name = "admin_id")]
     )
-    var administradores: MutableSet<Usuario> = mutableSetOf() // Cambiado a Set y @ManyToMany
+    var administradores: MutableSet<Usuario> = mutableSetOf(),
+
+    @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @JoinTable(name = "casa_tareas")
+    var tareas: MutableList<Tarea> = mutableListOf()
 )

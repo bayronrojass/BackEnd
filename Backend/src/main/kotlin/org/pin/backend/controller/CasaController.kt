@@ -2,13 +2,18 @@ package org.pin.backend.controller
 
 import org.pin.backend.dto.CasaRequestDTO
 import org.pin.backend.dto.CasaResponseDTO
-import org.pin.backend.dto.CasaDetailsResponseDTO // <-- Importar DTO nuevo
+import org.pin.backend.dto.CasaDetailsResponseDTO
 import org.pin.backend.dto.ListaRequestDTO
+import org.pin.backend.dto.TareaResponseDTO
+import org.pin.backend.dto.TareaRequestDTO
+import org.pin.backend.dto.UsuarioDTO
 import org.pin.backend.model.Casa
 import org.pin.backend.model.Lista
+import org.pin.backend.model.Tarea
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.ListaRepository
-import org.pin.backend.repository.UsuarioRepository // <-- Importar Repo nuevo
+import org.pin.backend.repository.TareaRepository
+import org.pin.backend.repository.UsuarioRepository
 import org.pin.backend.service.CasaService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -23,7 +28,8 @@ class CasaController(
     private val service: CasaService,
     private val casaRepository: CasaRepository,
     private val usuarioRepository: UsuarioRepository,
-    private val listaRepository: ListaRepository
+    private val listaRepository: ListaRepository,
+    private val tareaRepository: TareaRepository
 ) {
     @GetMapping
     fun getAll() = service.findAll()
@@ -131,5 +137,73 @@ class CasaController(
 
         // 5. Devuelve la lista CON ID
         return ResponseEntity.status(HttpStatus.CREATED).body(listaGuardada)
+    }
+
+    @GetMapping("/{casaId}/tareas")
+    @Transactional(readOnly = true)
+    fun getTareasByCasaId(@PathVariable casaId: Long): ResponseEntity<List<TareaResponseDTO>> {
+        val casa = casaRepository.findById(casaId).orElse(null)
+            ?: return ResponseEntity.notFound().build()
+
+        // Mapea Tarea a TareaResponseDTO
+        val tareasDTO = casa.tareas.map { tarea ->
+            TareaResponseDTO(
+                id = tarea.id!!,
+                nombre = tarea.nombre,
+                descripcion = tarea.descripcion,
+                completado = tarea.completado,
+                fechaFin = tarea.fechaFin,
+                frecuencia = tarea.frecuencia,
+                periodica = tarea.periodica,
+                asignadoA = tarea.asignadoA?.let {
+                    UsuarioDTO(it.id!!, it.nombre, it.correo)
+                }
+            )
+        }
+        return ResponseEntity.ok(tareasDTO)
+    }
+
+    @PostMapping("/{casaId}/tareas")
+    @Transactional
+    fun crearTareaEnCasa(
+        @PathVariable casaId: Long,
+        @RequestBody request: TareaRequestDTO
+    ): ResponseEntity<TareaResponseDTO> {
+        val casa = casaRepository.findById(casaId).orElse(null)
+            ?: return ResponseEntity.notFound().build()
+
+        // Busca al usuario asignado (si se pasó un ID)
+        val usuarioAsignado = request.asignadoAId?.let {
+            usuarioRepository.findById(it).orElse(null)
+        }
+
+        val nuevaTarea = Tarea(
+            nombre = request.nombre,
+            descripcion = request.descripcion,
+            completado = request.completado ?: false,
+            fechaFin = request.fechaFin,
+            frecuencia = request.frecuencia,
+            periodica = request.periodica ?: false,
+            asignadoA = usuarioAsignado
+        )
+
+        val tareaGuardada = tareaRepository.save(nuevaTarea)
+        casa.tareas.add(tareaGuardada)
+        casaRepository.save(casa)
+
+        val responseDTO = TareaResponseDTO(
+            id = tareaGuardada.id!!,
+            nombre = tareaGuardada.nombre,
+            descripcion = tareaGuardada.descripcion,
+            completado = tareaGuardada.completado,
+            fechaFin = tareaGuardada.fechaFin,
+            frecuencia = tareaGuardada.frecuencia,
+            periodica = tareaGuardada.periodica,
+            asignadoA = tareaGuardada.asignadoA?.let {
+                UsuarioDTO(it.id!!, it.nombre, it.correo)
+            }
+        )
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO)
     }
 }
