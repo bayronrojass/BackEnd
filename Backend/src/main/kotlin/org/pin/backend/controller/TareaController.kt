@@ -1,26 +1,20 @@
 package org.pin.backend.controller
-import org.pin.backend.service.TareaService
-import org.springframework.web.bind.annotation.*
-import org.pin.backend.dto.ElementoResponseDTO
 import org.pin.backend.dto.TareaRequestDTO
 import org.pin.backend.dto.TareaResponseDTO
 import org.pin.backend.dto.UsuarioDTO
 import org.pin.backend.model.Casa
-import org.pin.backend.model.Tarea
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.TareaRepository
 import org.pin.backend.repository.UsuarioRepository
+import org.pin.backend.service.TareaService
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/tareas")
+@RequestMapping("tareas")
 class TareaController(
     private val service: TareaService,
     private val tareaRepository: TareaRepository,

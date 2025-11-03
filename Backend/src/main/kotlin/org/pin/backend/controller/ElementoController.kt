@@ -2,7 +2,6 @@ package org.pin.backend.controller
 import org.pin.backend.dto.ElementoRequestDTO
 import org.pin.backend.dto.ElementoResponseDTO
 import org.pin.backend.model.Elemento
-import org.pin.backend.model.Item
 import org.pin.backend.model.Lista
 import org.pin.backend.repository.ElementoRepository
 import org.pin.backend.repository.ItemRepository
@@ -11,10 +10,7 @@ import org.pin.backend.service.ElementoService
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
-import java.util.Optional
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import java.util.*
 
 @RestController
 @RequestMapping("/api/elementos")

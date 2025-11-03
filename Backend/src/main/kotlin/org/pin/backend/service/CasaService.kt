@@ -2,7 +2,6 @@ package org.pin.backend.service
 
 import org.pin.backend.dto.CasaRequestDTO
 import org.pin.backend.model.Casa
-import org.pin.backend.model.Lienzo
 import org.pin.backend.repository.CasaRepository
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile

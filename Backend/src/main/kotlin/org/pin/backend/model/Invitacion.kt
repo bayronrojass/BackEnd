@@ -1,6 +1,7 @@
 package org.pin.backend.model
 
 import jakarta.persistence.*
+import org.pin.backend.model.enums.EstadoInvitacion
 import java.time.LocalDateTime
 
 @Entity

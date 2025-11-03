@@ -1,4 +1,4 @@
-package org.pin.backend.model
+package org.pin.backend.model.enums
 
 enum class EstadoInvitacion {
     PENDIENTE,

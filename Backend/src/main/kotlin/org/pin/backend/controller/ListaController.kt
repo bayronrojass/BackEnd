@@ -5,18 +5,14 @@ import org.pin.backend.model.Elemento
 import org.pin.backend.model.Lista
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.ListaRepository
-import org.pin.backend.service.ListaService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import java.util.*
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("api/listas")
+@RequestMapping("listas")
 class ListaController(
     private val listaRepository: ListaRepository,
     private val casaRepository: CasaRepository

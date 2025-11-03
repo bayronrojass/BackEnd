@@ -4,7 +4,6 @@ import org.pin.backend.dto.CasaDTO
 import org.pin.backend.dto.LoginRequest
 import org.pin.backend.dto.LoginResponse
 import org.pin.backend.dto.UsuarioDTO
-import org.pin.backend.model.Usuario
 import org.pin.backend.repository.UsuarioRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api") // Base de la API
+@RequestMapping() // Base de la API
 class AuthController(
     private val usuarioRepository: UsuarioRepository, // Inyecta el repositorio
 ) {

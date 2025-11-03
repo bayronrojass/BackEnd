@@ -1,6 +1,6 @@
 package org.pin.backend.dto
 
-import org.pin.backend.model.EstadoInvitacion
+import org.pin.backend.model.enums.EstadoInvitacion
 import org.pin.backend.model.Invitacion
 
 data class InvitacionResponse(
