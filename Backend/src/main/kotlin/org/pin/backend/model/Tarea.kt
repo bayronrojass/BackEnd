@@ -27,6 +27,6 @@ class Tarea(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "casa_id")
-    var casa: Casa
+    var casa: Casa?=null
 
-) : Elemento()
+) : Elemento(nombre = nombre, descripcion = descripcion, completado = completado)
