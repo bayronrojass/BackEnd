@@ -25,7 +25,9 @@ class AuthController(
         @RequestBody request: LoginRequest,
     ): ResponseEntity<LoginResponse> {
         // 1. Buscar usuario por correo
-        val usuario: Usuario? = usuarioRepository.findByCorreo(request.correo)
+        val usuario = usuarioRepository.findByCorreo(request.correo)
+            .orElseThrow { Exception("No existe un usuario con el email: $request.correo") }
+        //val usuario: Usuario? = usuarioRepository.findByCorreo(request.correo)
 
         // 2. Verificar contraseña (!! USAR HASH EN PRODUCCIÓN !!)
         // Aquí deberías comparar con un hash (ej. BCrypt)

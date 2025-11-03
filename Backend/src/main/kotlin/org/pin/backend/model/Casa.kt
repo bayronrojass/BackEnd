@@ -36,11 +36,26 @@ class Casa(
     var eventos: MutableList<Evento> = mutableListOf(),
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-        name = "casa_usuarios", // Nombre exacto de la tabla intermedia
-        joinColumns = [JoinColumn(name = "casa_id")], // Nombre exacto de la columna FK a Casa
-        inverseJoinColumns = [JoinColumn(name = "usuarios_id")], // Nombre exacto de la columna FK a Usuario
+        name = "casa_usuarios",
+        joinColumns = [JoinColumn(name = "casa_id")],
+        inverseJoinColumns = [JoinColumn(name = "usuarios_id")],
+    )
+    var miembros: MutableSet<Usuario> = mutableSetOf(),
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "casa_administradores",
+        joinColumns = [JoinColumn(name = "casa_id")],
+        inverseJoinColumns = [JoinColumn(name = "admin_id")]
     )
     var usuarios: MutableList<Usuario> = mutableListOf(),
     @OneToMany
     var administradores: MutableList<Usuario> = mutableListOf(),
+    @OneToMany(
+        mappedBy = "casa",
+        cascade = [CascadeType.ALL],
+        orphanRemoval = true,
+        fetch = FetchType.LAZY
+    )
+    var tareas: MutableList<Tarea> = mutableListOf()
 )
