@@ -4,7 +4,7 @@
 
 INSERT INTO public.usuario (id, correo, nombre, contrasena) VALUES (1,'u1@mail.com', 'Usuario1', '1'),(2,'u2@mail.com', 'Usuario2', '2'),(3,'u3@mail.com', 'Usuario3', '3');
 INSERT INTO public.lienzo (id, bytes, width, height, last_edited) VALUES (1,decode(repeat('88', 1875000), 'hex'), 1500, 2500, NOW()),(2,decode(repeat('88', 1875000), 'hex'), 1500, 2500, NOW()),(3,decode(repeat('88', 1875000), 'hex'), 1500, 2500, NOW());
-INSERT INTO public.lienzo (id, bytes, width, height, last_edited) VALUES (4,decode(repeat('22', 1875000), 'hex'), 1500, 2500, NOW()),(5,decode(repeat('33', 1875000), 'hex'), 1500, 2500, NOW()),(6,decode(repeat('55', 1875000), 'hex'), 1500, 2500, NOW());
+INSERT INTO public.lienzo (id, bytes, width, height, last_edited) VALUES (4,decode(repeat('22', 1875000), 'hex'), 700, 600, NOW()),(5,decode(repeat('33', 1875000), 'hex'), 1500, 2500, NOW()),(6,decode(repeat('55', 1875000), 'hex'), 1500, 2500, NOW());
 INSERT INTO public.casa (id, descripcion, fecha_creacion, lienzo_id, nombre, ruta_imagen) VALUES (1, 'Casa 1', now(), 1, 'Casa1', 'ruta1.jpg'),(2, 'Casa 2', now(), 2, 'Casa2', 'ruta2.jpg'),(3, 'Casa 3', now(), 3, 'Casa3', 'ruta3.jpg');
 INSERT INTO public.elemento (completado, descripcion, nombre) VALUES (TRUE, 'Elemento 1', 'Elem1'),(FALSE, 'Elemento 2', 'Elem2'),(TRUE, 'Elemento 3', 'Elem3');
 INSERT INTO public.gasto (descripcion, fecha_inicio, nombre) VALUES ('Gasto 1', now(), 'Gasto1'),('Gasto 2', now(), 'Gasto2'),('Gasto 3', now(), 'Gasto3');

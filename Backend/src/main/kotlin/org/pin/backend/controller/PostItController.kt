@@ -1,6 +1,7 @@
 package org.pin.backend.controller
 import org.pin.backend.dto.PostItDTO
 import org.pin.backend.service.CasaService
+import org.pin.backend.service.LienzoService
 import org.pin.backend.service.PostItService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*
 class PostItController(
     private val service: PostItService,
     private val casaService: CasaService,
+    private val lienzoService: LienzoService,
 ) {
     @GetMapping
     fun getAll() = service.findAll()
@@ -32,6 +34,7 @@ class PostItController(
             if (multimediaIt.casa != null) {
                 multimediaIt.casa?.multimedia?.remove(multimediaIt)
                 casaService.save(multimediaIt.casa!!)
+                lienzoService.delete(multimediaIt.lienzo!!)
                 service.deleteById(id)
                 return ResponseEntity.ok(true)
             }
@@ -39,15 +42,16 @@ class PostItController(
         return ResponseEntity.notFound().build()
     }
 
-    @PostMapping("{id}/pos")
-    fun updatePosition(@PathVariable id : Long, @RequestBody postItDTO: PostItDTO) : ResponseEntity<Boolean> {
-        val multimedia = service.getById(id)
+    @PostMapping("/pos")
+    fun updatePosition(@RequestBody postItDTO: PostItDTO) : ResponseEntity<Boolean> {
+        val multimedia = service.getById(postItDTO.id)
         if (multimedia.isPresent) {
             val multimediaIt = multimedia.get()
             multimediaIt.posicionX = postItDTO.posicionX
             multimediaIt.posicionY = postItDTO.posicionY
             multimediaIt.plegado = postItDTO.plegado
             service.save(multimediaIt)
+            return ResponseEntity.ok(true)
         }
         return ResponseEntity.notFound().build()
     }

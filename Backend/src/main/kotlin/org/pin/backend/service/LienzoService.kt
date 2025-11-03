@@ -27,6 +27,8 @@ class LienzoService(
 
     fun save(lienzo: Lienzo): Lienzo = repo.save(lienzo)
 
+    fun delete(lienzo: Lienzo) = repo.delete(lienzo)
+
     @OptIn(ExperimentalTime::class)
     fun createDefault(): Lienzo {
         val width = 2500
@@ -46,8 +48,8 @@ class LienzoService(
 
     @OptIn(ExperimentalTime::class)
     fun createDefaultPostIt(): Lienzo {
-        val width = 1000
-        val height = 1000
+        val width = 700
+        val height = 600
 
         val bufferedImage = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
         val graphics = bufferedImage.createGraphics()
