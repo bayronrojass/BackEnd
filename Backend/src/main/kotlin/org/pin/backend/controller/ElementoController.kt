@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
-@RequestMapping("/api/elementos")
+@RequestMapping("/elementos")
 class ElementoController(
     private val service: ElementoService,
     private val elementoRepository: ElementoRepository,
