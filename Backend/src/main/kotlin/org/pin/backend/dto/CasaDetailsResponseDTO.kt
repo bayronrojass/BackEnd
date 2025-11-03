@@ -1,7 +1,7 @@
 package org.pin.backend.dto
 
-import java.time.LocalDateTime
-import  org.pin.backend.model.Usuario
+import org.pin.backend.model.Usuario
+
 data class CasaDetailsResponseDTO(
     val id: Long,
     val nombre: String,

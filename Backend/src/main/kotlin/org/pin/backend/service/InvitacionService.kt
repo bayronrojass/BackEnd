@@ -1,6 +1,6 @@
 package org.pin.backend.service
 
-import org.pin.backend.model.EstadoInvitacion
+import org.pin.backend.model.enums.EstadoInvitacion
 import org.pin.backend.model.Invitacion
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.InvitacionRepository

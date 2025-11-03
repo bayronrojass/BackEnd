@@ -1,5 +1,5 @@
 package org.pin.backend.model
-import jakarta.persistence.*
+import jakarta.persistence.Entity
 
 @Entity
 class Push : Notificacion()

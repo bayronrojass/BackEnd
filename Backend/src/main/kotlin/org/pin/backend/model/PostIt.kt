@@ -1,8 +1,12 @@
 package org.pin.backend.model
-import jakarta.persistence.*
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Entity
+import jakarta.persistence.OneToOne
 
 @Entity
 class PostIt(
     @OneToOne(orphanRemoval = true, cascade = [CascadeType.ALL])
     var lienzo: Lienzo? = null,
+
+    var plegado: Boolean? = false
 ) : Multimedia()

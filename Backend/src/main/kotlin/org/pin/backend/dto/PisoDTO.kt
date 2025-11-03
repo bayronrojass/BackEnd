@@ -5,5 +5,5 @@ package org.pin.backend.dto
  * Coincide con el modelo Piso.kt del frontend.
  */
 data class PisoDTO(
-    val id: Long
+    val id: Long,
 )
