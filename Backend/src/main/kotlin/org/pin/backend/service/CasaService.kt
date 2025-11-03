@@ -3,11 +3,10 @@ package org.pin.backend.service
 import org.pin.backend.dto.CasaRequestDTO
 import org.pin.backend.model.Casa
 import org.pin.backend.repository.CasaRepository
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
-import org.springframework.web.multipart.MultipartFile // Importa MultipartFile
+import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
-import java.util.Optional
+import java.util.*
 
 @Service
 class CasaService(

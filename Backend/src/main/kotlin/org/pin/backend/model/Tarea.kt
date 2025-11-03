@@ -1,5 +1,6 @@
 package org.pin.backend.model
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
 import org.jetbrains.annotations.NotNull
 import java.time.LocalDateTime
 

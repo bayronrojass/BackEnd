@@ -1,7 +1,6 @@
 package org.pin.backend.utils
 
 import java.awt.image.BufferedImage
-import kotlin.text.get
 
 class Lienzo4bpp(
     val width: Short,

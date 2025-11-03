@@ -2,7 +2,6 @@ package org.pin.backend.service
 import org.pin.backend.dto.PointDeltaDTO
 import org.pin.backend.model.Lienzo
 import org.pin.backend.repository.LienzoRepository
-import org.pin.backend.utils.LZ4Compression
 import org.pin.backend.utils.Lienzo4bpp
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -12,8 +11,8 @@ import java.awt.BasicStroke
 import java.awt.Color
 import java.awt.RenderingHints
 import java.awt.geom.GeneralPath
+import java.awt.image.BufferedImage
 import java.time.Instant
-import java.time.LocalDateTime
 import kotlin.jvm.optionals.getOrElse
 import kotlin.time.ExperimentalTime
 
@@ -30,18 +29,36 @@ class LienzoService(
 
     @OptIn(ExperimentalTime::class)
     fun createDefault(): Lienzo {
-        val bytes = ByteArray(1875000)
-        bytes.fill(11)
+        val width = 2500
+        val height = 1500
 
-        val lienzo = Lienzo(null, bytes, 2500, 1500, Instant.now())
+        val bufferedImage = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
+        val graphics = bufferedImage.createGraphics()
+
+        graphics.color = Color.WHITE
+        graphics.fillRect(0, 0, width, height)
+        graphics.dispose()
+        val bytes = Lienzo4bpp.encodeImage(bufferedImage)
+        val lienzo = Lienzo(null, bytes, width.toShort(), height.toShort(), Instant.now())
         lienzo.comprimirBytes()
         return save(lienzo)
     }
+
     @OptIn(ExperimentalTime::class)
     fun createDefaultPostIt(): Lienzo {
-        val bytes = ByteArray(1000 * 1000)
-        bytes.fill(55)
-        val lienzo = Lienzo(null, bytes, 1000, 1000, Instant.now())
+        val width = 1000
+        val height = 1000
+
+        val bufferedImage = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
+        val graphics = bufferedImage.createGraphics()
+
+        graphics.color = Color.YELLOW
+        graphics.fillRect(0, 0, width, height)
+        graphics.dispose()
+
+        val bytes = Lienzo4bpp.encodeImage(bufferedImage)
+
+        val lienzo = Lienzo(null, bytes, width.toShort(), height.toShort(), Instant.now())
         lienzo.comprimirBytes()
         return save(lienzo)
     }

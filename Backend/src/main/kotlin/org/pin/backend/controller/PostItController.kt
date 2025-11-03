@@ -1,5 +1,4 @@
 package org.pin.backend.controller
-import org.apache.coyote.Response
 import org.pin.backend.dto.PostItDTO
 import org.pin.backend.service.CasaService
 import org.pin.backend.service.PostItService

@@ -4,7 +4,6 @@ import jakarta.validation.constraints.Min
 import org.hibernate.annotations.UpdateTimestamp
 import org.pin.backend.utils.LZ4Compression
 import java.time.Instant
-import java.time.LocalDateTime
 import kotlin.time.ExperimentalTime
 
 @Entity
