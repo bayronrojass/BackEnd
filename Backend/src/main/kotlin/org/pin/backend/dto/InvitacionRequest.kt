@@ -12,5 +12,8 @@ data class InvitacionRequest(
 
     @field:NotBlank(message = "El email del destinatario no puede estar vacío")
     @field:Email(message = "Debe ser un formato de email válido")
-    val emailDestinatario: String
+    val emailDestinatario: String,
+
+    @field:Min(value = 1, message = "El ID del remitente no puede ser nulo")
+    val remitenteId: Long
 )

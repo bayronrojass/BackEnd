@@ -21,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import org.pin.backend.dto.UsuarioDTO
+import org.pin.backend.dto.toDTO
 
 @RestController
 @RequestMapping("/casas")
@@ -247,5 +249,18 @@ class CasaController(
             return ResponseEntity.ok(PostItDTO(postIt.id!!, postIt.lienzo!!.id!!, 0f, 0f, false))
         }
         return ResponseEntity.notFound().build()
+    }
+
+    @GetMapping("/{id}/miembros")
+    @Transactional(readOnly = true)
+    fun getCasaMiembros(@PathVariable id: Long): ResponseEntity<List<UsuarioDTO>> {
+        return casaRepository.findById(id).map { casa ->
+            // 1. Carga los miembros
+            val miembros = casa.miembros
+            // 2. Convierte a DTO para evitar el bucle
+            val miembrosDTO = miembros.map { it.toDTO() }
+            // 3. Devuelve solo la lista de DTOs
+            ResponseEntity.ok(miembrosDTO)
+        }.orElse(ResponseEntity.notFound().build())
     }
 }

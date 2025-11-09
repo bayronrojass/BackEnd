@@ -128,6 +128,6 @@ class LienzoService(
         save(lienzo)
         logger.info("Deltas aplicados")
 
-        return ResponseEntity<Boolean>.ok(true)
+        return ResponseEntity.ok(true)
     }
 }
