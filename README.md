@@ -7,6 +7,7 @@ lanzable con un solo docker
 Para lanzar el docker, se utiliza los siguientes comandos
 
 - docker compose up (Lanzamiento y creación)
+- docker compose up db (Lanzamiento de solo la base de datos)
 - docker compose down (Cerrar todo)
 - docker compose down --rmi all --volumes --remove-orphans (Cerrar todo y borrar todo)
 

@@ -1,8 +1,14 @@
-import org.springframework.web.bind.annotation.*
+package org.pin.backend.controller
+import org.pin.backend.service.ItemService
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/items")
-class ItemController(private val service: ItemService) {
+class ItemController(
+    private val service: ItemService,
+) {
     @GetMapping
     fun getAll() = service.findAll()
 }

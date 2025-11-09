@@ -1,8 +1,17 @@
-import jakarta.persistence.*
+package org.pin.backend.model
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.OneToMany
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
 
 @Entity
-data class Encuesta(
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
-    val nombre: String
-)
+class Encuesta(
+    @Column(length = 50, nullable = false)
+    @field:Size(min = 1, max = 50, message = "Titulo length must be between 1 and 255")
+    @field:NotBlank(message = "Titulo cannot be blank")
+    var titulo: String,
+    @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
+    var opciones: MutableList<Opcion> = mutableListOf(),
+) : Multimedia()

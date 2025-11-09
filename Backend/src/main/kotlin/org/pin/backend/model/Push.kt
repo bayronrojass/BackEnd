@@ -1,8 +1,5 @@
-import jakarta.persistence.*
+package org.pin.backend.model
+import jakarta.persistence.Entity
 
 @Entity
-data class Push(
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
-    val nombre: String
-)
+class Push : Notificacion()

@@ -30,3 +30,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+secrets/
+db-data/
+db-data/*
+mosquitto/data/mosquitto.db

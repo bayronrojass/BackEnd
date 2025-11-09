@@ -1,8 +1,12 @@
-import jakarta.persistence.*
+package org.pin.backend.model
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Entity
+import jakarta.persistence.OneToOne
 
 @Entity
-data class PostIt(
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
-    val nombre: String
-)
+class PostIt(
+    @OneToOne(orphanRemoval = true, cascade = [CascadeType.ALL])
+    var lienzo: Lienzo? = null,
+
+    var plegado: Boolean? = false
+) : Multimedia()
