@@ -1,6 +1,8 @@
 package org.pin.backend.model
 import jakarta.persistence.*
-import jakarta.validation.constraints.*
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Size
 import java.time.LocalDateTime
 
 @Entity
@@ -18,32 +20,42 @@ class Casa(
     @Column(nullable = true)
     var rutaImagen: String? = null,
     @Column(nullable = false)
-    @field:PastOrPresent("Creation date cannot be in the future")
     @field:NotNull(message = "Date cannot be empty")
     val fechaCreacion: LocalDateTime,
-
-    //@OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
-    //var lienzo: Lienzo,
-
+    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
+    var lienzo: Lienzo,
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var notifaciones: MutableList<Notificacion> = mutableListOf(),
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var gastos: MutableList<Gasto> = mutableListOf(),
-    @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
+    @OneToMany(mappedBy = "casa", cascade = [CascadeType.ALL], orphanRemoval = true)
     var multimedia: MutableList<Multimedia> = mutableListOf(),
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var listas: MutableList<Lista> = mutableListOf(),
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var eventos: MutableList<Evento> = mutableListOf(),
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "casa_usuarios",
+        joinColumns = [JoinColumn(name = "casa_id")],
+        inverseJoinColumns = [JoinColumn(name = "usuarios_id")],
+    )
+    var miembros: MutableSet<Usuario> = mutableSetOf(),
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-        name = "casa_usuarios", // Nombre exacto de la tabla intermedia
-        joinColumns = [JoinColumn(name = "casa_id")], // Nombre exacto de la columna FK a Casa
-        inverseJoinColumns = [JoinColumn(name = "usuarios_id")] // Nombre exacto de la columna FK a Usuario
+        name = "casa_administradores",
+        joinColumns = [JoinColumn(name = "casa_id")],
+        inverseJoinColumns = [JoinColumn(name = "admin_id")]
     )
-    var usuarios: MutableList<Usuario> =  mutableListOf(),
-
+    var usuarios: MutableList<Usuario> = mutableListOf(),
     @OneToMany
     var administradores: MutableList<Usuario> = mutableListOf(),
+    @OneToMany(
+        mappedBy = "casa",
+        cascade = [CascadeType.ALL],
+        orphanRemoval = true,
+        fetch = FetchType.LAZY
+    )
+    var tareas: MutableList<Tarea> = mutableListOf()
 )

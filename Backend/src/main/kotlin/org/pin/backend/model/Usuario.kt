@@ -19,7 +19,9 @@ class Usuario(
     @Column(nullable = false)
     var contrasena: String = "",
 
-    // Relaciones
-    @ManyToMany(mappedBy = "usuarios")
-    var casas: MutableSet<Casa> = mutableSetOf())
+    @ManyToMany(mappedBy = "miembros", fetch = FetchType.LAZY)
+    var casas: MutableSet<Casa> = mutableSetOf(), // Cambiado a Set
 
+    @ManyToMany(mappedBy = "administradores", fetch = FetchType.LAZY)
+    var casasAdministradas: MutableSet<Casa> = mutableSetOf()
+)

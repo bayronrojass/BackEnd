@@ -21,6 +21,7 @@ services:
   db:
     image: postgres:16
     container_name: PIN_db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: mi_db
       POSTGRES_USER: usuario
@@ -44,6 +45,6 @@ services:
       - "1883:1883"
       - "9001:9001"
     volumes:
-      - ./mosquitto/config:/mosquitto/config:rw
+      #- ./mosquitto/config:/mosquitto/config:rw
       - ./mosquitto/data:/mosquitto/data:rw
       - ./mosquitto/logs:/mosquitto/logs:rw
