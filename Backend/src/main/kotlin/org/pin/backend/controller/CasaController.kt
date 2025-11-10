@@ -263,4 +263,26 @@ class CasaController(
             ResponseEntity.ok(miembrosDTO)
         }.orElse(ResponseEntity.notFound().build())
     }
+
+    @PostMapping("/{casaId}/join")
+    @Transactional
+    fun joinCasa(
+        @PathVariable casaId: Long,
+        @RequestBody request: JoinCasaRequest
+    ): ResponseEntity<String> {
+
+        val casa = casaRepository.findById(casaId)
+            .orElseThrow { Exception("Casa no encontrada") }
+
+        val usuario = usuarioRepository.findById(request.usuarioId)
+            .orElseThrow { Exception("Usuario no encontrado") }
+
+        if (casa.miembros.none { it.id == usuario.id }) {
+            casa.miembros.add(usuario)
+            casaRepository.save(casa)
+        }
+
+        return ResponseEntity.ok("¡Unido a la casa '${casa.nombre}' exitosamente!")
+    }
+
 }
