@@ -4,15 +4,17 @@ import org.pin.backend.dto.CasaDTO
 import org.pin.backend.dto.LoginRequest
 import org.pin.backend.dto.LoginResponse
 import org.pin.backend.dto.UsuarioDTO
-import org.pin.backend.model.Usuario
 import org.pin.backend.repository.UsuarioRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api") // Base de la API
+@RequestMapping() // Base de la API
 class AuthController(
     private val usuarioRepository: UsuarioRepository, // Inyecta el repositorio
 ) {
@@ -22,7 +24,9 @@ class AuthController(
         @RequestBody request: LoginRequest,
     ): ResponseEntity<LoginResponse> {
         // 1. Buscar usuario por correo
-        val usuario: Usuario? = usuarioRepository.findByCorreo(request.correo)
+        val usuario = usuarioRepository.findByCorreo(request.correo)
+            .orElseThrow { Exception("No existe un usuario con el email: $request.correo") }
+        //val usuario: Usuario? = usuarioRepository.findByCorreo(request.correo)
 
         // 2. Verificar contraseña (!! USAR HASH EN PRODUCCIÓN !!)
         // Aquí deberías comparar con un hash (ej. BCrypt)

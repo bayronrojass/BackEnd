@@ -6,11 +6,8 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.io.ByteArrayOutputStream
-import java.time.LocalDateTime
-import java.time.ZoneId
 import javax.imageio.ImageIO
 import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 @RestController
 @RequestMapping("/lienzos")
@@ -54,12 +51,8 @@ class LienzoController(
             ResponseEntity.notFound()
         }
 
-        val lastEditedMillis = lienzo!!.lastEdited
-            .atZone(ZoneId.systemDefault())
-            .toInstant()
-            .toEpochMilli()
-
-        return ResponseEntity.ok(lastEditedMillis > time)
+        val lastEditedMillis = lienzo!!.lastEdited.toEpochMilli() / 1000
+        return ResponseEntity.ok(lastEditedMillis > (time / 1000) - 1 )
     }
 
     @PostMapping("/{id}/deltas")

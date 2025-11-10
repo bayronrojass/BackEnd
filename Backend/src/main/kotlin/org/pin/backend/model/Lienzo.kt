@@ -3,7 +3,7 @@ import jakarta.persistence.*
 import jakarta.validation.constraints.Min
 import org.hibernate.annotations.UpdateTimestamp
 import org.pin.backend.utils.LZ4Compression
-import java.time.LocalDateTime
+import java.time.Instant
 import kotlin.time.ExperimentalTime
 
 @Entity
@@ -22,12 +22,9 @@ class Lienzo
         var height: Short,
         @UpdateTimestamp
         @Column(name = "last_edited", columnDefinition = "TIMESTAMP", nullable = false)
-        var lastEdited: LocalDateTime,
+        var lastEdited: Instant,
     ) {
         fun getBytesDescomprimidos(): ByteArray = LZ4Compression.decompress(bytes)
 
-        fun comprimirYGuardar(): Lienzo {
-            this.bytes = LZ4Compression.compress(bytes)
-            return this
-        }
+        fun comprimirBytes() {bytes = LZ4Compression.compress(bytes)}
     }

@@ -21,6 +21,7 @@ services:
   db:
     image: postgres:16
     container_name: PIN_db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: mi_db
       POSTGRES_USER: usuario
