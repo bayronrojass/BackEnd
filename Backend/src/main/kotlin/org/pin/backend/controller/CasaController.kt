@@ -21,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import org.pin.backend.dto.UsuarioDTO
+import org.pin.backend.dto.toDTO
 
 @RestController
 @RequestMapping("/casas")
@@ -248,4 +250,39 @@ class CasaController(
         }
         return ResponseEntity.notFound().build()
     }
+
+    @GetMapping("/{id}/miembros")
+    @Transactional(readOnly = true)
+    fun getCasaMiembros(@PathVariable id: Long): ResponseEntity<List<UsuarioDTO>> {
+        return casaRepository.findById(id).map { casa ->
+            // 1. Carga los miembros
+            val miembros = casa.miembros
+            // 2. Convierte a DTO para evitar el bucle
+            val miembrosDTO = miembros.map { it.toDTO() }
+            // 3. Devuelve solo la lista de DTOs
+            ResponseEntity.ok(miembrosDTO)
+        }.orElse(ResponseEntity.notFound().build())
+    }
+
+    @PostMapping("/{casaId}/join")
+    @Transactional
+    fun joinCasa(
+        @PathVariable casaId: Long,
+        @RequestBody request: JoinCasaRequest
+    ): ResponseEntity<String> {
+
+        val casa = casaRepository.findById(casaId)
+            .orElseThrow { Exception("Casa no encontrada") }
+
+        val usuario = usuarioRepository.findById(request.usuarioId)
+            .orElseThrow { Exception("Usuario no encontrado") }
+
+        if (casa.miembros.none { it.id == usuario.id }) {
+            casa.miembros.add(usuario)
+            casaRepository.save(casa)
+        }
+
+        return ResponseEntity.ok("¡Unido a la casa '${casa.nombre}' exitosamente!")
+    }
+
 }
