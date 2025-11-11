@@ -60,7 +60,7 @@ class Casa(
         joinColumns = [JoinColumn(name = "casa_id")],
         inverseJoinColumns = [JoinColumn(name = "admin_id")]
     )
-    var administradores: MutableSet<Usuario> = mutableSetOf(), // <-- CORREGIDO
+    var administradores: MutableSet<Usuario> = mutableSetOf(),
 
     @OneToMany(
         mappedBy = "casa",
