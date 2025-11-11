@@ -1,4 +1,6 @@
-package org.pin.backend.dto
+package org.pin.backend.dto.Response
+
+import org.pin.backend.dto.Data.UsuarioDTO
 
 data class TareaResponseDTO(
     val id: Long,
@@ -8,5 +10,5 @@ data class TareaResponseDTO(
     val fechaFin: String?,
     val frecuencia: String?,
     val periodica: Boolean,
-    val asignadoA: UsuarioDTO?
+    val asignadoA: UsuarioDTO?,
 )

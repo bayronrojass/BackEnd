@@ -1,4 +1,4 @@
-package org.pin.backend.dto
+package org.pin.backend.dto.Request
 
 data class TareaRequestDTO(
     val nombre: String,
@@ -7,5 +7,5 @@ data class TareaRequestDTO(
     val fechaFin: String?,
     val frecuencia: String?,
     val periodica: Boolean?,
-    val asignadoAId: Long?
+    val asignadoAId: Long?,
 )

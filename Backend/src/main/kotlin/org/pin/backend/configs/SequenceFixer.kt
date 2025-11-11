@@ -5,15 +5,17 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 
 @Component
-class SequenceFixer(val jdbc: JdbcTemplate) {
-
+class SequenceFixer(
+    val jdbc: JdbcTemplate,
+) {
     @PostConstruct
     fun fixSequences() {
-        val sql = """
+        val sql =
+            """
             SELECT table_name 
             FROM information_schema.columns
             WHERE column_name = 'id' AND table_schema = 'public'
-        """.trimIndent()
+            """.trimIndent()
 
         val tables = jdbc.queryForList(sql, String::class.java)
 
@@ -24,7 +26,7 @@ class SequenceFixer(val jdbc: JdbcTemplate) {
                     pg_get_serial_sequence('$table', 'id'),
                     (SELECT COALESCE(MAX(id), 0) + 1 FROM $table)
                 )
-                """.trimIndent()
+                """.trimIndent(),
             )
         }
     }

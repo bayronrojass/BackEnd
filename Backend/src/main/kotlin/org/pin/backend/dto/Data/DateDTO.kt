@@ -1,4 +1,4 @@
-package org.pin.backend.dto
+package org.pin.backend.dto.Data
 
 import java.time.LocalDateTime
 import kotlin.time.ExperimentalTime

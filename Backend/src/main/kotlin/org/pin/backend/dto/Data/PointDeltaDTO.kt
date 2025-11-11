@@ -1,4 +1,4 @@
-package org.pin.backend.dto
+package org.pin.backend.dto.Data
 
 data class PointDeltaDTO(
     val x: Float,

@@ -1,4 +1,7 @@
-package org.pin.backend.dto
+package org.pin.backend.dto.Response
+
+import org.pin.backend.dto.Data.CasaDTO
+import org.pin.backend.dto.Data.UsuarioDTO
 
 /**
  * DTO para la respuesta completa del login.

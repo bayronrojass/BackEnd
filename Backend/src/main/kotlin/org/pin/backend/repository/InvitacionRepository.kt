@@ -1,13 +1,18 @@
 package org.pin.backend.repository
 
-import org.pin.backend.model.enums.EstadoInvitacion
 import org.pin.backend.model.Invitacion
+import org.pin.backend.model.enums.EstadoInvitacion
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface InvitacionRepository : JpaRepository<Invitacion, Long> {
+    fun findByDestinatarioIdAndEstado(
+        destinatarioId: Long,
+        estado: EstadoInvitacion,
+    ): List<Invitacion>
 
-
-    fun findByDestinatarioIdAndEstado(destinatarioId: Long, estado: EstadoInvitacion): List<Invitacion>
-
-    fun existsByCasaIdAndDestinatarioIdAndEstado(casaId: Long, destinatarioId: Long, estado: EstadoInvitacion): Boolean
+    fun existsByCasaIdAndDestinatarioIdAndEstado(
+        casaId: Long,
+        destinatarioId: Long,
+        estado: EstadoInvitacion,
+    ): Boolean
 }

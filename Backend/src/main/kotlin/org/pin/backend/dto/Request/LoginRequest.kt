@@ -1,4 +1,4 @@
-package org.pin.backend.dto
+package org.pin.backend.dto.Request
 
 /**
  * DTO para recibir las credenciales de inicio de sesión.

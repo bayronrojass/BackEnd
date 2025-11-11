@@ -1,4 +1,4 @@
-package org.pin.backend.dto
+package org.pin.backend.dto.Data
 
 /**
  * DTO para enviar los datos públicos del usuario.

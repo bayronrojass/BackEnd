@@ -1,4 +1,4 @@
-package org.pin.backend.dto
+package org.pin.backend.dto.Data
 
 /**
  * DTO para enviar la información del piso (Casa en el backend).

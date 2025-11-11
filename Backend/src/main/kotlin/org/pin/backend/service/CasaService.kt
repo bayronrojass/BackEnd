@@ -1,6 +1,6 @@
 package org.pin.backend.service
 
-import org.pin.backend.dto.CasaRequestDTO
+import org.pin.backend.dto.Request.CasaRequestDTO
 import org.pin.backend.model.Casa
 import org.pin.backend.repository.CasaRepository
 import org.springframework.stereotype.Service
@@ -16,9 +16,9 @@ class CasaService(
 ) {
     fun findAll(): MutableList<Casa> = repo.findAll()
 
-    fun findById(id: Long) : Optional<Casa> = repo.findById(id)
+    fun findById(id: Long): Optional<Casa> = repo.findById(id)
 
-    fun save(casa: Casa) : Casa = repo.save(casa)
+    fun save(casa: Casa): Casa = repo.save(casa)
 
     fun crearNuevaCasa(
         request: CasaRequestDTO,
@@ -39,14 +39,14 @@ class CasaService(
     }
 
     fun crearNuevaCasaSinImagen(request: CasaRequestDTO): Casa {
-
-        val nuevaCasa = Casa(
-            nombre = request.nombre,
-            descripcion = request.descripcion,
-            rutaImagen = null,
-            fechaCreacion = LocalDateTime.now(),
-            lienzo = lienzoService.createDefault()
-        )
+        val nuevaCasa =
+            Casa(
+                nombre = request.nombre,
+                descripcion = request.descripcion,
+                rutaImagen = null,
+                fechaCreacion = LocalDateTime.now(),
+                lienzo = lienzoService.createDefault(),
+            )
 
         return repo.save(nuevaCasa)
     }
