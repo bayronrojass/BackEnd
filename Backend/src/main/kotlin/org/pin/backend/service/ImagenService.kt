@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile
 import java.awt.Graphics2D
 import java.awt.RenderingHints
 import java.awt.image.BufferedImage
-import java.util.Optional
+import java.util.*
 import javax.imageio.ImageIO
 
 @Service
