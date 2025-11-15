@@ -31,14 +31,11 @@ class Lienzo4bpp(
                     val index = y * width + x
                     val color = image.getRGB(x, y)
 
-                    // Encontrar el índice del color en la paleta
                     val colorIndex = findColorIndexInPalette(color)
 
-                    // Calcular posición en el array de bytes
                     val byteIndex = index / 2
                     val isHigh = index % 2 == 0
 
-                    // Empaquetar dos píxeles en un byte
                     if (isHigh) {
                         bytes[byteIndex] = (colorIndex shl 4).toByte()
                     } else {

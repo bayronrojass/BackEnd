@@ -19,9 +19,8 @@ private val logger: Logger = LoggerFactory.getLogger(BackendApplication::class.j
 @SpringBootApplication
 class BackendApplication(
     // Inyecta el MqttService real gestionado por Spring
-    private val mqttService: MqttService
+    private val mqttService: MqttService,
 ) {
-
     /**
      * ¡CORREGIDO!
      * Movido 'post()' DENTRO de la clase para que @PostConstruct funcione
@@ -34,7 +33,6 @@ class BackendApplication(
             // Puedes usar esto para enviar un mensaje de prueba si quieres.
             logger.info("MqttService inyectado y listo.")
             // mqttService.sendToUser(0, "TEST DE ARRANQUE")
-
         } catch (e: MqttException) {
             logger.error("Error en el PostConstruct de Mqtt: ${e.message}")
         }

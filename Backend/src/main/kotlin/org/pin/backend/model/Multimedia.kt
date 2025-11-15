@@ -13,11 +13,17 @@ class Multimedia(
     @Column(nullable = false)
     @field:PositiveOrZero
     var posicionY: Float = 0f,
+    @Column(nullable = false)
+    @field:PositiveOrZero
+    var width: Int = 0,
+    @Column(nullable = false)
+    @field:PositiveOrZero
+    var height: Int = 0,
     @Column(nullable = true)
     var ruta: String? = null,
     @ManyToOne()
     val usuario: Usuario? = null,
     @ManyToOne
     @JoinColumn(name = "casa_id")
-    var casa : Casa? = null,
+    var casa: Casa? = null,
 )

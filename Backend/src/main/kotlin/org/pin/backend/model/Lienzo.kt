@@ -14,6 +14,8 @@ class Lienzo
         val id: Long? = null,
         @Column(nullable = false, columnDefinition = "BYTEA")
         var bytes: ByteArray,
+        var format: String? = null,
+        var isImage: Boolean = false,
         @Column(nullable = false)
         @field:Min(1)
         var width: Short,
@@ -26,5 +28,7 @@ class Lienzo
     ) {
         fun getBytesDescomprimidos(): ByteArray = LZ4Compression.decompress(bytes)
 
-        fun comprimirBytes() {bytes = LZ4Compression.compress(bytes)}
+        fun comprimirBytes() {
+            bytes = LZ4Compression.compress(bytes)
+        }
     }

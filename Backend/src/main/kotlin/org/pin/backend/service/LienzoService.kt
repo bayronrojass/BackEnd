@@ -1,5 +1,5 @@
 package org.pin.backend.service
-import org.pin.backend.dto.PointDeltaDTO
+import org.pin.backend.dto.Data.PointDeltaDTO
 import org.pin.backend.model.Lienzo
 import org.pin.backend.repository.LienzoRepository
 import org.pin.backend.utils.Lienzo4bpp
@@ -12,7 +12,9 @@ import java.awt.Color
 import java.awt.RenderingHints
 import java.awt.geom.GeneralPath
 import java.awt.image.BufferedImage
+import java.io.ByteArrayOutputStream
 import java.time.Instant
+import javax.imageio.ImageIO
 import kotlin.jvm.optionals.getOrElse
 import kotlin.time.ExperimentalTime
 
@@ -23,7 +25,10 @@ class LienzoService(
     private val logger: Logger = LoggerFactory.getLogger(LienzoService::class.java)
 
     fun findById(id: Long): Lienzo? =
-        repo.findById(id).getOrElse { logger.error("{}", id); null }
+        repo.findById(id).getOrElse {
+            logger.error("{}", id)
+            null
+        }
 
     fun save(lienzo: Lienzo): Lienzo = repo.save(lienzo)
 
@@ -41,15 +46,39 @@ class LienzoService(
         graphics.fillRect(0, 0, width, height)
         graphics.dispose()
         val bytes = Lienzo4bpp.encodeImage(bufferedImage)
-        val lienzo = Lienzo(null, bytes, width.toShort(), height.toShort(), Instant.now())
+        val lienzo = Lienzo(null, bytes, null, false, width.toShort(), height.toShort(), Instant.now())
         lienzo.comprimirBytes()
+        return save(lienzo)
+    }
+
+    fun createFromImage(
+        image: BufferedImage,
+        format: String,
+    ): Lienzo {
+        val width = image.width
+        val height = image.height
+
+        val baos = ByteArrayOutputStream()
+        ImageIO.write(image, format, baos)
+
+        val lienzo =
+            Lienzo(
+                id = null,
+                format = format,
+                isImage = true,
+                bytes = baos.toByteArray(),
+                width = width.toShort(),
+                height = height.toShort(),
+                lastEdited = Instant.now(),
+            )
+
         return save(lienzo)
     }
 
     @OptIn(ExperimentalTime::class)
     fun createDefaultPostIt(): Lienzo {
-        val width = 700
-        val height = 600
+        val width = 500
+        val height = 400
 
         val bufferedImage = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
         val graphics = bufferedImage.createGraphics()
@@ -60,7 +89,7 @@ class LienzoService(
 
         val bytes = Lienzo4bpp.encodeImage(bufferedImage)
 
-        val lienzo = Lienzo(null, bytes, width.toShort(), height.toShort(), Instant.now())
+        val lienzo = Lienzo(null, bytes, null, false, width.toShort(), height.toShort(), Instant.now())
         lienzo.comprimirBytes()
         return save(lienzo)
     }

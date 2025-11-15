@@ -1,5 +1,5 @@
 package org.pin.backend.controller
-import org.pin.backend.dto.PostItDTO
+import org.pin.backend.dto.Data.PostItDTO
 import org.pin.backend.service.CasaService
 import org.pin.backend.service.LienzoService
 import org.pin.backend.service.PostItService
@@ -17,17 +17,31 @@ class PostItController(
     fun getAll() = service.findAll()
 
     @GetMapping("{id}")
-    fun getById(@PathVariable id : Long) : ResponseEntity<PostItDTO> {
+    fun getById(
+        @PathVariable id: Long,
+    ): ResponseEntity<PostItDTO> {
         val postit = service.getById(id)
         if (postit.isPresent) {
             val postIt = postit.get()
-            return ResponseEntity.ok(PostItDTO(postIt.id!!, postIt.lienzo!!.id!!, postIt.posicionX, postIt.posicionY, postIt.plegado))
+            return ResponseEntity.ok(
+                PostItDTO(
+                    postIt.id!!,
+                    postIt.lienzo!!.id!!,
+                    postIt.posicionX,
+                    postIt.posicionY,
+                    postIt.width,
+                    postIt.height,
+                    postIt.plegado!!,
+                ),
+            )
         }
         return ResponseEntity.notFound().build()
     }
 
     @DeleteMapping("{id}")
-    fun deleteById(@PathVariable id : Long) : ResponseEntity<Boolean> {
+    fun deleteById(
+        @PathVariable id: Long,
+    ): ResponseEntity<Boolean> {
         val multimedia = service.getById(id)
         if (multimedia.isPresent) {
             val multimediaIt = multimedia.get()
@@ -43,7 +57,9 @@ class PostItController(
     }
 
     @PostMapping("/pos")
-    fun updatePosition(@RequestBody postItDTO: PostItDTO) : ResponseEntity<Boolean> {
+    fun updatePosition(
+        @RequestBody postItDTO: PostItDTO,
+    ): ResponseEntity<Boolean> {
         val multimedia = service.getById(postItDTO.id)
         if (multimedia.isPresent) {
             val multimediaIt = multimedia.get()

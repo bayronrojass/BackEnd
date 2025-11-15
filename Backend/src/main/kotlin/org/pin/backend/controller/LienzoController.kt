@@ -1,10 +1,11 @@
 package org.pin.backend.controller
-import org.pin.backend.dto.PointDeltaDTO
+import org.pin.backend.dto.Data.PointDeltaDTO
 import org.pin.backend.service.LienzoService
 import org.pin.backend.utils.Lienzo4bpp
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 import kotlin.time.ExperimentalTime
@@ -19,24 +20,42 @@ class LienzoController(
         @PathVariable id: Long,
     ) = service.findById(id)
 
-    @GetMapping("/{id}/png", produces = [MediaType.IMAGE_PNG_VALUE])
-    fun getLienzoPng(
+    @GetMapping("/{id}/imagen")
+    fun getLienzoImagen(
         @PathVariable id: Long,
     ): ResponseEntity<ByteArray> {
-        val lienzo = service.findById(id)
+        val lienzo = service.findById(id) ?: return ResponseEntity.notFound().build()
 
-        if (lienzo == null) {
-            ResponseEntity.notFound()
-        }
+        val formato = lienzo.format?.lowercase() ?: "png"
 
-        val l4 = Lienzo4bpp(lienzo!!.width, lienzo.height, lienzo.getBytesDescomprimidos())
-        val bmp = l4.toBufferedImage()
-        return ResponseEntity.ok(
+        val bufferedImage =
+            if (!lienzo.isImage) {
+                val l4 = Lienzo4bpp(lienzo.width, lienzo.height, lienzo.getBytesDescomprimidos())
+                l4.toBufferedImage()
+            } else {
+                ByteArrayInputStream(lienzo.bytes).use { input ->
+                    ImageIO.read(input)
+                } ?: return ResponseEntity.badRequest().build()
+            }
+
+        val bytes =
             ByteArrayOutputStream().use {
-                ImageIO.write(bmp, "png", it)
+                ImageIO.write(bufferedImage, formato, it)
                 it.toByteArray()
-            },
-        )
+            }
+
+        val mediaType =
+            when (formato) {
+                "jpg", "jpeg" -> MediaType.IMAGE_JPEG
+                "png" -> MediaType.IMAGE_PNG
+                "gif" -> MediaType.IMAGE_GIF
+                else -> MediaType.APPLICATION_OCTET_STREAM
+            }
+
+        return ResponseEntity
+            .ok()
+            .contentType(mediaType)
+            .body(bytes)
     }
 
     @OptIn(ExperimentalTime::class)
@@ -52,7 +71,7 @@ class LienzoController(
         }
 
         val lastEditedMillis = lienzo!!.lastEdited.toEpochMilli() / 1000
-        return ResponseEntity.ok(lastEditedMillis > (time / 1000) - 1 )
+        return ResponseEntity.ok(lastEditedMillis > (time / 1000) - 1)
     }
 
     @PostMapping("/{id}/deltas")

@@ -1,11 +1,10 @@
-package org.pin.backend.dto
+package org.pin.backend.dto.Response
 
 import java.time.LocalDateTime
 
-data class CasaDTO(
+data class CasaResponseDTO(
     val id: Long,
     val nombre: String,
     val descripcion: String?,
-    val rutaImagen: String?,
     val fechaCreacion: LocalDateTime,
 )
