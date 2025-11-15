@@ -1,4 +1,5 @@
 package org.pin.backend.model
+
 import jakarta.persistence.*
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
@@ -19,7 +20,7 @@ class Usuario(
     @Column(nullable = false)
     var contrasena: String = "",
     @ManyToMany(mappedBy = "miembros", fetch = FetchType.LAZY)
-    var casas: MutableSet<Casa> = mutableSetOf(), // Cambiado a Set
+    var casas: MutableSet<Casa> = mutableSetOf(),
     @ManyToMany(mappedBy = "administradores", fetch = FetchType.LAZY)
     var casasAdministradas: MutableSet<Casa> = mutableSetOf(),
 )

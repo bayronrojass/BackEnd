@@ -1,4 +1,5 @@
 package org.pin.backend.model
+
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
@@ -47,9 +48,7 @@ class Casa(
         joinColumns = [JoinColumn(name = "casa_id")],
         inverseJoinColumns = [JoinColumn(name = "admin_id")],
     )
-    var usuarios: MutableList<Usuario> = mutableListOf(),
-    @OneToMany
-    var administradores: MutableList<Usuario> = mutableListOf(),
+    var administradores: MutableSet<Usuario> = mutableSetOf(),
     @OneToMany(
         mappedBy = "casa",
         cascade = [CascadeType.ALL],

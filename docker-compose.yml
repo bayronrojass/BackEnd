@@ -10,13 +10,14 @@ services:
       - SPRING_DATASOURCE_PASSWORD=clave
       - MULTIMEDIA_DIR=/multimedia
       - MQTT_BROKER=tcp://mqtt:1883
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create-drop
     volumes:
       - ./multimedia:/multimedia
     depends_on:
       db:
         condition: service_healthy
       mqtt:
-        condition: service_started
+        condition: service_healthy
 
   db:
     image: postgres:16
@@ -27,7 +28,7 @@ services:
       POSTGRES_USER: usuario
       POSTGRES_PASSWORD: clave
     #volumes:
-    #  - ./db-data:/var/lib/postgresql/data
+    # - ./db-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
@@ -36,7 +37,6 @@ services:
       timeout: 5s
       retries: 10
 
-
   mqtt:
     image: eclipse-mosquitto:2.0.22
     container_name: PIN_MQTT
@@ -44,7 +44,12 @@ services:
     ports:
       - "1883:1883"
       - "9001:9001"
-    volumes:
-      #- ./mosquitto/config:/mosquitto/config:rw
-      - ./mosquitto/data:/mosquitto/data:rw
-      - ./mosquitto/logs:/mosquitto/logs:rw
+    #volumes:
+    #  - ./mosquitto/config:/mosquitto/config:rw #
+    #  - ./mosquitto/data:/mosquitto/data:rw
+    #  - ./mosquitto/logs:/mosquitto/logs:rw
+    healthcheck:
+      test: ["CMD-SHELL", "mosquitto_pub -h 127.0.0.1 -t 'health/check' -m 'ok' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

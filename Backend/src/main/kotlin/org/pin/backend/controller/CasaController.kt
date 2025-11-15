@@ -3,6 +3,8 @@ package org.pin.backend.controller
 import org.pin.backend.dto.Data.ImagenDTO
 import org.pin.backend.dto.Data.PostItDTO
 import org.pin.backend.dto.Data.UsuarioDTO
+import org.pin.backend.dto.Data.toDTO
+import org.pin.backend.dto.JoinCasaRequest
 import org.pin.backend.dto.Request.CasaRequestDTO
 import org.pin.backend.dto.Request.ListaRequestDTO
 import org.pin.backend.dto.Request.TareaRequestDTO
@@ -315,5 +317,42 @@ class CasaController(
             return ResponseEntity.ok(ImagenDTO(imagen.id!!, imagen.lienzo!!.id!!, 0f, 0f, imagen.width, imagen.height, false))
         }
         return ResponseEntity.notFound().build()
+    }
+
+    @GetMapping("/{id}/miembros")
+    @Transactional(readOnly = true)
+    fun getCasaMiembros(
+        @PathVariable id: Long,
+    ): ResponseEntity<List<UsuarioDTO>> =
+        casaRepository
+            .findById(id)
+            .map { casa ->
+                val miembros = casa.miembros
+                val miembrosDTO = miembros.map { it.toDTO() }
+                ResponseEntity.ok(miembrosDTO)
+            }.orElse(ResponseEntity.notFound().build())
+
+    @PostMapping("/{casaId}/join")
+    @Transactional
+    fun joinCasa(
+        @PathVariable casaId: Long,
+        @RequestBody request: JoinCasaRequest,
+    ): ResponseEntity<String> {
+        val casa =
+            casaRepository
+                .findById(casaId)
+                .orElseThrow { Exception("Casa no encontrada") }
+
+        val usuario =
+            usuarioRepository
+                .findById(request.usuarioId)
+                .orElseThrow { Exception("Usuario no encontrado") }
+
+        if (casa.miembros.none { it.id == usuario.id }) {
+            casa.miembros.add(usuario)
+            casaRepository.save(casa)
+        }
+
+        return ResponseEntity.ok("¡Unido a la casa '${casa.nombre}' exitosamente!")
     }
 }

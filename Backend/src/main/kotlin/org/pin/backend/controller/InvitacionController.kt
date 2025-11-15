@@ -1,12 +1,12 @@
 package org.pin.backend.controller
 
+import jakarta.validation.Valid
+import org.pin.backend.dto.AccionInvitacionRequest
 import org.pin.backend.dto.Request.InvitacionRequest
 import org.pin.backend.dto.Response.InvitacionResponse
 import org.pin.backend.dto.Response.toResponse
-import org.pin.backend.security.services.UserDetailsImpl // Asumo que tienes esto de Spring Security
 import org.pin.backend.service.InvitacionService
 import org.springframework.http.ResponseEntity
-import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -17,34 +17,32 @@ class InvitacionController(
     @PostMapping
     fun crearInvitacion(
         @RequestBody request: InvitacionRequest,
-        authentication: Authentication,
+        // authentication: Authentication
     ): ResponseEntity<InvitacionResponse> {
-        val userPrincipal = authentication.principal as UserDetailsImpl
-        val remitenteId = userPrincipal.id
-
-        // El servicio lanzará excepciones si algo falla (capturadas por GlobalExceptionHandler)
+        val remitenteId = request.remitenteId
         val invitacion = service.crearInvitacion(request.casaId, request.emailDestinatario, remitenteId)
 
         return ResponseEntity.ok(invitacion.toResponse())
     }
 
-    @GetMapping("/me")
-    fun getMisInvitaciones(authentication: Authentication): ResponseEntity<List<InvitacionResponse>> {
-        val userPrincipal = authentication.principal as UserDetailsImpl
-        val destinatarioId = userPrincipal.id
-
-        val invitaciones = service.getMisInvitacionesPendientes(destinatarioId)
-
+    @GetMapping("/{usuarioId}")
+    fun getMisInvitaciones(
+        // authentication: Authentication
+        @PathVariable usuarioId: Long,
+    ): ResponseEntity<List<InvitacionResponse>> {
+        val invitaciones = service.getMisInvitacionesPendientes(usuarioId)
         return ResponseEntity.ok(invitaciones.map { it.toResponse() })
     }
 
     @PostMapping("/{id}/aceptar")
     fun aceptarInvitacion(
         @PathVariable id: Long,
-        authentication: Authentication,
+        @Valid @RequestBody request: AccionInvitacionRequest,
+        // authentication: Authentication
     ): ResponseEntity<InvitacionResponse> {
-        val userPrincipal = authentication.principal as UserDetailsImpl
-        val usuarioId = userPrincipal.id
+        // val userPrincipal = authentication.principal as UserDetailsImpl
+        // val usuarioId = userPrincipal.id
+        val usuarioId = request.usuarioId
 
         val invitacion = service.aceptarInvitacion(id, usuarioId)
 
@@ -54,10 +52,13 @@ class InvitacionController(
     @PostMapping("/{id}/rechazar")
     fun rechazarInvitacion(
         @PathVariable id: Long,
-        authentication: Authentication,
+        @Valid @RequestBody request: AccionInvitacionRequest,
+        // authentication: Authentication
     ): ResponseEntity<InvitacionResponse> {
-        val userPrincipal = authentication.principal as UserDetailsImpl
-        val usuarioId = userPrincipal.id
+        // val userPrincipal = authentication.principal as UserDetailsImpl
+        // val usuarioId = userPrincipal.id
+
+        val usuarioId = request.usuarioId
 
         val invitacion = service.rechazarInvitacion(id, usuarioId)
 
