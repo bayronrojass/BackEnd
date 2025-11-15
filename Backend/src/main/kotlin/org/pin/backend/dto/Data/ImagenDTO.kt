@@ -9,4 +9,3 @@ class ImagenDTO(
     height: Int,
     plegado: Boolean,
 ) : PostItDTO(id, lienzoId, posicionX, posicionY, width, height, plegado)
-

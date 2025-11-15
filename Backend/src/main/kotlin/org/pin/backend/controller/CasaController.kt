@@ -258,7 +258,9 @@ class CasaController(
             casa.get().multimedia.add(postIt)
             service.save(casa.get())
             logger.info("$postIt ${postIt.id}")
-            return ResponseEntity.ok(PostItDTO(postIt.id!!, postIt.lienzo!!.id!!, 0f, 0f, postIt.lienzo!!.width.toInt(), postIt.lienzo!!.height.toInt(), false))
+            return ResponseEntity.ok(
+                PostItDTO(postIt.id!!, postIt.lienzo!!.id!!, 0f, 0f, postIt.lienzo!!.width.toInt(), postIt.lienzo!!.height.toInt(), false),
+            )
         }
         return ResponseEntity.notFound().build()
     }

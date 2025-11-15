@@ -23,7 +23,17 @@ class PostItController(
         val postit = service.getById(id)
         if (postit.isPresent) {
             val postIt = postit.get()
-            return ResponseEntity.ok(PostItDTO(postIt.id!!, postIt.lienzo!!.id!!, postIt.posicionX, postIt.posicionY, postIt.width, postIt.height, postIt.plegado!!))
+            return ResponseEntity.ok(
+                PostItDTO(
+                    postIt.id!!,
+                    postIt.lienzo!!.id!!,
+                    postIt.posicionX,
+                    postIt.posicionY,
+                    postIt.width,
+                    postIt.height,
+                    postIt.plegado!!,
+                ),
+            )
         }
         return ResponseEntity.notFound().build()
     }

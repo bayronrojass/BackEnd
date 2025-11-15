@@ -44,7 +44,7 @@ class ImagenService(
         }
         val fileExtension = file.originalFilename?.substringAfterLast(".") ?: ""
         val scaledImage = resizeImage(image)
-        logger.info("Tamaños {} {}", image.width, scaledImage.width )
+        logger.info("Tamaños {} {}", image.width, scaledImage.width)
         val i = Imagen()
         i.posicionX = 100f
         i.posicionY = 100f

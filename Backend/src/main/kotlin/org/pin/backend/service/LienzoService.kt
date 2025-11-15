@@ -46,27 +46,31 @@ class LienzoService(
         graphics.fillRect(0, 0, width, height)
         graphics.dispose()
         val bytes = Lienzo4bpp.encodeImage(bufferedImage)
-        val lienzo = Lienzo(null, bytes, null,false, width.toShort(), height.toShort(), Instant.now())
+        val lienzo = Lienzo(null, bytes, null, false, width.toShort(), height.toShort(), Instant.now())
         lienzo.comprimirBytes()
         return save(lienzo)
     }
 
-    fun createFromImage(image: BufferedImage, format: String): Lienzo {
+    fun createFromImage(
+        image: BufferedImage,
+        format: String,
+    ): Lienzo {
         val width = image.width
         val height = image.height
 
         val baos = ByteArrayOutputStream()
         ImageIO.write(image, format, baos)
 
-        val lienzo = Lienzo(
-            id = null,
-            format = format,
-            isImage = true,
-            bytes = baos.toByteArray(),
-            width = width.toShort(),
-            height = height.toShort(),
-            lastEdited = Instant.now()
-        )
+        val lienzo =
+            Lienzo(
+                id = null,
+                format = format,
+                isImage = true,
+                bytes = baos.toByteArray(),
+                width = width.toShort(),
+                height = height.toShort(),
+                lastEdited = Instant.now(),
+            )
 
         return save(lienzo)
     }

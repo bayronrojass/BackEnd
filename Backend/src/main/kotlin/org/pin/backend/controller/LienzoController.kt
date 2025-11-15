@@ -28,30 +28,32 @@ class LienzoController(
 
         val formato = lienzo.format?.lowercase() ?: "png"
 
-        val bufferedImage = if (!lienzo.isImage)
-        {
-            val l4 = Lienzo4bpp(lienzo.width, lienzo.height, lienzo.getBytesDescomprimidos())
-            l4.toBufferedImage()
-        }
-        else {
-            ByteArrayInputStream(lienzo.bytes).use { input ->
-                ImageIO.read(input)
-            } ?: return ResponseEntity.badRequest().build()
-        }
+        val bufferedImage =
+            if (!lienzo.isImage) {
+                val l4 = Lienzo4bpp(lienzo.width, lienzo.height, lienzo.getBytesDescomprimidos())
+                l4.toBufferedImage()
+            } else {
+                ByteArrayInputStream(lienzo.bytes).use { input ->
+                    ImageIO.read(input)
+                } ?: return ResponseEntity.badRequest().build()
+            }
 
-        val bytes = ByteArrayOutputStream().use {
-            ImageIO.write(bufferedImage, formato, it)
-            it.toByteArray()
-        }
+        val bytes =
+            ByteArrayOutputStream().use {
+                ImageIO.write(bufferedImage, formato, it)
+                it.toByteArray()
+            }
 
-        val mediaType = when (formato) {
-            "jpg", "jpeg" -> MediaType.IMAGE_JPEG
-            "png" -> MediaType.IMAGE_PNG
-            "gif" -> MediaType.IMAGE_GIF
-            else -> MediaType.APPLICATION_OCTET_STREAM
-        }
+        val mediaType =
+            when (formato) {
+                "jpg", "jpeg" -> MediaType.IMAGE_JPEG
+                "png" -> MediaType.IMAGE_PNG
+                "gif" -> MediaType.IMAGE_GIF
+                else -> MediaType.APPLICATION_OCTET_STREAM
+            }
 
-        return ResponseEntity.ok()
+        return ResponseEntity
+            .ok()
             .contentType(mediaType)
             .body(bytes)
     }

@@ -10,7 +10,7 @@ import java.util.*
 
 @Service
 class FileStorageService(
-    @Value("\${multimedia_dir}") private var multimediaDir: String
+    @Value("\${multimedia_dir}") private var multimediaDir: String,
 ) {
     private val uploadDir = Paths.get(multimediaDir)
 
