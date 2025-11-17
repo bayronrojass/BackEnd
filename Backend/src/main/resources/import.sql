@@ -41,7 +41,7 @@ INSERT INTO public.gasto_pagos (gasto_id, pagos_id) VALUES (1, 1),(2, 2),(3, 3);
 INSERT INTO public.item (id) VALUES (1),(2),(3);
 INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica) VALUES (1, now(), now(), TRUE),(2, now(), now(), FALSE),(3, now(), now(), TRUE);
 INSERT INTO public.post_it (id, lienzo_id, plegado) VALUES (1, 4, false),(2, 5, false),(3, 6, false);
-INSERT INTO public.invitacion (id, remitente_id, destinatario_id, casa_id, fecha_creacion, estado) VALUES (1, 1, 4, 1, NOW(), 'PENDIENTE');
+INSERT INTO public.invitacion (id, remitente_id, destinatario_id, casa_id, fecha_creacion, estado) VALUES (1, 1, 2, 1, NOW(), 'PENDIENTE');
 --INSERT INTO public.audio (id) VALUES (1),(2),(3);
 --INSERT INTO public.imagen (id) VALUES (1),(2),(3);
 INSERT INTO public.notificacion_receptor (notificacion_id, receptor_id) VALUES (1, 1), (1, 2), (3, 3)
