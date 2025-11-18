@@ -48,8 +48,14 @@ class TareaController(
 
         // Actualiza el usuario asignado
         if (request.asignadoAId != null) {
-            val usuarioAsignado = usuarioRepository.findById(request.asignadoAId).orElse(null)
-            tarea.asignadoA = usuarioAsignado // Asigna el usuario (o null si el ID no existe)
+            if (request.asignadoAId == -1L) {
+                // Si el ID es -1, desasignamos explícitamente la tarea
+                tarea.asignadoA = null
+            } else {
+                // Si es un ID normal, buscamos el usuario
+                val usuarioAsignado = usuarioRepository.findById(request.asignadoAId).orElse(null)
+                tarea.asignadoA = usuarioAsignado
+            }
         }
 
         val tareaGuardada = tareaRepository.save(tarea)
