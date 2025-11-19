@@ -11,11 +11,7 @@ import org.pin.backend.dto.Request.TareaRequestDTO
 import org.pin.backend.dto.Response.CasaDetailsResponseDTO
 import org.pin.backend.dto.Response.CasaResponseDTO
 import org.pin.backend.dto.Response.TareaResponseDTO
-import org.pin.backend.model.Casa
-import org.pin.backend.model.Imagen
-import org.pin.backend.model.Lista
-import org.pin.backend.model.PostIt
-import org.pin.backend.model.Tarea
+import org.pin.backend.model.*
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.ListaRepository
 import org.pin.backend.repository.TareaRepository
