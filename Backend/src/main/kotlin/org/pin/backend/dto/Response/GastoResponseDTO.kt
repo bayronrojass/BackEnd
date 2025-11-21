@@ -1,10 +1,11 @@
 package org.pin.backend.dto.Response
 
-import java.time.LocalDateTime
-
-data class CasaResponseDTO(
+data class GastoResponseDTO(
     val id: Long,
     val nombre: String,
     val descripcion: String?,
-    val fechaCreacion: LocalDateTime,
+    val importe : Double,
+    val fecha: String,
+    val categoria: String,
+    val pagadoPorNombre: String
 )

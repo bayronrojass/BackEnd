@@ -4,7 +4,7 @@ data class EventoResponseDTO(
     val id: Long,
     val nombre: String,
     val descripcion: String?,
-    val fechaInicio: String, // ISO Date Time string
+    val fechaInicio: String,
     val fechaFin: String?,
     val creadoPorNombre: String
 )
