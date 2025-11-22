@@ -60,6 +60,12 @@ INSERT INTO public.gasto_pagos (gasto_id, pagos_id) VALUES (1, 1) ON CONFLICT DO
 INSERT INTO public.gasto_pagos (gasto_id, pagos_id) VALUES (2, 2) ON CONFLICT DO NOTHING;
 INSERT INTO public.gasto_pagos (gasto_id, pagos_id) VALUES (3, 3) ON CONFLICT DO NOTHING;
 
+-- ========================
+-- 2️⃣ Tablas dependientes simples
+-- ========================
+INSERT INTO public.multimedia (posicionx, posiciony, width, height, ruta, usuario_id, casa_id) VALUES (200, 200, 450, 400, 'rutaA', 1, 1),(300, 490, 450, 400, 'rutaB', 2, 2),(300, 500,450, 400, 'rutaC', 3, 3);
+INSERT INTO public.evento (id, descripcion, fecha_inicio, nombre, creado_por_id, fecha_creacion) VALUES (1, 'Evento 1', now(), 'Evento1', 1, now()), (2, 'Evento 2', now(), 'Evento2', 2, now()), (3, 'Evento 3', now(), 'Evento3', 3, now());
+INSERT INTO public.voto (votante_id) VALUES (1),(2),(3);
 
 -- =================================================================================================
 -- 5. EVENTOS (CORREGIDO: Inserción línea a línea)
@@ -70,11 +76,11 @@ ALTER SEQUENCE IF EXISTS evento_id_seq RESTART WITH 20;
 DELETE FROM public.casa_eventos WHERE eventos_id IN (1, 2, 3, 4, 5);
 DELETE FROM public.evento WHERE id IN (1, 2, 3, 4, 5);
 
-INSERT INTO public.evento (id, nombre, descripcion, fecha_inicio, creado_por_id) VALUES (1, 'Cena de Piso', 'Pizza y juegos', CURRENT_TIMESTAMP, 1) ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.evento (id, nombre, descripcion, fecha_inicio, creado_por_id) VALUES (2, 'Visita Casero', 'Revisión', CURRENT_DATE + INTERVAL '1 day' + TIME '10:00:00', 2) ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.evento (id, nombre, descripcion, fecha_inicio, creado_por_id) VALUES (3, 'Limpieza General', 'Toca baño', CURRENT_DATE + INTERVAL '3 day' + TIME '16:00:00', 3) ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.evento (id, nombre, descripcion, fecha_inicio, creado_por_id) VALUES (4, 'Cumpleaños', 'Regalo', CURRENT_DATE + INTERVAL '7 day' + TIME '21:00:00', 1) ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.evento (id, nombre, descripcion, fecha_inicio, creado_por_id) VALUES (5, 'Pagar Internet', 'Factura', CURRENT_DATE + INTERVAL '20 day' + TIME '09:00:00', 1) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.evento (id, nombre, descripcion, fecha_inicio, creado_por_id, fecha_creacion) VALUES (1, 'Cena de Piso', 'Pizza y juegos', CURRENT_TIMESTAMP, 1, now()) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.evento (id, nombre, descripcion, fecha_inicio, creado_por_id, fecha_creacion) VALUES (2, 'Visita Casero', 'Revisión', CURRENT_DATE + INTERVAL '1 day' + TIME '10:00:00', 2, now()) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.evento (id, nombre, descripcion, fecha_inicio, creado_por_id, fecha_creacion) VALUES (3, 'Limpieza General', 'Toca baño', CURRENT_DATE + INTERVAL '3 day' + TIME '16:00:00', 3, now()) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.evento (id, nombre, descripcion, fecha_inicio, creado_por_id, fecha_creacion) VALUES (4, 'Cumpleaños', 'Regalo', CURRENT_DATE + INTERVAL '7 day' + TIME '21:00:00', 1, now()) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.evento (id, nombre, descripcion, fecha_inicio, creado_por_id, fecha_creacion) VALUES (5, 'Pagar Internet', 'Factura', CURRENT_DATE + INTERVAL '20 day' + TIME '09:00:00', 1, now()) ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.casa_eventos (casa_id, eventos_id) VALUES (1, 1) ON CONFLICT DO NOTHING;
 INSERT INTO public.casa_eventos (casa_id, eventos_id) VALUES (1, 2) ON CONFLICT DO NOTHING;
