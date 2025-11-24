@@ -88,9 +88,9 @@ INSERT INTO public.casa_eventos (casa_id, eventos_id) VALUES (1, 3) ON CONFLICT 
 INSERT INTO public.casa_eventos (casa_id, eventos_id) VALUES (1, 4) ON CONFLICT DO NOTHING;
 INSERT INTO public.casa_eventos (casa_id, eventos_id) VALUES (1, 5) ON CONFLICT DO NOTHING;
 
-INSERT INTO public.evento_asistentes (evento_id, asistentes_id) VALUES (1, 2) ON CONFLICT DO NOTHING;
-INSERT INTO public.evento_asistentes (evento_id, asistentes_id) VALUES (2, 3) ON CONFLICT DO NOTHING;
-INSERT INTO public.evento_asistentes (evento_id, asistentes_id) VALUES (3, 1) ON CONFLICT DO NOTHING;
+INSERT INTO public.evento_asistentes (evento_id, usuario_id) VALUES (1, 2) ON CONFLICT DO NOTHING;
+INSERT INTO public.evento_asistentes (evento_id, usuario_id) VALUES (2, 3) ON CONFLICT DO NOTHING;
+INSERT INTO public.evento_asistentes (evento_id, usuario_id) VALUES (3, 1) ON CONFLICT DO NOTHING;
 
 -- =================================================================================================
 -- 6. ELEMENTOS Y TAREAS (Resto de datos)

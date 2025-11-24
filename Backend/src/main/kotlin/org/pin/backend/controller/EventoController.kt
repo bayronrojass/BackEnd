@@ -3,10 +3,11 @@ package org.pin.backend.controller
 import org.pin.backend.service.EventoService
 import org.pin.backend.dto.Request.EventoRequestDTO
 import org.pin.backend.dto.Response.EventoResponseDTO
+import org.pin.backend.repository.EventoRepository
+import org.pin.backend.repository.CasaRepository
 import org.springframework.web.bind.annotation.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.pin.backend.repository.CasaRepository
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 @RequestMapping("/casas")
 class EventoController(
     private val casaRepository: CasaRepository,
+    private val eventoRepository: EventoRepository,
     private val service: EventoService
 ) {
 
@@ -63,5 +65,30 @@ class EventoController(
             creadoPor = eventoGuardado.creadoPor.id ?: throw IllegalStateException("Creator ID cannot be null"),
             asistentes = eventoGuardado.asistentes.map { it.id ?: throw IllegalStateException("Attendee ID cannot be null") }
         )
+    }
+
+    @DeleteMapping("/eventos/{eventoId}")
+    @Transactional
+    fun borrarEvento(
+        @PathVariable eventoId: Long
+    ): ResponseEntity<Void> {
+        val evento = eventoRepository.findById(eventoId).orElse(null)
+        if (evento == null) {
+            return ResponseEntity.notFound().build()
+        }
+
+        val casaConEvento = casaRepository.findAll().find { casa ->
+            casa.eventos.any { it.id == eventoId }
+        }
+
+        if (casaConEvento != null) {
+            casaConEvento.eventos.remove(evento)
+            casaRepository.save(casaConEvento)
+        }
+
+        // Delete the evento entity
+        eventoRepository.delete(evento)
+
+        return ResponseEntity.noContent().build()
     }
 }
