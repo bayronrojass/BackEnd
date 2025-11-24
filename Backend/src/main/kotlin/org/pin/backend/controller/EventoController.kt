@@ -5,11 +5,13 @@ import org.pin.backend.dto.Request.EventoRequestDTO
 import org.pin.backend.dto.Response.EventoResponseDTO
 import org.pin.backend.repository.EventoRepository
 import org.pin.backend.repository.CasaRepository
+import org.pin.backend.model.Evento
 import org.springframework.web.bind.annotation.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
+import java.util.Optional
 
 @RestController
 @RequestMapping("/casas")
@@ -44,7 +46,7 @@ class EventoController(
             }
             return ResponseEntity.ok(eventosDTO)
         } catch (e: Exception) {
-            e.printStackTrace()
+            logger.error("Error fetching events for house $casaId", e)
             return ResponseEntity.internalServerError().build()
         }
     }
@@ -53,18 +55,24 @@ class EventoController(
     fun crearEvento(
         @PathVariable casaId: Long,
         @RequestBody request: EventoRequestDTO
-    ): EventoResponseDTO {
-        val eventoGuardado = service.crearEvento(casaId, request)
-        return EventoResponseDTO(
-            id = eventoGuardado.id ?: throw IllegalStateException("Event ID cannot be null"),
-            nombre = eventoGuardado.nombre,
-            descripcion = eventoGuardado.descripcion,
-            fechaCreacion = eventoGuardado.fechaCreacion.toString(),
-            fechaInicio = eventoGuardado.fechaInicio.toString(),
-            fechaFin = eventoGuardado.fechaFin?.toString(),
-            creadoPor = eventoGuardado.creadoPor.id ?: throw IllegalStateException("Creator ID cannot be null"),
-            asistentes = eventoGuardado.asistentes.map { it.id ?: throw IllegalStateException("Attendee ID cannot be null") }
-        )
+    ): ResponseEntity<EventoResponseDTO> {
+        try {
+            val eventoGuardado = service.crearEvento(casaId, request)
+            val responseDTO = EventoResponseDTO(
+                id = eventoGuardado.id ?: throw IllegalStateException("Event ID cannot be null"),
+                nombre = eventoGuardado.nombre,
+                descripcion = eventoGuardado.descripcion,
+                fechaCreacion = eventoGuardado.fechaCreacion.toString(),
+                fechaInicio = eventoGuardado.fechaInicio.toString(),
+                fechaFin = eventoGuardado.fechaFin?.toString(),
+                creadoPor = eventoGuardado.creadoPor.id ?: throw IllegalStateException("Creator ID cannot be null"),
+                asistentes = eventoGuardado.asistentes.map { it.id ?: throw IllegalStateException("Attendee ID cannot be null") }
+            )
+            return ResponseEntity.ok(responseDTO)
+        } catch (e: Exception) {
+            logger.error("Error creating event for house $casaId", e)
+            return ResponseEntity.badRequest().build()
+        }
     }
 
     @DeleteMapping("/eventos/{eventoId}")
@@ -77,18 +85,58 @@ class EventoController(
             return ResponseEntity.notFound().build()
         }
 
-        val casaConEvento = casaRepository.findAll().find { casa ->
-            casa.eventos.any { it.id == eventoId }
+        try {
+            val casaConEvento = casaRepository.findAll().find { casa ->
+                casa.eventos.any { it.id == eventoId }
+            }
+
+            if (casaConEvento != null) {
+                casaConEvento.eventos.remove(evento)
+                casaRepository.save(casaConEvento)
+            }
+
+            eventoRepository.delete(evento)
+            return ResponseEntity.noContent().build()
+        } catch (e: Exception) {
+            logger.error("Error deleting event $eventoId", e)
+            return ResponseEntity.internalServerError().build()
+        }
+    }
+
+    @PutMapping("/eventos/{eventoId}")
+    @Transactional
+    fun actualizarEvento(
+        @PathVariable eventoId: Long,
+        @RequestBody request: EventoRequestDTO,
+    ): ResponseEntity<EventoResponseDTO> {
+        val eventoOptional: Optional<Evento> = eventoRepository.findById(eventoId)
+        if (eventoOptional.isEmpty) {
+            return ResponseEntity.notFound().build()
         }
 
-        if (casaConEvento != null) {
-            casaConEvento.eventos.remove(evento)
-            casaRepository.save(casaConEvento)
+        try {
+            val evento = eventoOptional.get()
+            request.nombre?.let { evento.nombre = it }
+            request.descripcion?.let { evento.descripcion = it }
+            request.fechaInicio?.let { evento.fechaInicio = it }
+            request.fechaFin?.let { evento.fechaFin = it }
+
+            val eventoActualizado = eventoRepository.save(evento)
+
+            val responseDTO = EventoResponseDTO(
+                id = eventoActualizado.id!!,
+                nombre = eventoActualizado.nombre,
+                descripcion = eventoActualizado.descripcion,
+                fechaCreacion = eventoActualizado.fechaCreacion.toString(),
+                fechaInicio = eventoActualizado.fechaInicio.toString(),
+                fechaFin = eventoActualizado.fechaFin?.toString(),
+                creadoPor = eventoActualizado.creadoPor.id!!,
+                asistentes = eventoActualizado.asistentes.map { it.id!! }
+            )
+            return ResponseEntity.ok(responseDTO)
+        } catch (e: Exception) {
+            logger.error("Error updating event $eventoId", e)
+            return ResponseEntity.internalServerError().build()
         }
-
-        // Delete the evento entity
-        eventoRepository.delete(evento)
-
-        return ResponseEntity.noContent().build()
     }
 }
