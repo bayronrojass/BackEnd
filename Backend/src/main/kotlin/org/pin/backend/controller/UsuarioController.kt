@@ -1,25 +1,24 @@
 package org.pin.backend.controller
 import org.pin.backend.dto.Data.UsuarioDTO
-import org.pin.backend.model.Usuario
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.EventoRepository
 import org.pin.backend.repository.GastoRepository
 import org.pin.backend.repository.InvitacionRepository
 import org.pin.backend.repository.MultimediaRepository
-import org.pin.backend.repository.NotificaciónRepository
+import org.pin.backend.repository.NotificacionRepository
 import org.pin.backend.repository.TareaRepository
 import org.pin.backend.repository.UsuarioRepository
 import org.pin.backend.repository.VotoRepository
 import org.pin.backend.service.UsuarioService
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/usuarios")
@@ -31,18 +30,21 @@ class UsuarioController(
     private val tareaRepository: TareaRepository,
     private val invitacionRepository: InvitacionRepository,
     private val multimediaRepository: MultimediaRepository,
-    private val notificacionRepository: NotificaciónRepository,
+    private val notificacionRepository: NotificacionRepository,
     private val gastoRepository: GastoRepository,
-    private val votoRepository: VotoRepository
+    private val votoRepository: VotoRepository,
 ) {
     @GetMapping
     fun getAll() = service.findAll()
 
     @DeleteMapping("/{id}")
     @Transactional
-    fun deleteUsuario(@PathVariable id: Long): ResponseEntity<Void> {
-        val usuario = usuarioRepository.findById(id).orElse(null)
-            ?: return ResponseEntity.notFound().build()
+    fun deleteUsuario(
+        @PathVariable id: Long,
+    ): ResponseEntity<Void> {
+        val usuario =
+            usuarioRepository.findById(id).orElse(null)
+                ?: return ResponseEntity.notFound().build()
 
         // Limpiar Casas (Administradores)
         val casasAdmin = casaRepository.findByAdministradoresContains(usuario)
@@ -133,25 +135,27 @@ class UsuarioController(
 
     // 1. GET: Devolvemos UsuarioDTO, no la entidad completa
     @GetMapping("/{id}")
-    fun getUsuario(@PathVariable id: Long): ResponseEntity<UsuarioDTO> {
-        return usuarioRepository.findById(id)
+    fun getUsuario(
+        @PathVariable id: Long,
+    ): ResponseEntity<UsuarioDTO> =
+        usuarioRepository
+            .findById(id)
             .map { usuario ->
                 // Convertimos la entidad a DTO antes de enviarla
                 val dto = UsuarioDTO(usuario.id!!, usuario.nombre, usuario.correo)
                 ResponseEntity.ok(dto)
-            }
-            .orElse(ResponseEntity.notFound().build())
-    }
+            }.orElse(ResponseEntity.notFound().build())
 
     // 2. PUT: Recibimos DTO y devolvemos DTO
     @PutMapping("/{id}")
     @Transactional
     fun updateUsuario(
         @PathVariable id: Long,
-        @RequestBody usuarioDto: UsuarioDTO
+        @RequestBody usuarioDto: UsuarioDTO,
     ): ResponseEntity<UsuarioDTO> {
-        val usuario = usuarioRepository.findById(id).orElse(null)
-            ?: return ResponseEntity.notFound().build()
+        val usuario =
+            usuarioRepository.findById(id).orElse(null)
+                ?: return ResponseEntity.notFound().build()
 
         // Actualizamos los campos
         usuario.nombre = usuarioDto.nombre

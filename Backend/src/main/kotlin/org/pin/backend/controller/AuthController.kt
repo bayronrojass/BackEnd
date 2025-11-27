@@ -1,9 +1,9 @@
 package org.pin.backend.controller
 
 import org.pin.backend.dto.Data.CasaDTO
+import org.pin.backend.dto.Data.UsuarioDTO
 import org.pin.backend.dto.Request.LoginRequest
 import org.pin.backend.dto.Response.LoginResponse
-import org.pin.backend.dto.Data.UsuarioDTO
 import org.pin.backend.repository.UsuarioRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -24,9 +24,11 @@ class AuthController(
         @RequestBody request: LoginRequest,
     ): ResponseEntity<LoginResponse> {
         // 1. Buscar usuario por correo
-        val usuario = usuarioRepository.findByCorreo(request.correo)
-            .orElseThrow { Exception("No existe un usuario con el email: $request.correo") }
-        //val usuario: Usuario? = usuarioRepository.findByCorreo(request.correo)
+        val usuario =
+            usuarioRepository
+                .findByCorreo(request.correo)
+                .orElseThrow { Exception("No existe un usuario con el email: $request.correo") }
+        // val usuario: Usuario? = usuarioRepository.findByCorreo(request.correo)
 
         // 2. Verificar contraseña (!! USAR HASH EN PRODUCCIÓN !!)
         // Aquí deberías comparar con un hash (ej. BCrypt)
