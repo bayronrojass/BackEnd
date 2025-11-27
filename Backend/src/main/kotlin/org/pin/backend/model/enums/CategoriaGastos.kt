@@ -5,5 +5,5 @@ enum class CategoriaGasto {
     COMIDA,
     SUMINISTROS,
     OCIO,
-    OTROS
+    OTROS,
 }

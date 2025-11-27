@@ -1,7 +1,7 @@
 package org.pin.backend.dto.Request
 
-import java.time.LocalDateTime
 import org.springframework.format.annotation.DateTimeFormat
+import java.time.LocalDateTime
 
 data class EventoRequestDTO(
     val nombre: String,
@@ -10,5 +10,5 @@ data class EventoRequestDTO(
     val fechaInicio: LocalDateTime,
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     val fechaFin: LocalDateTime? = null,
-    val creadoPor: Long
+    val creadoPor: Long,
 )

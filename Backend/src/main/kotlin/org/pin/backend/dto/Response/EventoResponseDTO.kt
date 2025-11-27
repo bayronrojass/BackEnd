@@ -8,5 +8,5 @@ data class EventoResponseDTO(
     val fechaFin: String?,
     val creadoPor: Long,
     val fechaCreacion: String,
-    val asistentes: List<Long>
+    val asistentes: List<Long>,
 )

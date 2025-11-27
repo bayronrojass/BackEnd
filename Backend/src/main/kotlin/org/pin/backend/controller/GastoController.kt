@@ -16,26 +16,29 @@ import java.time.format.DateTimeFormatter
 @RequestMapping("/casas")
 class GastoController(
     private val casaRepository: CasaRepository,
-    private val usuarioRepository: UsuarioRepository
+    private val usuarioRepository: UsuarioRepository,
 ) {
-
     @GetMapping("/{casaId}/gastos")
     @Transactional(readOnly = true)
-    fun getGastosByCasaId(@PathVariable casaId: Long): ResponseEntity<List<GastoResponseDTO>> {
-        val casa = casaRepository.findById(casaId).orElse(null)
-            ?: return ResponseEntity.notFound().build()
+    fun getGastosByCasaId(
+        @PathVariable casaId: Long,
+    ): ResponseEntity<List<GastoResponseDTO>> {
+        val casa =
+            casaRepository.findById(casaId).orElse(null)
+                ?: return ResponseEntity.notFound().build()
 
-        val gastosDTO = casa.gastos.map { gasto ->
-            GastoResponseDTO(
-                id = gasto.id!!,
-                nombre = gasto.nombre,
-                descripcion = gasto.descripcion,
-                importe = gasto.importe,
-                fecha = gasto.fechaInicio.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                categoria = gasto.categoria.name,
-                pagadoPorNombre = gasto.pagadoPor?.nombre ?: "Desconocido"
-            )
-        }
+        val gastosDTO =
+            casa.gastos.map { gasto ->
+                GastoResponseDTO(
+                    id = gasto.id!!,
+                    nombre = gasto.nombre,
+                    descripcion = gasto.descripcion,
+                    importe = gasto.importe,
+                    fecha = gasto.fechaInicio.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                    categoria = gasto.categoria.name,
+                    pagadoPorNombre = gasto.pagadoPor?.nombre ?: "Desconocido",
+                )
+            }
         return ResponseEntity.ok(gastosDTO)
     }
 
@@ -43,25 +46,28 @@ class GastoController(
     @Transactional
     fun createGasto(
         @PathVariable casaId: Long,
-        @RequestBody request: GastoRequestDTO
+        @RequestBody request: GastoRequestDTO,
     ): ResponseEntity<String> {
-        val casa = casaRepository.findById(casaId).orElse(null)
-            ?: return ResponseEntity.notFound().build()
+        val casa =
+            casaRepository.findById(casaId).orElse(null)
+                ?: return ResponseEntity.notFound().build()
 
         val usuarioPaga = usuarioRepository.findById(request.pagadoPorId).orElse(null)
 
-        val nuevoGasto = Gasto(
-            nombre = request.nombre,
-            descripcion = request.descripcion,
-            importe = request.importe,
-            fechaInicio = LocalDateTime.now(),
-            categoria = try {
-                CategoriaGasto.valueOf(request.categoria)
-            } catch (e: Exception) {
-                CategoriaGasto.OTROS
-            },
-            pagadoPor = usuarioPaga
-        )
+        val nuevoGasto =
+            Gasto(
+                nombre = request.nombre,
+                descripcion = request.descripcion,
+                importe = request.importe,
+                fechaInicio = LocalDateTime.now(),
+                categoria =
+                    try {
+                        CategoriaGasto.valueOf(request.categoria)
+                    } catch (e: Exception) {
+                        CategoriaGasto.OTROS
+                    },
+                pagadoPor = usuarioPaga,
+            )
 
         casa.gastos.add(nuevoGasto)
         casaRepository.save(casa)
