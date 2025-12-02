@@ -77,13 +77,13 @@ class LienzoService(
 
     @OptIn(ExperimentalTime::class)
     fun createDefaultPostIt(): Lienzo {
-        val width = 500
-        val height = 400
+        val width = 1000
+        val height = 1000
 
         val bufferedImage = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
         val graphics = bufferedImage.createGraphics()
 
-        graphics.color = Color.YELLOW
+        graphics.color = Color(0, 0,0,0)
         graphics.fillRect(0, 0, width, height)
         graphics.dispose()
 

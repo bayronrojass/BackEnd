@@ -103,7 +103,6 @@ class Lienzo4bpp(
         for (y in 0..height - 1) {
             for (x in 0..width - 1) {
                 val color = palette[getPixel(x.toShort(), y.toShort())]
-
                 img.setRGB(x, y, color)
             }
         }
