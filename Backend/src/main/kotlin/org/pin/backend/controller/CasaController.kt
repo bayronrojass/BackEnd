@@ -276,7 +276,8 @@ class CasaController(
                 casa
                     .get()
                     .multimedia
-                    .filter { it is PostIt && it !is Imagen && it.localizacion == location }
+                    .filter { it is PostIt && it !is Imagen }
+                    .filter { it.localizacion == location }
                     .map { it.id!! }
                     .toList()
             return ResponseEntity.ok(lista)

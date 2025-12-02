@@ -1,5 +1,6 @@
 package org.pin.backend.model
 import jakarta.persistence.*
+import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.PositiveOrZero
 
 @Entity
@@ -21,6 +22,9 @@ class Multimedia(
     var height: Int = 0,
     @Column(nullable = true)
     var ruta: String? = null,
+    @Column(nullable = false)
+    @field:NotBlank(message = "Location cannot be blank")
+    var localizacion: String = "",
     @ManyToOne()
     val usuario: Usuario? = null,
     @ManyToOne
