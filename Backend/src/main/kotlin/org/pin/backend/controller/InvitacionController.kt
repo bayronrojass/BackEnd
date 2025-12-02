@@ -1,7 +1,7 @@
 package org.pin.backend.controller
 
 import jakarta.validation.Valid
-import org.pin.backend.dto.AccionInvitacionRequest
+import org.pin.backend.dto.Request.AccionInvitacionRequest
 import org.pin.backend.dto.Request.InvitacionRequest
 import org.pin.backend.dto.Response.InvitacionResponse
 import org.pin.backend.dto.Response.toResponse

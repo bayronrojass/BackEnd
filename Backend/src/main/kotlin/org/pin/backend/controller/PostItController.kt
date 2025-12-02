@@ -31,7 +31,7 @@ class PostItController(
                     postIt.posicionY,
                     postIt.width,
                     postIt.height,
-                    postIt.plegado!!,
+                    postIt.localizacion,
                 ),
             )
         }
@@ -65,7 +65,6 @@ class PostItController(
             val multimediaIt = multimedia.get()
             multimediaIt.posicionX = postItDTO.posicionX
             multimediaIt.posicionY = postItDTO.posicionY
-            multimediaIt.plegado = postItDTO.plegado
             service.save(multimediaIt)
             return ResponseEntity.ok(true)
         }

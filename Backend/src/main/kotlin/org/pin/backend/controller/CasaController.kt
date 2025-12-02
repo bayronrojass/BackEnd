@@ -4,7 +4,7 @@ import org.pin.backend.dto.Data.ImagenDTO
 import org.pin.backend.dto.Data.PostItDTO
 import org.pin.backend.dto.Data.UsuarioDTO
 import org.pin.backend.dto.Data.toDTO
-import org.pin.backend.dto.JoinCasaRequest
+import org.pin.backend.dto.Request.JoinCasaRequest
 import org.pin.backend.dto.Request.CasaRequestDTO
 import org.pin.backend.dto.Request.ListaRequestDTO
 import org.pin.backend.dto.Request.TareaRequestDTO
@@ -249,23 +249,26 @@ class CasaController(
     @PostMapping("/{id}/postIt")
     fun crearPostIt(
         @PathVariable id: Long,
+        @RequestBody postItDTO: PostItDTO,
     ): ResponseEntity<PostItDTO> {
         val casa = service.findById(id)
         if (casa.isPresent) {
             val postIt = postItService.new(casa.get())
+            postIt.localizacion = postItDTO.localizacion
             casa.get().multimedia.add(postIt)
             service.save(casa.get())
             logger.info("$postIt ${postIt.id}")
             return ResponseEntity.ok(
-                PostItDTO(postIt.id!!, postIt.lienzo!!.id!!, 0f, 0f, postIt.lienzo!!.width.toInt(), postIt.lienzo!!.height.toInt(), false),
+                PostItDTO(postIt.id!!, postIt.lienzo!!.id!!, 0f, 0f, postIt.lienzo!!.width.toInt(), postIt.lienzo!!.height.toInt(), postIt.localizacion),
             )
         }
         return ResponseEntity.notFound().build()
     }
 
-    @GetMapping("/{id}/postIt")
+    @GetMapping("/{id}/{location}/postIt")
     fun getPostIt(
         @PathVariable id: Long,
+        @PathVariable location: String,
     ): ResponseEntity<List<Long>> {
         val casa = service.findById(id)
         if (casa.isPresent) {
@@ -273,7 +276,7 @@ class CasaController(
                 casa
                     .get()
                     .multimedia
-                    .filter { it is PostIt && it !is Imagen }
+                    .filter { it is PostIt && it !is Imagen && it.localizacion == location }
                     .map { it.id!! }
                     .toList()
             return ResponseEntity.ok(lista)
@@ -314,7 +317,7 @@ class CasaController(
             val imagen = i.get()
             casa.get().multimedia.add(imagen)
             service.save(casa.get())
-            return ResponseEntity.ok(ImagenDTO(imagen.id!!, imagen.lienzo!!.id!!, 0f, 0f, imagen.width, imagen.height, false))
+            return ResponseEntity.ok(ImagenDTO(imagen.id!!, imagen.lienzo!!.id!!, 0f, 0f, imagen.width, imagen.height, imagen.localizacion))
         }
         return ResponseEntity.notFound().build()
     }

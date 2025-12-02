@@ -1,4 +1,4 @@
-package org.pin.backend.dto
+package org.pin.backend.dto.Request
 
 import jakarta.validation.constraints.Min
 

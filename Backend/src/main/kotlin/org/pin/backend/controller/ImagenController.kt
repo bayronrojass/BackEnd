@@ -31,7 +31,7 @@ class ImagenController(
                     imagen.posicionY,
                     imagen.width,
                     imagen.height,
-                    imagen.plegado == true,
+                    imagen.localizacion
                 ),
             )
         }
@@ -65,7 +65,6 @@ class ImagenController(
             val multimediaIt = multimedia.get()
             multimediaIt.posicionX = imagenDTO.posicionX
             multimediaIt.posicionY = imagenDTO.posicionY
-            multimediaIt.plegado = imagenDTO.plegado
             service.save(multimediaIt)
             return ResponseEntity.ok(true)
         }

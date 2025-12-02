@@ -149,9 +149,9 @@ INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignad
 INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre) VALUES (11, NOW() + INTERVAL '3 days', 'Semanal', TRUE, 1, 2, false, 'Ir a la lavandería') ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre) VALUES (12, NOW() + INTERVAL '7 days', 'Mensual', FALSE, 1, 3, false,'Pasar la aspiradora') ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO public.post_it (id, lienzo_id, plegado) VALUES (1, 4, false) ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.post_it (id, lienzo_id, plegado) VALUES (2, 5, false) ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.post_it (id, lienzo_id, plegado) VALUES (3, 6, false) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.post_it (id, lienzo_id, localizacion) VALUES (1, 4, "Home") ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.post_it (id, lienzo_id, localizacion) VALUES (2, 5, "Home") ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.post_it (id, lienzo_id, localizacion) VALUES (3, 6, "Home") ON CONFLICT (id) DO NOTHING;
 
 ALTER SEQUENCE IF EXISTS invitacion_id_seq RESTART WITH 10;
 INSERT INTO public.invitacion (id, remitente_id, destinatario_id, casa_id, fecha_creacion, estado) VALUES (1, 1, 4, 1, NOW(), 'PENDIENTE') ON CONFLICT (id) DO NOTHING;
