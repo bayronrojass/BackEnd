@@ -6,6 +6,4 @@ data class CasaDetailsResponseDTO(
     val id: Long,
     val nombre: String,
     val descripcion: String?,
-    val miembros: List<Usuario>, // Asumiendo que tu @Entity Usuario es segura para enviar
-    val administradores: List<Usuario>,
 )

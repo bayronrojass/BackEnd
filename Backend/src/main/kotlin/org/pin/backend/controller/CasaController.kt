@@ -93,8 +93,6 @@ class CasaController(
                         id = casa.id!!,
                         nombre = casa.nombre,
                         descripcion = casa.descripcion,
-                        miembros = casa.miembros.toList(),
-                        administradores = casa.administradores.toList(),
                     )
                 ResponseEntity.ok(dto)
             }.orElse(ResponseEntity.notFound().build())
