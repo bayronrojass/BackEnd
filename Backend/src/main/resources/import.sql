@@ -14,6 +14,9 @@ ALTER SEQUENCE IF EXISTS lienzo_id_seq RESTART WITH 10;
 INSERT INTO public.lienzo (id, bytes, width, height, last_edited, is_image) VALUES (1, decode(repeat('00', 500000), 'hex'), 1000, 1000, NOW(), false) ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.lienzo (id, bytes, width, height, last_edited, is_image) VALUES (2, decode(repeat('00', 500000), 'hex'), 1000, 1000, NOW(), false) ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.lienzo (id, bytes, width, height, last_edited, is_image) VALUES (3, decode(repeat('00', 500000), 'hex'), 1000, 1000, NOW(), false) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.lienzo (id, bytes, width, height, last_edited, is_image) VALUES (4, decode(repeat('00', 500000), 'hex'), 1000, 1000, NOW(), false) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.lienzo (id, bytes, width, height, last_edited, is_image) VALUES (5, decode(repeat('00', 500000), 'hex'), 1000, 1000, NOW(), false) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.lienzo (id, bytes, width, height, last_edited, is_image) VALUES (6, decode(repeat('00', 500000), 'hex'), 1000, 1000, NOW(), false) ON CONFLICT (id) DO NOTHING;
 
 -- =================================================================================================
 -- 3. CASAS
@@ -146,9 +149,9 @@ INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignad
 INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre) VALUES (11, NOW() + INTERVAL '3 days', 'Semanal', TRUE, 1, 2, false, 'Ir a la lavandería') ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre) VALUES (12, NOW() + INTERVAL '7 days', 'Mensual', FALSE, 1, 3, false,'Pasar la aspiradora') ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO public.post_it (id, lienzo_id) VALUES (1, 1) ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.post_it (id, lienzo_id) VALUES (2, 2) ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.post_it (id, lienzo_id) VALUES (3, 3) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.post_it (id, lienzo_id) VALUES (1, 4) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.post_it (id, lienzo_id) VALUES (2, 5) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.post_it (id, lienzo_id) VALUES (3, 6) ON CONFLICT (id) DO NOTHING;
 
 ALTER SEQUENCE IF EXISTS invitacion_id_seq RESTART WITH 10;
 INSERT INTO public.invitacion (id, remitente_id, destinatario_id, casa_id, fecha_creacion, estado) VALUES (1, 1, 4, 1, NOW(), 'PENDIENTE') ON CONFLICT (id) DO NOTHING;

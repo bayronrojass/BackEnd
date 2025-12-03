@@ -4,8 +4,8 @@ import org.pin.backend.dto.Data.ImagenDTO
 import org.pin.backend.dto.Data.PostItDTO
 import org.pin.backend.dto.Data.UsuarioDTO
 import org.pin.backend.dto.Data.toDTO
-import org.pin.backend.dto.Request.JoinCasaRequest
 import org.pin.backend.dto.Request.CasaRequestDTO
+import org.pin.backend.dto.Request.JoinCasaRequest
 import org.pin.backend.dto.Request.ListaRequestDTO
 import org.pin.backend.dto.Request.TareaRequestDTO
 import org.pin.backend.dto.Response.CasaDetailsResponseDTO
@@ -246,20 +246,27 @@ class CasaController(
         return ResponseEntity.notFound().build()
     }
 
-    @PostMapping("/{id}/postIt")
+    @PostMapping("/{id}/{location}/postIt")
     fun crearPostIt(
         @PathVariable id: Long,
-        @RequestBody postItDTO: PostItDTO,
+        @PathVariable location: String,
     ): ResponseEntity<PostItDTO> {
         val casa = service.findById(id)
         if (casa.isPresent) {
-            val postIt = postItService.new(casa.get())
-            postIt.localizacion = postItDTO.localizacion
+            val postIt = postItService.new(casa.get(), location)
             casa.get().multimedia.add(postIt)
             service.save(casa.get())
             logger.info("$postIt ${postIt.id}")
             return ResponseEntity.ok(
-                PostItDTO(postIt.id!!, postIt.lienzo!!.id!!, 0f, 0f, postIt.lienzo!!.width.toInt(), postIt.lienzo!!.height.toInt(), postIt.localizacion),
+                PostItDTO(
+                    postIt.id!!,
+                    postIt.lienzo!!.id!!,
+                    0f,
+                    0f,
+                    postIt.lienzo!!.width.toInt(),
+                    postIt.lienzo!!.height.toInt(),
+                    postIt.localizacion,
+                ),
             )
         }
         return ResponseEntity.notFound().build()

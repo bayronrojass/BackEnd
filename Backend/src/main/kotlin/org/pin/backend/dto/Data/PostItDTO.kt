@@ -1,11 +1,11 @@
 package org.pin.backend.dto.Data
 
 open class PostItDTO(
-    val id: Long,
-    val lienzoId: Long,
-    val posicionX: Float,
-    val posicionY: Float,
-    val width: Int,
-    val height: Int,
-    val localizacion: String
+    val id: Long? = null,
+    val lienzoId: Long? = null,
+    val posicionX: Float = 0f,
+    val posicionY: Float = 0f,
+    val width: Int = 0,
+    val height: Int = 0,
+    val localizacion: String,
 )
