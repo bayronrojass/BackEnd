@@ -8,4 +8,5 @@ data class TareaRequestDTO(
     val frecuencia: String?,
     val periodica: Boolean?,
     val asignadoAId: Long?,
+    val prioridad: String?
 )

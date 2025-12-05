@@ -142,12 +142,12 @@ INSERT INTO public.multimedia (id, posicionx, posiciony, width, height, ruta, us
 INSERT INTO public.multimedia (id, posicionx, posiciony, width, height, ruta, usuario_id, casa_id, localizacion) VALUES (3, 300, 500,450, 400, 'rutaC', 3, 3,'Home') ON CONFLICT (id) DO NOTHING;
 
 ALTER SEQUENCE IF EXISTS tarea_id_seq RESTART WITH 20;
-INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre) VALUES (1, now(), 'Semanal', TRUE, 1, 1, false, 'Sacar basura (Mañana)') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre) VALUES (2, now(), 'Mensual', FALSE, 1, 2, false, 'Limpiar Baño') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre) VALUES (3, now(), 'Diaria', TRUE, 1, 3, false, 'Reunion piso') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre) VALUES (10, NOW() + INTERVAL '1 day', 'Diaria', TRUE, 1, 1, false, 'Cargar el lavaplatos') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre) VALUES (11, NOW() + INTERVAL '3 days', 'Semanal', TRUE, 1, 2, false, 'Ir a la lavandería') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre) VALUES (12, NOW() + INTERVAL '7 days', 'Mensual', FALSE, 1, 3, false,'Pasar la aspiradora') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre, prioridad) VALUES (1, now(), 'Semanal', TRUE, 1, 1, false, 'Sacar basura (Mañana)', 'Alta') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre, prioridad) VALUES (2, now(), 'Mensual', FALSE, 1, 2, false, 'Limpiar Baño', 'Alta') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre, prioridad) VALUES (3, now(), 'Diaria', TRUE, 1, 3, false, 'Reunion piso', 'Media') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre, prioridad) VALUES (10, NOW() + INTERVAL '1 day', 'Diaria', TRUE, 1, 1, false, 'Cargar el lavaplatos', 'Media') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre, prioridad) VALUES (11, NOW() + INTERVAL '3 days', 'Semanal', TRUE, 1, 2, false, 'Ir a la lavandería', 'Baja') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre, prioridad) VALUES (12, NOW() + INTERVAL '7 days', 'Mensual', FALSE, 1, 3, false,'Pasar la aspiradora', 'Baja') ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.post_it (id, lienzo_id) VALUES (1, 4) ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.post_it (id, lienzo_id) VALUES (2, 5) ON CONFLICT (id) DO NOTHING;

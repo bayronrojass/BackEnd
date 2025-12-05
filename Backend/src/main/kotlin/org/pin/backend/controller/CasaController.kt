@@ -171,6 +171,7 @@ class CasaController(
                         tarea.asignadoA?.let {
                             UsuarioDTO(it.id!!, it.nombre, it.correo)
                         },
+                    prioridad = tarea.prioridad,
                 )
             }
         return ResponseEntity.ok(tareasDTO)
@@ -206,6 +207,7 @@ class CasaController(
                         )
                     },
                 frecuencia = request.frecuencia,
+                prioridad = request.prioridad,
                 periodica = request.periodica ?: false,
                 asignadoA = usuarioAsignado,
                 casa = casa,
@@ -228,6 +230,7 @@ class CasaController(
                     tareaGuardada.asignadoA?.let {
                         UsuarioDTO(it.id!!, it.nombre, it.correo)
                     },
+                prioridad = tareaGuardada.prioridad,
             )
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO)

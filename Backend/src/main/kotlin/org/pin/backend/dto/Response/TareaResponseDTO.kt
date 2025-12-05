@@ -11,4 +11,5 @@ data class TareaResponseDTO(
     val frecuencia: String?,
     val periodica: Boolean,
     val asignadoA: UsuarioDTO?,
+    val prioridad: String?
 )

@@ -45,6 +45,7 @@ class TareaController(
             }
         request.frecuencia?.let { tarea.frecuencia = it }
         request.periodica?.let { tarea.periodica = it }
+        request.prioridad?.let { tarea.prioridad = it }
 
         // Actualiza el usuario asignado
         if (request.asignadoAId != null) {
@@ -73,6 +74,7 @@ class TareaController(
                     tareaGuardada.asignadoA?.let {
                         UsuarioDTO(it.id!!, it.nombre, it.correo)
                     },
+                prioridad = tareaGuardada.prioridad
             )
         return ResponseEntity.ok(responseDTO)
     }
