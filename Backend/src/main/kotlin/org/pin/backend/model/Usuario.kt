@@ -23,4 +23,6 @@ class Usuario(
     var casas: MutableSet<Casa> = mutableSetOf(),
     @ManyToMany(mappedBy = "administradores", fetch = FetchType.LAZY)
     var casasAdministradas: MutableSet<Casa> = mutableSetOf(),
+    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
+    var tokens: MutableSet<FirebaseToken> = mutableSetOf(),
 )

@@ -31,7 +31,7 @@ class ImagenController(
                     imagen.posicionY,
                     imagen.width,
                     imagen.height,
-                    imagen.localizacion
+                    imagen.localizacion,
                 ),
             )
         }
@@ -60,7 +60,7 @@ class ImagenController(
     fun updatePosition(
         @RequestBody imagenDTO: ImagenDTO,
     ): ResponseEntity<Boolean> {
-        val multimedia = service.getById(imagenDTO.id)
+        val multimedia = service.getById(imagenDTO.id!!)
         if (multimedia.isPresent) {
             val multimediaIt = multimedia.get()
             multimediaIt.posicionX = imagenDTO.posicionX

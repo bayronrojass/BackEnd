@@ -120,9 +120,9 @@ class EventoController(
 
         try {
             val evento = eventoOptional.get()
-            request.nombre?.let { evento.nombre = it }
+            request.nombre.let { evento.nombre = it }
             request.descripcion?.let { evento.descripcion = it }
-            request.fechaInicio?.let { evento.fechaInicio = it }
+            request.fechaInicio.let { evento.fechaInicio = it }
             request.fechaFin?.let { evento.fechaFin = it }
 
             val eventoActualizado = eventoRepository.save(evento)

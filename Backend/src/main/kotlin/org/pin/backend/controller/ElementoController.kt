@@ -38,7 +38,7 @@ class ElementoController(
         val elemento = elementoOptional.get()
 
         // Actualiza solo los campos que no sean nulos en el request
-        request.nombre?.let { elemento.nombre = it }
+        request.nombre.let { elemento.nombre = it }
         request.descripcion?.let { elemento.descripcion = it }
         request.completado?.let { elemento.completado = it } // <-- Esto marcará como completado
 

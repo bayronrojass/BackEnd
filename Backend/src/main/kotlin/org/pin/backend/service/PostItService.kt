@@ -17,7 +17,10 @@ class PostItService(
 
     fun save(postIt: PostIt): PostIt = repo.save(postIt)
 
-    fun new(casa: Casa): PostIt {
+    fun new(
+        casa: Casa,
+        location: String,
+    ): PostIt {
         val p = PostIt()
         p.posicionX = 100f
         p.posicionY = 100f
@@ -25,6 +28,7 @@ class PostItService(
         p.lienzo = lienzoService.createDefaultPostIt()
         p.width = p.lienzo?.width?.toInt()!! / 3
         p.height = p.lienzo?.height?.toInt()!! / 3
+        p.localizacion = location
         return repo.save(p)
     }
 }

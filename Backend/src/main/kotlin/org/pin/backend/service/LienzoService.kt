@@ -83,7 +83,7 @@ class LienzoService(
         val bufferedImage = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
         val graphics = bufferedImage.createGraphics()
 
-        graphics.color = Color(0, 0,0,0)
+        graphics.color = Color(0, 0, 0, 0)
         graphics.fillRect(0, 0, width, height)
         graphics.dispose()
 

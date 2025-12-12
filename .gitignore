@@ -36,4 +36,4 @@ db-data/
 db-data/*
 mosquitto/data/mosquitto.db
 Backend/mirumi-23884-firebase-adminsdk-fbsvc-ce13046c20.json
-Backend/google-services.json
+mirumi-23884-firebase-adminsdk-fbsvc-ce13046c20.json

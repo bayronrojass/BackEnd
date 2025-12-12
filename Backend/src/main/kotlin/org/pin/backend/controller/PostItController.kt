@@ -60,7 +60,7 @@ class PostItController(
     fun updatePosition(
         @RequestBody postItDTO: PostItDTO,
     ): ResponseEntity<Boolean> {
-        val multimedia = service.getById(postItDTO.id)
+        val multimedia = service.getById(postItDTO.id!!)
         if (multimedia.isPresent) {
             val multimediaIt = multimedia.get()
             multimediaIt.posicionX = postItDTO.posicionX

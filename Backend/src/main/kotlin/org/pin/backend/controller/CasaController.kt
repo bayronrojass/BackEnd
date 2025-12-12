@@ -4,8 +4,8 @@ import org.pin.backend.dto.Data.ImagenDTO
 import org.pin.backend.dto.Data.PostItDTO
 import org.pin.backend.dto.Data.UsuarioDTO
 import org.pin.backend.dto.Data.toDTO
-import org.pin.backend.dto.Request.JoinCasaRequest
 import org.pin.backend.dto.Request.CasaRequestDTO
+import org.pin.backend.dto.Request.JoinCasaRequest
 import org.pin.backend.dto.Request.ListaRequestDTO
 import org.pin.backend.dto.Request.TareaRequestDTO
 import org.pin.backend.dto.Response.CasaDetailsResponseDTO
@@ -93,8 +93,6 @@ class CasaController(
                         id = casa.id!!,
                         nombre = casa.nombre,
                         descripcion = casa.descripcion,
-                        miembros = casa.miembros.toList(),
-                        administradores = casa.administradores.toList(),
                     )
                 ResponseEntity.ok(dto)
             }.orElse(ResponseEntity.notFound().build())
@@ -173,6 +171,7 @@ class CasaController(
                         tarea.asignadoA?.let {
                             UsuarioDTO(it.id!!, it.nombre, it.correo)
                         },
+                    prioridad = tarea.prioridad,
                 )
             }
         return ResponseEntity.ok(tareasDTO)
@@ -208,6 +207,7 @@ class CasaController(
                         )
                     },
                 frecuencia = request.frecuencia,
+                prioridad = request.prioridad,
                 periodica = request.periodica ?: false,
                 asignadoA = usuarioAsignado,
                 casa = casa,
@@ -230,36 +230,33 @@ class CasaController(
                     tareaGuardada.asignadoA?.let {
                         UsuarioDTO(it.id!!, it.nombre, it.correo)
                     },
+                prioridad = tareaGuardada.prioridad,
             )
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO)
     }
 
-    @GetMapping("/{id}/lienzo")
-    fun getLienzo(
-        @PathVariable id: Long,
-    ): ResponseEntity<Long> {
-        val casa = service.findById(id)
-        if (casa.isPresent) {
-            return ResponseEntity.ok(casa.get().lienzo.id)
-        }
-        return ResponseEntity.notFound().build()
-    }
-
-    @PostMapping("/{id}/postIt")
+    @PostMapping("/{id}/{location}/postIt")
     fun crearPostIt(
         @PathVariable id: Long,
-        @RequestBody postItDTO: PostItDTO,
+        @PathVariable location: String,
     ): ResponseEntity<PostItDTO> {
         val casa = service.findById(id)
         if (casa.isPresent) {
-            val postIt = postItService.new(casa.get())
-            postIt.localizacion = postItDTO.localizacion
+            val postIt = postItService.new(casa.get(), location)
             casa.get().multimedia.add(postIt)
             service.save(casa.get())
             logger.info("$postIt ${postIt.id}")
             return ResponseEntity.ok(
-                PostItDTO(postIt.id!!, postIt.lienzo!!.id!!, 0f, 0f, postIt.lienzo!!.width.toInt(), postIt.lienzo!!.height.toInt(), postIt.localizacion),
+                PostItDTO(
+                    postIt.id!!,
+                    postIt.lienzo!!.id!!,
+                    0f,
+                    0f,
+                    postIt.lienzo!!.width.toInt(),
+                    postIt.lienzo!!.height.toInt(),
+                    postIt.localizacion,
+                ),
             )
         }
         return ResponseEntity.notFound().build()
@@ -269,7 +266,7 @@ class CasaController(
     fun getPostIt(
         @PathVariable id: Long,
         @PathVariable location: String,
-    ): ResponseEntity<List<Long>> {
+    ): ResponseEntity<List<PostItDTO>>{
         val casa = service.findById(id)
         if (casa.isPresent) {
             val lista =
@@ -278,7 +275,16 @@ class CasaController(
                     .multimedia
                     .filter { it is PostIt && it !is Imagen }
                     .filter { it.localizacion == location }
-                    .map { it.id!! }
+                    .map{ it as PostIt
+                        PostItDTO(
+                        it.id!!,
+                        it.lienzo!!.id,
+                        it.posicionX,
+                        it.posicionY,
+                        it.width,
+                        it.height,
+                        it.localizacion,
+                    ) }
                     .toList()
             return ResponseEntity.ok(lista)
         }

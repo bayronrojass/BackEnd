@@ -1,15 +1,21 @@
 package org.pin.backend.controller
+import lombok.extern.java.Log
 import org.pin.backend.dto.Data.UsuarioDTO
+import org.pin.backend.model.FirebaseToken
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.EventoRepository
+import org.pin.backend.repository.FirebaseTokenRepository
 import org.pin.backend.repository.GastoRepository
 import org.pin.backend.repository.InvitacionRepository
 import org.pin.backend.repository.MultimediaRepository
-import org.pin.backend.repository.NotificacionRepository
 import org.pin.backend.repository.TareaRepository
 import org.pin.backend.repository.UsuarioRepository
 import org.pin.backend.repository.VotoRepository
+import org.pin.backend.service.FirebaseMessagingService
+import org.pin.backend.service.LienzoService
 import org.pin.backend.service.UsuarioService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -19,6 +25,7 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.Instant
 
 @RestController
 @RequestMapping("/usuarios")
@@ -30,10 +37,14 @@ class UsuarioController(
     private val tareaRepository: TareaRepository,
     private val invitacionRepository: InvitacionRepository,
     private val multimediaRepository: MultimediaRepository,
-    private val notificacionRepository: NotificacionRepository,
     private val gastoRepository: GastoRepository,
     private val votoRepository: VotoRepository,
+    private val firebaseRepository: FirebaseTokenRepository,
+    private val usuarioService: UsuarioService,
+    private val firebaseMessagingService: FirebaseMessagingService,
 ) {
+    private val logger: Logger = LoggerFactory.getLogger(UsuarioController::class.java)
+
     @GetMapping
     fun getAll() = service.findAll()
 
@@ -99,14 +110,6 @@ class UsuarioController(
             val multimediaUsuario = multimediaRepository.findByUsuario(usuario)
             multimediaRepository.deleteAll(multimediaUsuario)
 
-            // 8. NUEVO: Limpiar Notificaciones (Receptor)
-            // Buscamos notificaciones recibidas y quitamos al usuario de la lista
-            val notificacionesRecibidas = notificacionRepository.findByReceptorContains(usuario)
-            for (notificacion in notificacionesRecibidas) {
-                notificacion.receptor.remove(usuario)
-                notificacionRepository.save(notificacion)
-            }
-
             // C. Ahora es seguro borrar el evento
             eventoRepository.delete(evento)
         }
@@ -120,6 +123,8 @@ class UsuarioController(
             gasto.pagos.removeIf { it.pagadoPor.id == usuario.id }
             gastoRepository.save(gasto)
         }
+
+        firebaseRepository.deleteAllByUsuario_Id(usuario.id!!)
 
         // 10. NUEVO: Limpiar Votos en Encuestas
         // Buscamos todos los votos del usuario y los eliminamos.
@@ -166,5 +171,38 @@ class UsuarioController(
         // Devolvemos el DTO actualizado
         val responseDto = UsuarioDTO(guardado.id!!, guardado.nombre, guardado.correo)
         return ResponseEntity.ok(responseDto)
+    }
+
+    @PutMapping("/{id}/token")
+    @Transactional
+    fun updateUsuarioToken(
+        @PathVariable id: Long,
+        @RequestBody token: String,
+    ): ResponseEntity<Void> {
+        val cleanToken = token.replace("\"", "")
+        logger.info(cleanToken)
+        val usuario =
+            usuarioRepository.findById(id).orElse(null)
+                ?: return ResponseEntity.notFound().build()
+        try {
+            var elem = usuario.tokens.find { it.token == cleanToken }
+            if (elem != null) {
+                elem.lastEdited = Instant.now()
+            } else {
+                elem = FirebaseToken()
+                elem.usuario = usuario
+                elem.token = cleanToken
+                elem.lastEdited = Instant.now()
+                usuario.tokens.add(elem)
+                usuarioRepository.save(usuario)
+            }
+            firebaseRepository.save(elem)
+
+            firebaseMessagingService.enviar(cleanToken, "Test", "Test")
+            return ResponseEntity.ok().build()
+        }
+        catch (e: Exception){
+            return ResponseEntity.internalServerError().build()
+        }
     }
 }

@@ -14,14 +14,17 @@ ALTER SEQUENCE IF EXISTS lienzo_id_seq RESTART WITH 10;
 INSERT INTO public.lienzo (id, bytes, width, height, last_edited, is_image) VALUES (1, decode(repeat('00', 500000), 'hex'), 1000, 1000, NOW(), false) ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.lienzo (id, bytes, width, height, last_edited, is_image) VALUES (2, decode(repeat('00', 500000), 'hex'), 1000, 1000, NOW(), false) ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.lienzo (id, bytes, width, height, last_edited, is_image) VALUES (3, decode(repeat('00', 500000), 'hex'), 1000, 1000, NOW(), false) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.lienzo (id, bytes, width, height, last_edited, is_image) VALUES (4, decode(repeat('00', 500000), 'hex'), 1000, 1000, NOW(), false) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.lienzo (id, bytes, width, height, last_edited, is_image) VALUES (5, decode(repeat('00', 500000), 'hex'), 1000, 1000, NOW(), false) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.lienzo (id, bytes, width, height, last_edited, is_image) VALUES (6, decode(repeat('00', 500000), 'hex'), 1000, 1000, NOW(), false) ON CONFLICT (id) DO NOTHING;
 
 -- =================================================================================================
 -- 3. CASAS
 -- =================================================================================================
 ALTER SEQUENCE IF EXISTS casa_id_seq RESTART WITH 10;
-INSERT INTO public.casa (id, descripcion, fecha_creacion, lienzo_id, nombre, ruta_imagen) VALUES (1, 'DANI MOROSO', now(), 1, 'Escultor José Capuz 29', 'ruta1.jpg') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.casa (id, descripcion, fecha_creacion, lienzo_id, nombre, ruta_imagen) VALUES (2, 'Prohibida la entrada a pelirrojos', now(), 2, 'Matías Perelló 12', 'ruta2.jpg') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.casa (id, descripcion, fecha_creacion, lienzo_id, nombre, ruta_imagen) VALUES (3, 'La casa del terror', now(), 3, 'Av. Dr. Waksman 33', 'ruta3.jpg') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.casa (id, descripcion, fecha_creacion, nombre, ruta_imagen) VALUES (1, 'DANI MOROSO', now(), 'Escultor José Capuz 29', 'ruta1.jpg') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.casa (id, descripcion, fecha_creacion, nombre, ruta_imagen) VALUES (2, 'Prohibida la entrada a pelirrojos', now(), 'Matías Perelló 12', 'ruta2.jpg') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.casa (id, descripcion, fecha_creacion, nombre, ruta_imagen) VALUES (3, 'La casa del terror', now(), 'Av. Dr. Waksman 33', 'ruta3.jpg') ON CONFLICT (id) DO NOTHING;
 
 -- Relaciones Casa-Usuario
 INSERT INTO public.casa_usuarios (casa_id, usuarios_id) VALUES (1, 1) ON CONFLICT DO NOTHING;
@@ -113,15 +116,6 @@ INSERT INTO public.lista_elementos (lista_id, elementos_id) VALUES (1, 1) ON CON
 INSERT INTO public.lista_elementos (lista_id, elementos_id) VALUES (2, 2) ON CONFLICT DO NOTHING;
 INSERT INTO public.lista_elementos (lista_id, elementos_id) VALUES (3, 3) ON CONFLICT DO NOTHING;
 
-ALTER SEQUENCE IF EXISTS notificacion_id_seq RESTART WITH 10;
-INSERT INTO public.notificacion (id, dtype, cuerpo, titulo) VALUES (1, 'Push', 'Cuerpo 1', 'Titulo1') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.notificacion (id, dtype, cuerpo, titulo) VALUES (2, 'Push', 'Cuerpo 2', 'Titulo2') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.notificacion (id, dtype, cuerpo, titulo) VALUES (3, 'PopUp', 'Cuerpo 3', 'Titulo3') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.casa_notifaciones (casa_id, notifaciones_id) VALUES (1, 1) ON CONFLICT DO NOTHING;
-INSERT INTO public.casa_notifaciones (casa_id, notifaciones_id) VALUES (1, 2) ON CONFLICT DO NOTHING;
-INSERT INTO public.casa_notifaciones (casa_id, notifaciones_id) VALUES (1, 3) ON CONFLICT DO NOTHING;
-INSERT INTO public.notificacion_receptor (notificacion_id, receptor_id) VALUES (1, 1) ON CONFLICT DO NOTHING;
-
 INSERT INTO public.opcion (id, nombre) VALUES (1, 'Opcion1') ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.opcion (id, nombre) VALUES (2, 'Opcion2') ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.opcion (id, nombre) VALUES (3, 'Opcion3') ON CONFLICT (id) DO NOTHING;
@@ -139,16 +133,19 @@ INSERT INTO public.multimedia (id, posicionx, posiciony, width, height, ruta, us
 INSERT INTO public.multimedia (id, posicionx, posiciony, width, height, ruta, usuario_id, casa_id, localizacion) VALUES (3, 300, 500,450, 400, 'rutaC', 3, 3,'Home') ON CONFLICT (id) DO NOTHING;
 
 ALTER SEQUENCE IF EXISTS tarea_id_seq RESTART WITH 20;
-INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre) VALUES (1, now(), 'Semanal', TRUE, 1, 1, false, 'Sacar basura (Mañana)') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre) VALUES (2, now(), 'Mensual', FALSE, 1, 2, false, 'Limpiar Baño') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre) VALUES (3, now(), 'Diaria', TRUE, 1, 3, false, 'Reunion piso') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre) VALUES (10, NOW() + INTERVAL '1 day', 'Diaria', TRUE, 1, 1, false, 'Cargar el lavaplatos') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre) VALUES (11, NOW() + INTERVAL '3 days', 'Semanal', TRUE, 1, 2, false, 'Ir a la lavandería') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre) VALUES (12, NOW() + INTERVAL '7 days', 'Mensual', FALSE, 1, 3, false,'Pasar la aspiradora') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre, prioridad) VALUES (1, now(), 'Semanal', TRUE, 1, 1, false, 'Sacar basura (Mañana)', 'Alta') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre, prioridad) VALUES (2, now(), 'Mensual', FALSE, 1, 2, false, 'Limpiar Baño', 'Alta') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre, prioridad) VALUES (3, now(), 'Diaria', TRUE, 1, 3, false, 'Reunion piso', 'Media') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre, prioridad) VALUES (10, NOW() + INTERVAL '1 day', 'Diaria', TRUE, 1, 1, false, 'Cargar el lavaplatos', 'Media') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre, prioridad) VALUES (11, NOW() + INTERVAL '3 days', 'Semanal', TRUE, 1, 2, false, 'Ir a la lavandería', 'Baja') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre, prioridad) VALUES (12, NOW() + INTERVAL '7 days', 'Mensual', FALSE, 1, 3, false,'Pasar la aspiradora', 'Baja') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre, prioridad) VALUES (13, now() - INTERVAL '4 days', 'Semanal', TRUE, 1, 1, true, 'Sacar al perro', 'Baja') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre, prioridad) VALUES (14, now() - INTERVAL '7 days', 'Mensual', FALSE, 1, 2, true, 'Limpiar Cocina', 'Alta') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.tarea (id, fecha_fin, frecuencia, periodica, casa_id, asignadoa_id, completado, nombre, prioridad) VALUES (15, now() - INTERVAL '15 days', 'Diaria', TRUE, 1, 3, true, 'Reunion propietaria', 'Media') ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO public.post_it (id, lienzo_id) VALUES (1, 1) ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.post_it (id, lienzo_id) VALUES (2, 2) ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.post_it (id, lienzo_id) VALUES (3, 3) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.post_it (id, lienzo_id) VALUES (1, 4) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.post_it (id, lienzo_id) VALUES (2, 5) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.post_it (id, lienzo_id) VALUES (3, 6) ON CONFLICT (id) DO NOTHING;
 
 ALTER SEQUENCE IF EXISTS invitacion_id_seq RESTART WITH 10;
 INSERT INTO public.invitacion (id, remitente_id, destinatario_id, casa_id, fecha_creacion, estado) VALUES (1, 1, 4, 1, NOW(), 'PENDIENTE') ON CONFLICT (id) DO NOTHING;
