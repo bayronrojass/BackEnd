@@ -1,7 +1,6 @@
 package org.pin.backend.controller
-import lombok.extern.java.Log
+import jakarta.persistence.EntityNotFoundException
 import org.pin.backend.dto.Data.UsuarioDTO
-import org.pin.backend.model.FirebaseToken
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.EventoRepository
 import org.pin.backend.repository.FirebaseTokenRepository
@@ -11,8 +10,7 @@ import org.pin.backend.repository.MultimediaRepository
 import org.pin.backend.repository.TareaRepository
 import org.pin.backend.repository.UsuarioRepository
 import org.pin.backend.repository.VotoRepository
-import org.pin.backend.service.FirebaseMessagingService
-import org.pin.backend.service.LienzoService
+import org.pin.backend.service.FirebaseTokenService
 import org.pin.backend.service.UsuarioService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -25,7 +23,6 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.time.Instant
 
 @RestController
 @RequestMapping("/usuarios")
@@ -40,8 +37,7 @@ class UsuarioController(
     private val gastoRepository: GastoRepository,
     private val votoRepository: VotoRepository,
     private val firebaseRepository: FirebaseTokenRepository,
-    private val usuarioService: UsuarioService,
-    private val firebaseMessagingService: FirebaseMessagingService,
+    private val firebaseTokenService: FirebaseTokenService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(UsuarioController::class.java)
 
@@ -174,35 +170,16 @@ class UsuarioController(
     }
 
     @PutMapping("/{id}/token")
-    @Transactional
     fun updateUsuarioToken(
         @PathVariable id: Long,
         @RequestBody token: String,
-    ): ResponseEntity<Void> {
-        val cleanToken = token.replace("\"", "")
-        logger.info(cleanToken)
-        val usuario =
-            usuarioRepository.findById(id).orElse(null)
-                ?: return ResponseEntity.notFound().build()
+    ): ResponseEntity<Void> =
         try {
-            var elem = usuario.tokens.find { it.token == cleanToken }
-            if (elem != null) {
-                elem.lastEdited = Instant.now()
-            } else {
-                elem = FirebaseToken()
-                elem.usuario = usuario
-                elem.token = cleanToken
-                elem.lastEdited = Instant.now()
-                usuario.tokens.add(elem)
-                usuarioRepository.save(usuario)
-            }
-            firebaseRepository.save(elem)
-
-            firebaseMessagingService.enviar(cleanToken, "Test", "Test")
-            return ResponseEntity.ok().build()
+            firebaseTokenService.procesarToken(id, token)
+            ResponseEntity.ok().build()
+        } catch (e: EntityNotFoundException) {
+            ResponseEntity.notFound().build()
+        } catch (e: Exception) {
+            ResponseEntity.internalServerError().build()
         }
-        catch (e: Exception){
-            return ResponseEntity.internalServerError().build()
-        }
-    }
 }

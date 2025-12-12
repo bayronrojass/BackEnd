@@ -17,6 +17,7 @@ import org.pin.backend.repository.ListaRepository
 import org.pin.backend.repository.TareaRepository
 import org.pin.backend.repository.UsuarioRepository
 import org.pin.backend.service.CasaService
+import org.pin.backend.service.FirebaseMessagingService
 import org.pin.backend.service.ImagenService
 import org.pin.backend.service.PostItService
 import org.slf4j.Logger
@@ -40,6 +41,7 @@ class CasaController(
     private val tareaRepository: TareaRepository,
     private val postItService: PostItService,
     private val imagenService: ImagenService,
+    private val firebaseMessagingService: FirebaseMessagingService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(CasaController::class.java)
 
@@ -207,7 +209,6 @@ class CasaController(
                         )
                     },
                 frecuencia = request.frecuencia,
-                prioridad = request.prioridad,
                 periodica = request.periodica ?: false,
                 asignadoA = usuarioAsignado,
                 casa = casa,
@@ -216,6 +217,11 @@ class CasaController(
         val tareaGuardada = tareaRepository.save(nuevaTarea)
         casa.tareas.add(tareaGuardada)
         casaRepository.save(casa)
+        if (request.asignadoAId !=
+            request.creadoPor
+        ) {
+            firebaseMessagingService.enviarAUsuario(request.asignadoAId!!, "¡Nueva tarea asignada!", request.nombre)
+        }
 
         val responseDTO =
             TareaResponseDTO(
@@ -239,7 +245,7 @@ class CasaController(
     @PostMapping("/{id}/{location}/postIt")
     fun crearPostIt(
         @PathVariable id: Long,
-        @RequestBody postItDTO: PostItDTO,
+        @RequestBody location: String,
     ): ResponseEntity<PostItDTO> {
         val casa = service.findById(id)
         if (casa.isPresent) {
@@ -266,7 +272,7 @@ class CasaController(
     fun getPostIt(
         @PathVariable id: Long,
         @PathVariable location: String,
-    ): ResponseEntity<List<PostItDTO>>{
+    ): ResponseEntity<List<PostItDTO>> {
         val casa = service.findById(id)
         if (casa.isPresent) {
             val lista =
@@ -275,17 +281,18 @@ class CasaController(
                     .multimedia
                     .filter { it is PostIt && it !is Imagen }
                     .filter { it.localizacion == location }
-                    .map{ it as PostIt
+                    .map {
+                        it as PostIt
                         PostItDTO(
-                        it.id!!,
-                        it.lienzo!!.id,
-                        it.posicionX,
-                        it.posicionY,
-                        it.width,
-                        it.height,
-                        it.localizacion,
-                    ) }
-                    .toList()
+                            it.id!!,
+                            it.lienzo!!.id!!,
+                            it.posicionX,
+                            it.posicionY,
+                            it.width,
+                            it.height,
+                            it.localizacion,
+                        )
+                    }.toList()
             return ResponseEntity.ok(lista)
         }
         return ResponseEntity.notFound().build()

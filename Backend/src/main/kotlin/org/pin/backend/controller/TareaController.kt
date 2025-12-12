@@ -6,6 +6,7 @@ import org.pin.backend.model.Casa
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.TareaRepository
 import org.pin.backend.repository.UsuarioRepository
+import org.pin.backend.service.FirebaseMessagingService
 import org.pin.backend.service.TareaService
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
@@ -20,6 +21,7 @@ class TareaController(
     private val tareaRepository: TareaRepository,
     private val usuarioRepository: UsuarioRepository,
     private val casaRepository: CasaRepository,
+    private val firebaseMessagingService: FirebaseMessagingService,
 ) {
     @GetMapping
     fun getAll() = service.findAll()
@@ -60,6 +62,11 @@ class TareaController(
         }
 
         val tareaGuardada = tareaRepository.save(tarea)
+        if (request.asignadoAId !=
+            request.creadoPor
+        ) {
+            firebaseMessagingService.enviarAUsuario(request.asignadoAId!!, "¡Nueva tarea asignada!", request.nombre)
+        }
 
         val responseDTO =
             TareaResponseDTO(
@@ -74,7 +81,7 @@ class TareaController(
                     tareaGuardada.asignadoA?.let {
                         UsuarioDTO(it.id!!, it.nombre, it.correo)
                     },
-                prioridad = tareaGuardada.prioridad
+                prioridad = tareaGuardada.prioridad,
             )
         return ResponseEntity.ok(responseDTO)
     }
@@ -97,5 +104,22 @@ class TareaController(
         }
 
         return ResponseEntity.noContent().build()
+    }
+
+    @PutMapping("/{tareaId}/notify")
+    @Transactional
+    fun notificarTarea(
+        @PathVariable tareaId: Long,
+    ): ResponseEntity<Void> {
+        val tarea =
+            tareaRepository.findById(tareaId).orElse(null)
+                ?: return ResponseEntity.notFound().build()
+        if (tarea.asignadoA != null) {
+            firebaseMessagingService.enviarAUsuario(tarea.asignadoA!!.id!!, "¡Recordatorio de tarea!", "Que no se te pase " + tarea.nombre)
+            firebaseMessagingService.enviarAUsuario(1, "¡Recordatorio de tarea!", "Que no se te pase " + tarea.nombre)
+            return ResponseEntity.ok().build()
+        } else {
+            return ResponseEntity.badRequest().build()
+        }
     }
 }

@@ -14,6 +14,7 @@ class InvitacionService(
     private val invitacionRepository: InvitacionRepository,
     private val usuarioRepository: UsuarioRepository,
     private val casaRepository: CasaRepository,
+    private val firebaseMessagingService: FirebaseMessagingService,
 ) {
     /**
      * Crea una nueva invitación.
@@ -59,6 +60,7 @@ class InvitacionService(
             )
 
         val invitacionGuardada = invitacionRepository.save(nuevaInvitacion)
+        firebaseMessagingService.enviarAUsuario(destinatario.id!!, "¡Nueva invitación!", "¡Tienes una nueva invitación! ¡Vamos a verla!")
 
         return invitacionGuardada
     }

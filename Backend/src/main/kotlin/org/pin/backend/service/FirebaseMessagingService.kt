@@ -15,11 +15,12 @@ import javax.annotation.PostConstruct
 
 @Service
 class FirebaseMessagingService {
+    private lateinit var firebaseTokenService: FirebaseTokenService
     private val logger: Logger = LoggerFactory.getLogger(LienzoService::class.java)
 
     @PostConstruct
-    fun inicializar(){
-    val nombreArchivo = "firebase-config.json" // El nombre corto que pusimos en Docker
+    fun inicializar() {
+        val nombreArchivo = "firebase-config.json" // El nombre corto que pusimos en Docker
 
         val file = File(System.getenv("FCM_CREDENTIALS_PATH") ?: nombreArchivo)
         val finalFile = if (file.exists()) file else File("Backend/mirumi-23884-firebase-adminsdk-fbsvc-ce13046c20.json")
@@ -33,6 +34,17 @@ class FirebaseMessagingService {
 
         if (FirebaseApp.getApps().isEmpty()) {
             FirebaseApp.initializeApp(options)
+        }
+    }
+
+    fun enviarAUsuario(
+        usuarioId: Long,
+        titulo: String,
+        cuerpo: String,
+    ) {
+        val tokens = firebaseTokenService.getTokens(usuarioId)
+        for (token in tokens) {
+            enviar(token, titulo, cuerpo)
         }
     }
 
