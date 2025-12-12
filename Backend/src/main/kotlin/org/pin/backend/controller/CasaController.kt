@@ -239,7 +239,7 @@ class CasaController(
     @PostMapping("/{id}/{location}/postIt")
     fun crearPostIt(
         @PathVariable id: Long,
-        @PathVariable location: String,
+        @RequestBody postItDTO: PostItDTO,
     ): ResponseEntity<PostItDTO> {
         val casa = service.findById(id)
         if (casa.isPresent) {
