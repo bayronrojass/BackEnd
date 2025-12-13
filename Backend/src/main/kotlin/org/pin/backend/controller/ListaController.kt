@@ -1,10 +1,12 @@
 package org.pin.backend.controller
+import org.pin.backend.dto.Data.toDTO
 import org.pin.backend.dto.Request.ElementoRequestDTO
 import org.pin.backend.dto.Request.ListaRequestDTO
 import org.pin.backend.dto.Response.ListaResponseDTO
 import org.pin.backend.model.Elemento
 import org.pin.backend.model.Lista
 import org.pin.backend.repository.ListaRepository
+import org.pin.backend.repository.UsuarioRepository
 import org.pin.backend.service.ListaService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -22,6 +24,8 @@ class ListaController(
 
     @Autowired
     lateinit var listaService: ListaService
+    @Autowired lateinit var usuarioRepository: UsuarioRepository
+
     @GetMapping
     fun getAll() = listaRepository.findAll()
 
@@ -73,12 +77,28 @@ class ListaController(
     @PostMapping("/casa/{casaId}")
     fun crearLista(
         @PathVariable casaId: Long,
-        @RequestBody listaDTO: ListaRequestDTO,
-        authentication: Authentication // Inyectamos autenticación
-    ): ResponseEntity<Lista> {
-        val email = authentication.name // Obtenemos el email del token
-        val nuevaLista = listaService.crearLista(casaId, listaDTO, email)
-        return ResponseEntity(nuevaLista, HttpStatus.CREATED)
+        @RequestBody listaDTO: ListaRequestDTO
+    ): ResponseEntity<ListaResponseDTO> {
+
+        // 1. Buscamos al dueño por el ID que nos manda la app (sin seguridad)
+        val propietario = usuarioRepository.findById(listaDTO.propietarioId)
+            .orElseThrow { RuntimeException("Usuario no encontrado") }
+
+        // 2. Llamamos al servicio pasando el EMAIL del usuario encontrado
+        val nuevaLista = listaService.crearLista(casaId, listaDTO, propietario.correo)
+
+        // 3. Convertimos a DTO y devolvemos
+        val responseDTO = ListaResponseDTO(
+            id = nuevaLista.id ?: 0,
+            nombre = nuevaLista.nombre,
+            descripcion = nuevaLista.descripcion,
+            fechaCreacion = nuevaLista.fechaCreacion.toString(),
+            fechaEdicion = nuevaLista.fechaEdicion?.toString(),
+            propietario = nuevaLista.propietario?.toDTO(),
+            participantes = nuevaLista.participantes.map { it.toDTO() }
+        )
+
+        return ResponseEntity(responseDTO, HttpStatus.CREATED)
     }
 
     @DeleteMapping("/{id}")
