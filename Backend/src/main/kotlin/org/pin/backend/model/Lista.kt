@@ -1,4 +1,5 @@
 package org.pin.backend.model
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
@@ -28,6 +29,10 @@ class Lista(
         inverseJoinColumns = [JoinColumn(name = "usuario_id")],
     )
     var participantes: MutableList<Usuario> = mutableListOf(),
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "casa_id")
+    var casa: Casa? = null,
     @Column(nullable = false)
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var elementos: MutableList<Elemento> = mutableListOf(),

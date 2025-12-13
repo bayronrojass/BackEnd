@@ -106,9 +106,17 @@ INSERT INTO public.evento_asistentes (evento_id, usuario_id) VALUES (3, 1) ON CO
 -- =================================================================================================
 -- 7. OTROS (Listas, Tareas, etc.)
 -- =================================================================================================
-INSERT INTO public.lista (id, descripcion, nombre) VALUES (1, 'Lista 1', 'Lista Natalia') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.lista (id, descripcion, nombre) VALUES (2, 'Lista 2', 'Tareas x hacer') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.lista (id, descripcion, nombre) VALUES (3, 'Lista 3', 'Lista David') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.lista (id, descripcion, nombre, fecha_creacion, fecha_edicion, propietario_id, casa_id) VALUES (1, 'Lista 1', 'Lista Natalia', '2025-10-11 15:00:00', NULL, 1, 1) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.lista (id, descripcion, nombre, fecha_creacion, fecha_edicion, propietario_id, casa_id) VALUES (2, 'Lista 2', 'Tareas x hacer', '2025-05-11 19:00:00', NULL, 2, 1) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.lista (id, descripcion, nombre, fecha_creacion, fecha_edicion, propietario_id, casa_id) VALUES (3, 'Lista 3', 'Lista David', '2025-12-05 21:00:00', NULL, 3, 1) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.lista (id, nombre, descripcion, fecha_creacion, fecha_edicion, propietario_id, casa_id) VALUES (4, 'Lista de la compra', 'Compra semanal', '2025-10-11 15:00:00', NULL, 1, 1);
+INSERT INTO public.lista (id, nombre, descripcion, fecha_creacion, fecha_edicion, propietario_id, casa_id) VALUES (5, 'Lista de Navidad', 'Cosas para Navidad', '2025-11-13 10:00:00', NULL, 2, 1);
+
+INSERT INTO public.lista_participantes (lista_id, usuario_id) VALUES (4, 1);
+INSERT INTO public.lista_participantes (lista_id, usuario_id) VALUES (4, 2);
+INSERT INTO public.lista_participantes (lista_id, usuario_id) VALUES (5, 2);
+INSERT INTO public.lista_participantes (lista_id, usuario_id) VALUES (5, 1);
+
 INSERT INTO public.casa_listas (casa_id, listas_id) VALUES (1, 1) ON CONFLICT DO NOTHING;
 INSERT INTO public.casa_listas (casa_id, listas_id) VALUES (1, 2) ON CONFLICT DO NOTHING;
 INSERT INTO public.casa_listas (casa_id, listas_id) VALUES (1, 3) ON CONFLICT DO NOTHING;
