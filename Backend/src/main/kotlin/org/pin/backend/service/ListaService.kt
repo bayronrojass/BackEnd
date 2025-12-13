@@ -25,17 +25,26 @@ class ListaService(
 
     fun crearLista(casaId: Long, listaDTO: ListaRequestDTO, emailPropietario: String): Lista {
         val casa = casaRepository.findById(casaId).orElseThrow { RuntimeException("Casa no encontrada") }
-        val usuario = usuarioRepository.findByCorreo(emailPropietario).orElseThrow { RuntimeException("Usuario no encontrado") }
+        val propietario = usuarioRepository.findByCorreo(emailPropietario).orElseThrow { RuntimeException("Usuario no encontrado") }
 
         val lista = Lista(
             nombre = listaDTO.nombre,
             descripcion = listaDTO.descripcion,
             casa = casa,
-            propietario = usuario, // Asignamos propietario
+            propietario = propietario,
             fechaCreacion = LocalDateTime.now()
         )
-        // Añadimos al creador como participante automáticamente
-        lista.participantes.add(usuario)
+
+        // 1. Añadir al propietario siempre como participante
+        lista.participantes.add(propietario)
+
+        // 2. Añadir a los participantes seleccionados (si los hay)
+        if (!listaDTO.participantesIds.isNullOrEmpty()) {
+            val usuariosInvitados = usuarioRepository.findAllById(listaDTO.participantesIds)
+            // Filtramos para no añadir al propietario dos veces si se auto-seleccionó
+            val nuevosInvitados = usuariosInvitados.filter { it.id != propietario.id }
+            lista.participantes.addAll(nuevosInvitados)
+        }
 
         return listaRepository.save(lista)
     }
