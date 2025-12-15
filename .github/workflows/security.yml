@@ -10,12 +10,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Create Firebase Config
-        run: echo "${{ secrets.FIREBASE_CONFIG }}" > firebase-config.json
+        run: echo "${{ secrets.FIREBASE_CONFIG }}" > ./Backend/firebase-config.json
       - name: Start Application
         run: |
           docker compose up -d backend
           # Esperar a que el puerto 8080 responda (healthcheck simple)
           timeout 60s sh -c 'until curl -s http://localhost:8080/health > /dev/null; do sleep 5; done'
+
+      - name: Debug - Listar archivos
+        run: |
+          echo "Estoy en la carpeta: $(pwd)"
+          ls -la
+          echo "¿Existe el json?: " && ls firebase-config.json
 
       - name: ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.10.0
