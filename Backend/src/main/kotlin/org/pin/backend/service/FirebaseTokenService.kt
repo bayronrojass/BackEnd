@@ -8,7 +8,6 @@ import org.pin.backend.repository.FirebaseTokenRepository
 import org.pin.backend.repository.UsuarioRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -18,7 +17,6 @@ class FirebaseTokenService(
     private val firebaseRepository: FirebaseTokenRepository,
     private val firebaseMessagingService: FirebaseMessagingService,
 ) {
-
     val logger: Logger = LoggerFactory.getLogger(FirebaseTokenService::class.java)
 
     @Transactional

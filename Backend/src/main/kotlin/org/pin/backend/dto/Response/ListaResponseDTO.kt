@@ -9,5 +9,5 @@ data class ListaResponseDTO(
     val fechaCreacion: String?,
     val fechaEdicion: String?,
     val propietario: UsuarioDTO?,
-    val participantes: List<UsuarioDTO> = emptyList()
+    val participantes: List<UsuarioDTO> = emptyList(),
 )

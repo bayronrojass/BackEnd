@@ -14,16 +14,15 @@ import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import java.util.*
-import org.springframework.security.core.Authentication
 
 @RestController
 @RequestMapping("listas")
 class ListaController(
     private val listaRepository: ListaRepository,
 ) {
-
     @Autowired
     lateinit var listaService: ListaService
+
     @Autowired lateinit var usuarioRepository: UsuarioRepository
 
     @GetMapping
@@ -45,9 +44,9 @@ class ListaController(
     }
 
     @GetMapping("/casa/{casaId}")
-    fun getListasByCasaId(@PathVariable casaId: Long): List<ListaResponseDTO> {
-        return listaService.getListasByCasaId(casaId)
-    }
+    fun getListasByCasaId(
+        @PathVariable casaId: Long,
+    ): List<ListaResponseDTO> = listaService.getListasByCasaId(casaId)
 
     @PostMapping("/{listaId}/elementos")
     @Transactional
@@ -77,32 +76,36 @@ class ListaController(
     @PostMapping("/casa/{casaId}")
     fun crearLista(
         @PathVariable casaId: Long,
-        @RequestBody listaDTO: ListaRequestDTO
+        @RequestBody listaDTO: ListaRequestDTO,
     ): ResponseEntity<ListaResponseDTO> {
-
         // 1. Buscamos al dueño por el ID que nos manda la app (sin seguridad)
-        val propietario = usuarioRepository.findById(listaDTO.propietarioId)
-            .orElseThrow { RuntimeException("Usuario no encontrado") }
+        val propietario =
+            usuarioRepository
+                .findById(listaDTO.propietarioId)
+                .orElseThrow { RuntimeException("Usuario no encontrado") }
 
         // 2. Llamamos al servicio pasando el EMAIL del usuario encontrado
         val nuevaLista = listaService.crearLista(casaId, listaDTO, propietario.correo)
 
         // 3. Convertimos a DTO y devolvemos
-        val responseDTO = ListaResponseDTO(
-            id = nuevaLista.id ?: 0,
-            nombre = nuevaLista.nombre,
-            descripcion = nuevaLista.descripcion,
-            fechaCreacion = nuevaLista.fechaCreacion.toString(),
-            fechaEdicion = nuevaLista.fechaEdicion?.toString(),
-            propietario = nuevaLista.propietario?.toDTO(),
-            participantes = nuevaLista.participantes.map { it.toDTO() }
-        )
+        val responseDTO =
+            ListaResponseDTO(
+                id = nuevaLista.id ?: 0,
+                nombre = nuevaLista.nombre,
+                descripcion = nuevaLista.descripcion,
+                fechaCreacion = nuevaLista.fechaCreacion.toString(),
+                fechaEdicion = nuevaLista.fechaEdicion?.toString(),
+                propietario = nuevaLista.propietario?.toDTO(),
+                participantes = nuevaLista.participantes.map { it.toDTO() },
+            )
 
         return ResponseEntity(responseDTO, HttpStatus.CREATED)
     }
 
     @DeleteMapping("/{id}")
-    fun borrarLista(@PathVariable id: Long): ResponseEntity<Void> {
+    fun borrarLista(
+        @PathVariable id: Long,
+    ): ResponseEntity<Void> {
         listaService.borrarLista(id)
         return ResponseEntity.noContent().build()
     }

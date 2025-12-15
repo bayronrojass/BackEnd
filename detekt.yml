@@ -1,0 +1,117 @@
+build:
+  maxIssues: 100000
+  weights:
+    security: 10
+    potential-bugs: 5
+    performance: 3
+
+config:
+  # 👇 CAMBIO IMPORTANTE: Desactivamos la validación estricta de configuración
+  # para evitar que falle si una librería no carga bien una propiedad.
+  validation: false
+  warningsAsErrors: true
+
+processors:
+  active: true
+
+console-reports:
+  active: true
+  exclude:
+    - 'ProjectStatisticsReport'
+
+# ---------------------------------------------------------------------
+# 🔒 SEGURIDAD
+# ---------------------------------------------------------------------
+security:
+  active: true
+  HardcodedPassword:
+    active: true
+    excludes: ['**/test/**', '**/*Test.kt', '**/*Spec.kt']
+  HardcodedIp:
+    active: true
+    excludes: ['**/test/**']
+  SqlInjection:
+    active: true
+  WeakHash:
+    active: true
+  HardcodedToken:
+    active: true
+  BroadcastException:
+    active: true
+
+# ---------------------------------------------------------------------
+# 🐛 POTENTIAL BUGS
+# ---------------------------------------------------------------------
+potential-bugs:
+  active: true
+  AvoidReferentialEquality:
+    active: true
+  DontDowncastCollectionTypes:
+    active: true
+  ExitOutsideMain:
+    active: true
+  HasPlatformType:
+    active: true
+  IgnoredReturnValue:
+    active: true
+  NullCheckOnMutableProperty:
+    active: true
+
+# ---------------------------------------------------------------------
+# ⚡ PERFORMANCE & COROUTINES
+# ---------------------------------------------------------------------
+performance:
+  active: true
+  SpreadOperator:
+    active: true
+  UnnecessaryTemporaryInstantiation:
+    active: true
+
+coroutines:
+  active: true
+  GlobalScopeUsage:
+    active: true
+
+# ---------------------------------------------------------------------
+# 🚫 EMPTY BLOCKS
+# ---------------------------------------------------------------------
+empty-blocks:
+  active: true
+  EmptyCatchBlock:
+    active: true
+    allowedExceptionNameRegex: "^(_|ignored)$"
+
+# ---------------------------------------------------------------------
+# 📝 EXCEPTIONS
+# ---------------------------------------------------------------------
+exceptions:
+  active: true
+  PrintStackTrace:
+    active: true
+  ThrowingExceptionsWithoutMessageOrCause:
+    active: true
+  TooGenericExceptionCaught:
+    active: true
+
+# ---------------------------------------------------------------------
+# 🧹 COMPLEXITY & STYLE
+# ---------------------------------------------------------------------
+complexity:
+  active: true
+  LongMethod:
+    active: true
+    threshold: 60
+  # 👇 CORREGIDO: Nombre actualizado para versión 1.23.x
+  CyclomaticComplexMethod:
+    active: true
+    threshold: 15
+
+style:
+  active: true
+  MagicNumber:
+    active: true
+    excludes: ['**/test/**']
+  MaxLineLength:
+    active: true
+    maxLineLength: 140
+    # Eliminada propiedad conflictiva excludeComment

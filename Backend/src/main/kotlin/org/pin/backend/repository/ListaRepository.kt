@@ -6,5 +6,6 @@ import java.util.*
 
 interface ListaRepository : JpaRepository<Lista, Long> {
     fun findByElementosContains(elemento: Elemento): Optional<Lista>
+
     fun findByCasaId(casaId: Long): List<Lista>
 }

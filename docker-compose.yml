@@ -9,7 +9,6 @@ services:
       - SPRING_DATASOURCE_USERNAME=usuario
       - SPRING_DATASOURCE_PASSWORD=clave
       - MULTIMEDIA_DIR=/multimedia
-      - MQTT_BROKER=tcp://mqtt:1883
       - SPRING_JPA_HIBERNATE_DDL_AUTO=create-drop
     volumes:
       - ./multimedia:/multimedia
