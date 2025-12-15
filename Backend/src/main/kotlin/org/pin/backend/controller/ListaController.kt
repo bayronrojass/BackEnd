@@ -105,8 +105,7 @@ class ListaController(
         try {
             listaService.borrarLista(id)
             return ResponseEntity.noContent().build()
-        }
-        catch (e: Exception){
+        } catch (e: Exception) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
         }
     }

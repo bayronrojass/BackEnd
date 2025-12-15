@@ -234,7 +234,8 @@
 
                             <arguments>
                                 <argument>detect</argument>
-                                <argument>--source="../../"</argument>
+                                <argument>--source</argument>
+                                <argument>.</argument>
                                 <argument>--report-path="${project.basedir}/target/gitleaks-report.json"</argument>
                                 <argument>--verbose</argument>
                             </arguments>

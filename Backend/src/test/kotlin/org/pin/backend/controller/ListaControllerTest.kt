@@ -11,7 +11,6 @@ import org.mockito.Mockito
 import org.mockito.Mockito.*
 import org.mockito.junit.jupiter.MockitoExtension
 import org.pin.backend.dto.Request.ElementoRequestDTO
-import org.pin.backend.model.Casa
 import org.pin.backend.model.Elemento
 import org.pin.backend.model.Lista
 import org.pin.backend.repository.CasaRepository
@@ -19,7 +18,6 @@ import org.pin.backend.repository.ListaRepository
 import org.pin.backend.repository.UsuarioRepository
 import org.pin.backend.service.ListaService
 import org.springframework.http.HttpStatus
-import java.time.LocalDateTime
 import java.util.*
 
 @ExtendWith(MockitoExtension::class)
@@ -122,8 +120,10 @@ class ListaControllerTest {
         // GIVEN
         val id = 1L
 
-        Mockito.doThrow(NoSuchElementException("La lista no existe"))
-            .`when`(listaService).borrarLista(id)
+        Mockito
+            .doThrow(NoSuchElementException("La lista no existe"))
+            .`when`(listaService)
+            .borrarLista(id)
 
         // WHEN
         val response = controller.borrarLista(id)
