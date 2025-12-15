@@ -11,11 +11,6 @@ jobs:
         uses: actions/checkout@v4
       - name: Create Firebase Config
         run: echo "${{ secrets.FIREBASE_CONFIG }}" > ./Backend/firebase-config.json
-      - name: Debug - Listar archivos
-        run: |
-          echo "Estoy en la carpeta: $(pwd)"
-          ls -la
-          echo "¿Existe el json?: " && ls firebase-config.json
       - name: Start Application
         run: |
           docker compose up -d backend
