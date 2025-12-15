@@ -5,7 +5,7 @@ COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
 COPY src ./src
-RUN mvn package -DskipTests
+RUN mvn package -DskipTests -Dexec.skip=true
 
 # Etapa final (para correr la app ligera)
 FROM eclipse-temurin:17-jre
