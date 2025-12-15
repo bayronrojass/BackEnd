@@ -18,19 +18,16 @@ class Lista(
     var descripcion: String? = null,
     var fechaCreacion: LocalDateTime = LocalDateTime.now(),
     var fechaEdicion: LocalDateTime? = null,
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "propietario_id")
     var propietario: Usuario? = null,
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "lista_participantes",
         joinColumns = [JoinColumn(name = "lista_id")],
-        inverseJoinColumns = [JoinColumn(name = "usuario_id")]
+        inverseJoinColumns = [JoinColumn(name = "usuario_id")],
     )
     var participantes: MutableList<Usuario> = mutableListOf(),
-
     @Column(nullable = false)
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var elementos: MutableList<Elemento> = mutableListOf(),

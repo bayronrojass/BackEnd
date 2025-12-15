@@ -277,7 +277,7 @@ class CasaController(
     fun getPostIt(
         @PathVariable id: Long,
         @PathVariable location: String,
-    ): ResponseEntity<List<PostItDTO>>{
+    ): ResponseEntity<List<PostItDTO>> {
         val casa = service.findById(id)
         if (casa.isPresent) {
             val lista =
@@ -286,17 +286,18 @@ class CasaController(
                     .multimedia
                     .filter { it is PostIt && it !is Imagen }
                     .filter { it.localizacion == location }
-                    .map{ it as PostIt
+                    .map {
+                        it as PostIt
                         PostItDTO(
-                        it.id!!,
-                        it.lienzo!!.id,
-                        it.posicionX,
-                        it.posicionY,
-                        it.width,
-                        it.height,
-                        it.localizacion,
-                    ) }
-                    .toList()
+                            it.id!!,
+                            it.lienzo!!.id,
+                            it.posicionX,
+                            it.posicionY,
+                            it.width,
+                            it.height,
+                            it.localizacion,
+                        )
+                    }.toList()
             return ResponseEntity.ok(lista)
         }
         return ResponseEntity.notFound().build()
