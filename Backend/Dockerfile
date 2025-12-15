@@ -11,5 +11,5 @@ RUN mvn package -DskipTests
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
-COPY mirumi-23884-firebase-adminsdk-fbsvc-ce13046c20.json ./firebase-config.json
+COPY firebase-config.json ./firebase-config.json
 ENTRYPOINT ["java", "-jar", "app.jar"]

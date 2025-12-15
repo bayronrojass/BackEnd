@@ -9,6 +9,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Create Firebase Config
+        run: echo "${{ secrets.FIREBASE_JSON_CONTENT }}" > firebase-config.json
       - name: Start Application
         run: |
           docker compose up -d backend

@@ -23,7 +23,7 @@ class FirebaseMessagingService {
         val nombreArchivo = "firebase-config.json" // El nombre corto que pusimos en Docker
 
         val file = File(System.getenv("FCM_CREDENTIALS_PATH") ?: nombreArchivo)
-        val finalFile = if (file.exists()) file else File("mirumi-23884-firebase-adminsdk-fbsvc-ce13046c20.json")
+        val finalFile = if (file.exists()) file else File("firebase-config.json")
         val serviceAccount = FileInputStream(finalFile)
 
         val options =
