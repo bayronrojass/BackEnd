@@ -9,4 +9,5 @@ data class TareaRequestDTO(
     val periodica: Boolean? = false,
     val asignadoAId: Long? = null,
     val prioridad: String? = null,
+    val creadoPor: Long? = 0L,
 )

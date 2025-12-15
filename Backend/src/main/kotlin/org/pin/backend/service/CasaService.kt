@@ -11,7 +11,6 @@ import java.util.*
 @Service
 class CasaService(
     private val repo: CasaRepository,
-    private val lienzoService: LienzoService,
     private val fileStorageService: FileStorageService,
 ) {
     fun findAll(): MutableList<Casa> = repo.findAll()
@@ -32,7 +31,6 @@ class CasaService(
                 descripcion = request.descripcion,
                 rutaImagen = filename,
                 fechaCreacion = LocalDateTime.now(),
-                lienzo = lienzoService.createDefault(),
             )
 
         return repo.save(nuevaCasa)
@@ -45,7 +43,6 @@ class CasaService(
                 descripcion = request.descripcion,
                 rutaImagen = null,
                 fechaCreacion = LocalDateTime.now(),
-                lienzo = lienzoService.createDefault(),
             )
 
         return repo.save(nuevaCasa)

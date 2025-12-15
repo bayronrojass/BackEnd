@@ -6,6 +6,7 @@ import org.pin.backend.model.Evento
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.EventoRepository
 import org.pin.backend.service.EventoService
+import org.pin.backend.service.FirebaseMessagingService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -19,6 +20,7 @@ class EventoController(
     private val casaRepository: CasaRepository,
     private val eventoRepository: EventoRepository,
     private val service: EventoService,
+    private val firebaseMessagingService: FirebaseMessagingService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(EventoController::class.java)
 
@@ -120,10 +122,14 @@ class EventoController(
 
         try {
             val evento = eventoOptional.get()
-            request.nombre?.let { evento.nombre = it }
+            request.nombre.let { evento.nombre = it }
             request.descripcion?.let { evento.descripcion = it }
-            request.fechaInicio?.let { evento.fechaInicio = it }
+            request.fechaInicio.let { evento.fechaInicio = it }
             request.fechaFin?.let { evento.fechaFin = it }
+            val nuevosInvitados = evento.asistentes // TODO: No se ven los nuevos invitados
+            for (invitado in nuevosInvitados) {
+                firebaseMessagingService.enviarAUsuario(invitado.id!!, "Te han invitado a un evento", "¡Preparate para la fiesta!")
+            }
 
             val eventoActualizado = eventoRepository.save(evento)
 

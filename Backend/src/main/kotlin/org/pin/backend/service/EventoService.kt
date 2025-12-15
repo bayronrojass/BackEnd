@@ -14,6 +14,7 @@ class EventoService(
     private val repo: EventoRepository,
     private val usuarioRepo: UsuarioRepository,
     private val casaRepo: CasaRepository,
+    private val firebaseMessagingService: FirebaseMessagingService,
 ) {
     fun findAll() = repo.findAll()
 
@@ -35,6 +36,10 @@ class EventoService(
             mutableListOf<Usuario>().apply {
                 add(creadoPor)
             }
+
+        asistentes
+            .filter { it -> it.id != creadoPor.id }
+            .forEach { it -> firebaseMessagingService.enviarAUsuario(it.id!!, "Te han invitado a un evento", "¡Preparate para la fiesta!") }
 
         val nuevoEvento =
             Evento(

@@ -1,22 +1,31 @@
 package org.pin.backend.controller
+import org.pin.backend.dto.Data.toDTO
 import org.pin.backend.dto.Request.ElementoRequestDTO
-import org.pin.backend.model.Casa
+import org.pin.backend.dto.Request.ListaRequestDTO
+import org.pin.backend.dto.Response.ListaResponseDTO
 import org.pin.backend.model.Elemento
 import org.pin.backend.model.Lista
-import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.ListaRepository
+import org.pin.backend.repository.UsuarioRepository
+import org.pin.backend.service.ListaService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import java.util.*
+import org.springframework.security.core.Authentication
 
 @RestController
 @RequestMapping("listas")
 class ListaController(
     private val listaRepository: ListaRepository,
-    private val casaRepository: CasaRepository,
 ) {
+
+    @Autowired
+    lateinit var listaService: ListaService
+    @Autowired lateinit var usuarioRepository: UsuarioRepository
+
     @GetMapping
     fun getAll() = listaRepository.findAll()
 
@@ -33,6 +42,11 @@ class ListaController(
         } else {
             ResponseEntity.notFound().build() // Devuelve 404 si la lista no existe
         }
+    }
+
+    @GetMapping("/casa/{casaId}")
+    fun getListasByCasaId(@PathVariable casaId: Long): List<ListaResponseDTO> {
+        return listaService.getListasByCasaId(casaId)
     }
 
     @PostMapping("/{listaId}/elementos")
@@ -60,31 +74,36 @@ class ListaController(
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoElemento)
     }
 
-    @DeleteMapping("/{listaId}")
-    @Transactional
-    fun borrarLista(
-        @PathVariable listaId: Long,
-    ): ResponseEntity<Void> {
-        val listaOptional: Optional<Lista> = listaRepository.findById(listaId)
-        if (listaOptional.isEmpty) {
-            return ResponseEntity.notFound().build() // 404 si la lista no existe
-        }
+    @PostMapping("/casa/{casaId}")
+    fun crearLista(
+        @PathVariable casaId: Long,
+        @RequestBody listaDTO: ListaRequestDTO
+    ): ResponseEntity<ListaResponseDTO> {
 
-        val lista = listaOptional.get()
+        // 1. Buscamos al dueño por el ID que nos manda la app (sin seguridad)
+        val propietario = usuarioRepository.findById(listaDTO.propietarioId)
+            .orElseThrow { RuntimeException("Usuario no encontrado") }
 
-        // 1. Encontrar la Casa dueña de esta lista
-        val casaOptional: Optional<Casa> = casaRepository.findByListasContains(lista)
+        // 2. Llamamos al servicio pasando el EMAIL del usuario encontrado
+        val nuevaLista = listaService.crearLista(casaId, listaDTO, propietario.correo)
 
-        if (casaOptional.isPresent) {
-            // 2. Quitar la lista de la colección de la Casa
-            val casa = casaOptional.get()
-            casa.listas.remove(lista)
-            casaRepository.save(casa) // 3. Guardar la Casa
-        } else {
-            // Si ninguna Casa la posee (lista huérfana), la borramos directamente
-            listaRepository.delete(lista)
-        }
+        // 3. Convertimos a DTO y devolvemos
+        val responseDTO = ListaResponseDTO(
+            id = nuevaLista.id ?: 0,
+            nombre = nuevaLista.nombre,
+            descripcion = nuevaLista.descripcion,
+            fechaCreacion = nuevaLista.fechaCreacion.toString(),
+            fechaEdicion = nuevaLista.fechaEdicion?.toString(),
+            propietario = nuevaLista.propietario?.toDTO(),
+            participantes = nuevaLista.participantes.map { it.toDTO() }
+        )
 
-        return ResponseEntity.noContent().build() // HTTP 204 (Éxito, sin contenido)
+        return ResponseEntity(responseDTO, HttpStatus.CREATED)
+    }
+
+    @DeleteMapping("/{id}")
+    fun borrarLista(@PathVariable id: Long): ResponseEntity<Void> {
+        listaService.borrarLista(id)
+        return ResponseEntity.noContent().build()
     }
 }

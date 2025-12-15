@@ -1,15 +1,19 @@
 package org.pin.backend.controller
+import jakarta.persistence.EntityNotFoundException
 import org.pin.backend.dto.Data.UsuarioDTO
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.EventoRepository
+import org.pin.backend.repository.FirebaseTokenRepository
 import org.pin.backend.repository.GastoRepository
 import org.pin.backend.repository.InvitacionRepository
 import org.pin.backend.repository.MultimediaRepository
-import org.pin.backend.repository.NotificacionRepository
 import org.pin.backend.repository.TareaRepository
 import org.pin.backend.repository.UsuarioRepository
 import org.pin.backend.repository.VotoRepository
+import org.pin.backend.service.FirebaseTokenService
 import org.pin.backend.service.UsuarioService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -30,10 +34,13 @@ class UsuarioController(
     private val tareaRepository: TareaRepository,
     private val invitacionRepository: InvitacionRepository,
     private val multimediaRepository: MultimediaRepository,
-    private val notificacionRepository: NotificacionRepository,
     private val gastoRepository: GastoRepository,
     private val votoRepository: VotoRepository,
+    private val firebaseRepository: FirebaseTokenRepository,
+    private val firebaseTokenService: FirebaseTokenService,
 ) {
+    private val logger: Logger = LoggerFactory.getLogger(UsuarioController::class.java)
+
     @GetMapping
     fun getAll() = service.findAll()
 
@@ -99,14 +106,6 @@ class UsuarioController(
             val multimediaUsuario = multimediaRepository.findByUsuario(usuario)
             multimediaRepository.deleteAll(multimediaUsuario)
 
-            // 8. NUEVO: Limpiar Notificaciones (Receptor)
-            // Buscamos notificaciones recibidas y quitamos al usuario de la lista
-            val notificacionesRecibidas = notificacionRepository.findByReceptorContains(usuario)
-            for (notificacion in notificacionesRecibidas) {
-                notificacion.receptor.remove(usuario)
-                notificacionRepository.save(notificacion)
-            }
-
             // C. Ahora es seguro borrar el evento
             eventoRepository.delete(evento)
         }
@@ -120,6 +119,8 @@ class UsuarioController(
             gasto.pagos.removeIf { it.pagadoPor.id == usuario.id }
             gastoRepository.save(gasto)
         }
+
+        firebaseRepository.deleteAllByUsuario_Id(usuario.id!!)
 
         // 10. NUEVO: Limpiar Votos en Encuestas
         // Buscamos todos los votos del usuario y los eliminamos.
@@ -167,4 +168,18 @@ class UsuarioController(
         val responseDto = UsuarioDTO(guardado.id!!, guardado.nombre, guardado.correo)
         return ResponseEntity.ok(responseDto)
     }
+
+    @PutMapping("/{id}/token")
+    fun updateUsuarioToken(
+        @PathVariable id: Long,
+        @RequestBody token: String,
+    ): ResponseEntity<Void> =
+        try {
+            firebaseTokenService.procesarToken(id, token)
+            ResponseEntity.ok().build()
+        } catch (e: EntityNotFoundException) {
+            ResponseEntity.notFound().build()
+        } catch (e: Exception) {
+            ResponseEntity.internalServerError().build()
+        }
 }

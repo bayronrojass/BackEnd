@@ -1,10 +1,15 @@
-FROM maven:3.9.6-eclipse-temurin-21 AS builder
+# Etapa de compilación
+FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
 COPY pom.xml .
-COPY src ./src
-RUN mvn clean package -DskipTests
+RUN mvn dependency:go-offline -B
 
-FROM eclipse-temurin:21-jdk-alpine
+COPY src ./src
+RUN mvn package -DskipTests
+
+# Etapa final (para correr la app ligera)
+FROM eclipse-temurin:17-jre
 WORKDIR /app
-COPY --from=builder /app/target/*.jar app.jar
-CMD ["java", "-jar", "app.jar"]
+COPY --from=build /app/target/*.jar app.jar
+COPY mirumi-23884-firebase-adminsdk-fbsvc-ce13046c20.json ./firebase-config.json
+ENTRYPOINT ["java", "-jar", "app.jar"]
