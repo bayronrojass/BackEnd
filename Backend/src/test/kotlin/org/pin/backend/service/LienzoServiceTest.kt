@@ -23,6 +23,9 @@ class LienzoServiceTest {
     @Mock
     private lateinit var lienzoRepository: LienzoRepository
 
+    @Mock
+    lateinit var firebaseMessagingService: FirebaseMessagingService
+
     @InjectMocks
     private lateinit var lienzoService: LienzoService
 

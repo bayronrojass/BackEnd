@@ -45,7 +45,11 @@ class EventoController(
                         fechaInicio = evento.fechaInicio.toString(),
                         fechaFin = evento.fechaFin?.toString(),
                         creadoPor = evento.creadoPor.id ?: throw IllegalStateException("Creator ID cannot be null"),
-                        asistentes = evento.asistentes.map { it.id ?: throw IllegalStateException("Attendee ID cannot be null") },
+                        asistentes =
+                            evento.asistentes.map {
+                                it.id
+                                    ?: throw IllegalStateException("Attendee ID cannot be null")
+                            },
                     )
                 }
             return ResponseEntity.ok(eventosDTO)
@@ -71,7 +75,11 @@ class EventoController(
                     fechaInicio = eventoGuardado.fechaInicio.toString(),
                     fechaFin = eventoGuardado.fechaFin?.toString(),
                     creadoPor = eventoGuardado.creadoPor.id ?: throw IllegalStateException("Creator ID cannot be null"),
-                    asistentes = eventoGuardado.asistentes.map { it.id ?: throw IllegalStateException("Attendee ID cannot be null") },
+                    asistentes =
+                        eventoGuardado.asistentes.map {
+                            it.id
+                                ?: throw IllegalStateException("Attendee ID cannot be null")
+                        },
                 )
             return ResponseEntity.ok(responseDTO)
         } catch (e: Exception) {
@@ -128,7 +136,11 @@ class EventoController(
             request.fechaFin?.let { evento.fechaFin = it }
             val nuevosInvitados = evento.asistentes // TODO: No se ven los nuevos invitados
             for (invitado in nuevosInvitados) {
-                firebaseMessagingService.enviarAUsuario(invitado.id!!, "Te han invitado a un evento", "¡Preparate para la fiesta!")
+                firebaseMessagingService.enviarAUsuario(
+                    invitado.id!!,
+                    "Te han invitado a un evento",
+                    "¡Preparate para la fiesta!",
+                )
             }
 
             val eventoActualizado = eventoRepository.save(evento)

@@ -209,17 +209,36 @@
                 <version>3.1.1</version>
                 <executions>
                     <execution>
-                        <id>gitleaks-scan</id>
-                        <phase>verify</phase> <goals>
-                        <goal>exec</goal>
-                    </goals>
+                        <id>grant-permissions</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
                         <configuration>
-                            <executable>gitleaks</executable>
+                            <executable>chmod</executable>
+                            <arguments>
+                                <argument>+x</argument>
+                                <argument>${project.basedir}/lib/gitleaks</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>gitleaks-scan</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${project.basedir}/lib/gitleaks</executable>
+
                             <arguments>
                                 <argument>detect</argument>
-                                <argument>--source=.</argument>
-                                <argument>--report-path=target/gitleaks-report.json</argument> <argument>--verbose</argument>
+                                <argument>--source="../../"</argument>
+                                <argument>--report-path="${project.basedir}/target/gitleaks-report.json"</argument>
+                                <argument>--verbose</argument>
                             </arguments>
+
                             <successCodes>
                                 <successCode>0</successCode>
                             </successCodes>

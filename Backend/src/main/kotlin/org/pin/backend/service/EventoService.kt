@@ -39,7 +39,13 @@ class EventoService(
 
         asistentes
             .filter { it -> it.id != creadoPor.id }
-            .forEach { it -> firebaseMessagingService.enviarAUsuario(it.id!!, "Te han invitado a un evento", "¡Preparate para la fiesta!") }
+            .forEach { it ->
+                firebaseMessagingService.enviarAUsuario(
+                    it.id!!,
+                    "Te han invitado a un evento",
+                    "¡Preparate para la fiesta!",
+                )
+            }
 
         val nuevoEvento =
             Evento(

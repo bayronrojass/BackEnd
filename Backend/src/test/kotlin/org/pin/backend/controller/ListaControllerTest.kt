@@ -1,22 +1,24 @@
 package org.pin.backend.controller
 
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.*
 import org.mockito.junit.jupiter.MockitoExtension
 import org.pin.backend.dto.Request.ElementoRequestDTO
 import org.pin.backend.model.Casa
 import org.pin.backend.model.Elemento
-import org.pin.backend.model.Lienzo
 import org.pin.backend.model.Lista
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.ListaRepository
+import org.pin.backend.repository.UsuarioRepository
+import org.pin.backend.service.ListaService
 import org.springframework.http.HttpStatus
-import java.time.Instant
 import java.time.LocalDateTime
 import java.util.*
 
@@ -26,7 +28,13 @@ class ListaControllerTest {
     private lateinit var listaRepository: ListaRepository
 
     @Mock
+    private lateinit var listaService: ListaService
+
+    @Mock
     private lateinit var casaRepository: CasaRepository
+
+    @Mock
+    private lateinit var usuarioRepository: UsuarioRepository
 
     @InjectMocks
     private lateinit var controller: ListaController
@@ -111,52 +119,43 @@ class ListaControllerTest {
 
     @Test
     fun `borrarLista should return 404 when list does not exist`() {
-        // Given
-        `when`(listaRepository.findById(1L)).thenReturn(Optional.empty())
+        // GIVEN
+        val id = 1L
 
-        // When
-        val response = controller.borrarLista(1L)
+        Mockito.doThrow(NoSuchElementException("La lista no existe"))
+            .`when`(listaService).borrarLista(id)
 
-        // Then
-        assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
+        // WHEN
+        val response = controller.borrarLista(id)
+
+        // THEN
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
     }
 
     @Test
     fun `borrarLista should remove list from casa when it is associated`() {
-        // Given
-        val casa =
-            Casa(
-                id = 1,
-                nombre = "Mi Casa",
-                listas = mutableListOf(lista),
-                lienzo = Lienzo(bytes = ByteArray(0), width = 100, height = 100, lastEdited = Instant.now()),
-                fechaCreacion = LocalDateTime.now(),
-            )
-        `when`(listaRepository.findById(1L)).thenReturn(Optional.of(lista))
-        `when`(casaRepository.findByListasContains(lista)).thenReturn(Optional.of(casa))
+        // GIVEN
+        val id = 1L
 
-        // When
-        val response = controller.borrarLista(1L)
+        // WHEN
+        val response = controller.borrarLista(id)
 
-        // Then
-        assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
-        assertFalse(casa.listas.contains(lista)) // La lista se elimina de la casa
-        verify(casaRepository).save(casa) // Se guarda la casa para persistir el cambio
-        verify(listaRepository, never()).delete(any()) // No se debe llamar al delete de listaRepository
+        // THEN
+        Assertions.assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
+
+        Mockito.verify(listaService).borrarLista(id)
     }
 
     @Test
     fun `borrarLista should delete list directly when it is an orphan`() {
-        // Given
-        `when`(listaRepository.findById(1L)).thenReturn(Optional.of(lista))
-        `when`(casaRepository.findByListasContains(lista)).thenReturn(Optional.empty()) // No se encuentra casa
+        // GIVEN
+        val id = 1L
+        // WHEN
+        val response = controller.borrarLista(id)
 
-        // When
-        val response = controller.borrarLista(1L)
+        // THEN
+        Assertions.assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
 
-        // Then
-        assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
-        verify(listaRepository).delete(lista) // Se llama directamente al delete de lista
-        verify(casaRepository, never()).save(any()) // No se guarda ninguna casa
+        Mockito.verify(listaService).borrarLista(id)
     }
 }

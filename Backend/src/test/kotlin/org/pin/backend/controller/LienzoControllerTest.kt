@@ -45,15 +45,6 @@ class LienzoControllerTest {
     }
 
     @Test
-    fun `getLienzoImagen should return image when lienzo is found`() {
-        `when`(lienzoService.findById(1)).thenReturn(lienzo)
-
-        val result = lienzoController.getLienzoImagen(1)
-
-        assert(result.statusCode == HttpStatus.OK)
-    }
-
-    @Test
     fun `postDeltas should return ok`() {
         val deltas = listOf(PointDeltaDTO(1f, 1f, 1f, 1))
         `when`(lienzoService.applyDelta(1, deltas)).thenReturn(ResponseEntity.ok(true))

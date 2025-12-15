@@ -29,7 +29,10 @@ class ListaService(
         emailPropietario: String,
     ): Lista {
         val casa = casaRepository.findById(casaId).orElseThrow { RuntimeException("Casa no encontrada") }
-        val propietario = usuarioRepository.findByCorreo(emailPropietario).orElseThrow { RuntimeException("Usuario no encontrado") }
+        val propietario =
+            usuarioRepository.findByCorreo(emailPropietario).orElseThrow {
+                RuntimeException("Usuario no encontrado")
+            }
 
         val lista =
             Lista(

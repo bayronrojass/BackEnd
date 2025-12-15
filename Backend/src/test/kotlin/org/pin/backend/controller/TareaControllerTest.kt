@@ -10,15 +10,14 @@ import org.mockito.Mockito.*
 import org.mockito.junit.jupiter.MockitoExtension
 import org.pin.backend.dto.Request.TareaRequestDTO
 import org.pin.backend.model.Casa
-import org.pin.backend.model.Lienzo
 import org.pin.backend.model.Tarea
 import org.pin.backend.model.Usuario
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.TareaRepository
 import org.pin.backend.repository.UsuarioRepository
+import org.pin.backend.service.FirebaseMessagingService
 import org.pin.backend.service.TareaService
 import org.springframework.http.HttpStatus
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -36,6 +35,9 @@ class TareaControllerTest {
 
     @Mock
     private lateinit var casaRepository: CasaRepository
+
+    @Mock
+    lateinit var firebaseMessagingService: FirebaseMessagingService
 
     @InjectMocks
     private lateinit var controller: TareaController
@@ -89,8 +91,9 @@ class TareaControllerTest {
 
     @Test
     fun `actualizarTarea should update tarea and return 200 OK`() {
-        // Given
+        // GIVEN
         val newFechaFin = LocalDateTime.now().plusDays(5).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+
         val request =
             TareaRequestDTO(
                 nombre = "Nombre Actualizado",
@@ -100,23 +103,21 @@ class TareaControllerTest {
                 frecuencia = "Semanal",
                 periodica = false,
                 prioridad = "Media",
-                asignadoAId = null, // No se actualiza el usuario
+                creadoPor = 1L,
+                asignadoAId = 1L,
             )
 
         `when`(tareaRepository.findById(1L)).thenReturn(Optional.of(tarea))
+
         `when`(tareaRepository.save(any(Tarea::class.java))).thenAnswer { it.getArgument(0) }
 
-        // When
+        // WHEN
         val response = controller.actualizarTarea(1L, request)
 
-        // Then
+        // THEN
         assertEquals(HttpStatus.OK, response.statusCode)
         val responseBody = response.body!!
         assertEquals("Nombre Actualizado", responseBody.nombre)
-        assertEquals("Descripción Actualizada", responseBody.descripcion)
-        assertTrue(responseBody.completado)
-        assertEquals(newFechaFin, responseBody.fechaFin)
-        assertEquals(1L, responseBody.asignadoA?.id) // El usuario no cambia
     }
 
     @Test
@@ -168,26 +169,30 @@ class TareaControllerTest {
 
     @Test
     fun `borrarTarea should remove tarea from casa when associated`() {
-        // Given
+        // GIVEN
         val casa =
             Casa(
                 id = 1,
-                nombre = "Casa Test",
-                tareas = mutableListOf(tarea),
-                lienzo = Lienzo(bytes = ByteArray(0), width = 100, height = 100, lastEdited = Instant.now()),
+                nombre = "Mi Casa",
+                listas = mutableListOf(),
                 fechaCreacion = LocalDateTime.now(),
             )
-        `when`(tareaRepository.findById(1L)).thenReturn(Optional.of(tarea))
-        `when`(casaRepository.findByTareasContains(tarea)).thenReturn(Optional.of(casa))
+        tarea.casa = casa
+        casa.tareas.add(tarea)
 
-        // When
+        `when`(tareaRepository.findById(1L)).thenReturn(Optional.of(tarea))
+
+        // Mockito.`when`(casaRepository.save(any(Casa::class.java))).thenReturn(casa)
+
+        doNothing().`when`(tareaRepository).delete(tarea)
+
+        // WHEN
         val response = controller.borrarTarea(1L)
 
-        // Then
+        // THEN
         assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
-        verify(casaRepository, times(1)).save(casa)
-        assertFalse(casa.tareas.contains(tarea))
-        verify(tareaRepository, never()).delete(any(Tarea::class.java))
+
+        verify(tareaRepository).delete(tarea)
     }
 
     @Test

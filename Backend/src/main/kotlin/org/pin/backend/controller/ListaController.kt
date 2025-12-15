@@ -8,7 +8,6 @@ import org.pin.backend.model.Lista
 import org.pin.backend.repository.ListaRepository
 import org.pin.backend.repository.UsuarioRepository
 import org.pin.backend.service.ListaService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
@@ -19,12 +18,9 @@ import java.util.*
 @RequestMapping("listas")
 class ListaController(
     private val listaRepository: ListaRepository,
+    private var listaService: ListaService,
+    private var usuarioRepository: UsuarioRepository,
 ) {
-    @Autowired
-    lateinit var listaService: ListaService
-
-    @Autowired lateinit var usuarioRepository: UsuarioRepository
-
     @GetMapping
     fun getAll() = listaRepository.findAll()
 
@@ -106,7 +102,12 @@ class ListaController(
     fun borrarLista(
         @PathVariable id: Long,
     ): ResponseEntity<Void> {
-        listaService.borrarLista(id)
-        return ResponseEntity.noContent().build()
+        try {
+            listaService.borrarLista(id)
+            return ResponseEntity.noContent().build()
+        }
+        catch (e: Exception){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+        }
     }
 }

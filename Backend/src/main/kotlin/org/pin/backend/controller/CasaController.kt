@@ -331,7 +331,9 @@ class CasaController(
             val imagen = i.get()
             casa.get().multimedia.add(imagen)
             service.save(casa.get())
-            return ResponseEntity.ok(ImagenDTO(imagen.id!!, imagen.lienzo!!.id!!, 0f, 0f, imagen.width, imagen.height, imagen.localizacion))
+            return ResponseEntity.ok(
+                ImagenDTO(imagen.id!!, imagen.lienzo!!.id!!, 0f, 0f, imagen.width, imagen.height, imagen.localizacion),
+            )
         }
         return ResponseEntity.notFound().build()
     }

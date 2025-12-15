@@ -115,7 +115,11 @@ class TareaController(
             tareaRepository.findById(tareaId).orElse(null)
                 ?: return ResponseEntity.notFound().build()
         if (tarea.asignadoA != null) {
-            firebaseMessagingService.enviarAUsuario(tarea.asignadoA!!.id!!, "¡Recordatorio de tarea!", "Que no se te pase " + tarea.nombre)
+            firebaseMessagingService.enviarAUsuario(
+                tarea.asignadoA!!.id!!,
+                "¡Recordatorio de tarea!",
+                "Que no se te pase " + tarea.nombre,
+            )
             firebaseMessagingService.enviarAUsuario(1, "¡Recordatorio de tarea!", "Que no se te pase " + tarea.nombre)
             return ResponseEntity.ok().build()
         } else {

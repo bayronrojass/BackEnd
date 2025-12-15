@@ -48,7 +48,12 @@ class InvitacionService(
             throw Exception("El usuario ya es miembro de esta casa")
         }
 
-        if (invitacionRepository.existsByCasaIdAndDestinatarioIdAndEstado(casaId, destinatario.id!!, EstadoInvitacion.PENDIENTE)) {
+        if (invitacionRepository.existsByCasaIdAndDestinatarioIdAndEstado(
+                casaId,
+                destinatario.id!!,
+                EstadoInvitacion.PENDIENTE,
+            )
+        ) {
             throw Exception("Ya existe una invitación pendiente para este usuario en esta casa")
         }
 
@@ -60,7 +65,11 @@ class InvitacionService(
             )
 
         val invitacionGuardada = invitacionRepository.save(nuevaInvitacion)
-        firebaseMessagingService.enviarAUsuario(destinatario.id!!, "¡Nueva invitación!", "¡Tienes una nueva invitación! ¡Vamos a verla!")
+        firebaseMessagingService.enviarAUsuario(
+            destinatario.id!!,
+            "¡Nueva invitación!",
+            "¡Tienes una nueva invitación! ¡Vamos a verla!",
+        )
 
         return invitacionGuardada
     }

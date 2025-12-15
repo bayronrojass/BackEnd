@@ -19,6 +19,9 @@ class TareaServiceTest {
     @InjectMocks
     private lateinit var service: TareaService
 
+    @Mock
+    lateinit var firebaseMessagingService: FirebaseMessagingService
+
     @Test
     fun `findAll should call repository and return its result`() {
         // Given: Preparamos una lista de tareas que el repositorio debería devolver.

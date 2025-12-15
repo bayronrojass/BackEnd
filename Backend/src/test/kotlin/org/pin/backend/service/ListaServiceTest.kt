@@ -9,7 +9,9 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
 import org.pin.backend.model.Lista
+import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.ListaRepository
+import org.pin.backend.repository.UsuarioRepository
 
 @ExtendWith(MockitoExtension::class)
 class ListaServiceTest {
@@ -18,6 +20,15 @@ class ListaServiceTest {
 
     @InjectMocks
     private lateinit var service: ListaService
+
+    @Mock
+    lateinit var firebaseMessagingService: FirebaseMessagingService
+
+    @Mock
+    lateinit var usuarioRepository: UsuarioRepository
+
+    @Mock
+    lateinit var casaRepository: CasaRepository
 
     @Test
     fun `findAll should call repository and return its result`() {
