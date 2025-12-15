@@ -25,7 +25,7 @@ jobs:
 
       - name: Fix file permissions for ZAP
         run: |
-          chmod -R 777 .
+          chmod -R 777 ./Backend
           touch report_html.html
           chmod 666 report_html.html
 
