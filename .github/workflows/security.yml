@@ -27,6 +27,7 @@ jobs:
         run: |
           chmod -R 777 ./Backend
           touch report-html.html
+          chmod 666 /zap/wrk/zap.yaml 
           chmod 666 report-html.html
 
       - name: ZAP Baseline Scan

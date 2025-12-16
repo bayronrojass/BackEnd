@@ -2,6 +2,7 @@ package org.pin.backend.service
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -30,6 +31,14 @@ class LienzoServiceTest {
     private lateinit var lienzoService: LienzoService
 
     private lateinit var lienzo: Lienzo
+
+    companion object {
+        @JvmStatic
+        @BeforeAll
+        fun setupHeadless() {
+            System.setProperty("java.awt.headless", "true")
+        }
+    }
 
     @BeforeEach
     fun setUp() {
