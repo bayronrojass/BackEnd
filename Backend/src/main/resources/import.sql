@@ -33,17 +33,6 @@ INSERT INTO public.casa_usuarios (casa_id, usuarios_id) VALUES (1, 3) ON CONFLIC
 INSERT INTO public.casa_usuarios (casa_id, usuarios_id) VALUES (2, 4) ON CONFLICT DO NOTHING;
 INSERT INTO public.casa_administradores (casa_id, admin_id) VALUES (1, 1) ON CONFLICT DO NOTHING;
 
--- =================================================================================================
--- 4. ELEMENTOS
--- =================================================================================================
-ALTER SEQUENCE IF EXISTS elemento_id_seq RESTART WITH 20;
-INSERT INTO public.elemento (id, completado, descripcion, nombre) VALUES (1, TRUE, '2 barras', 'Pan') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.elemento (id, completado, descripcion, nombre) VALUES (2, FALSE, 'Para limpiar el baño', 'Lejía') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.elemento (id, completado, descripcion, nombre) VALUES (3, TRUE, 'Está caro', 'Pollo') ON CONFLICT (id) DO NOTHING;
--- Elementos extra para tareas
-INSERT INTO public.elemento (id, completado, descripcion, nombre) VALUES (10, FALSE, 'Bajar al contenedor azul', 'Sacar basura (Mañana)') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.elemento (id, completado, descripcion, nombre) VALUES (11, FALSE, 'Fregar azulejos', 'Limpiar Baño') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.elemento (id, completado, descripcion, nombre) VALUES (12, FALSE, 'Hablar de gastos', 'Reunión de Piso') ON CONFLICT (id) DO NOTHING;
 
 
 -- =================================================================================================
@@ -120,9 +109,18 @@ INSERT INTO public.lista_participantes (lista_id, usuario_id) VALUES (5, 1);
 INSERT INTO public.casa_listas (casa_id, listas_id) VALUES (1, 1) ON CONFLICT DO NOTHING;
 INSERT INTO public.casa_listas (casa_id, listas_id) VALUES (1, 2) ON CONFLICT DO NOTHING;
 INSERT INTO public.casa_listas (casa_id, listas_id) VALUES (1, 3) ON CONFLICT DO NOTHING;
-INSERT INTO public.lista_elementos (lista_id, elementos_id) VALUES (1, 1) ON CONFLICT DO NOTHING;
-INSERT INTO public.lista_elementos (lista_id, elementos_id) VALUES (2, 2) ON CONFLICT DO NOTHING;
-INSERT INTO public.lista_elementos (lista_id, elementos_id) VALUES (3, 3) ON CONFLICT DO NOTHING;
+
+-- =================================================================================================
+-- 4. ELEMENTOS
+-- =================================================================================================
+ALTER SEQUENCE IF EXISTS elemento_id_seq RESTART WITH 20;
+INSERT INTO public.elemento (id, completado, descripcion, nombre, cantidad, lista_id) VALUES (1, TRUE, '2 barras', 'Pan', 4, 1) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.elemento (id, completado, descripcion, nombre, cantidad, lista_id) VALUES (2, FALSE, 'Para limpiar el baño', 'Lejía', 2, 1) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.elemento (id, completado, descripcion, nombre, cantidad, lista_id) VALUES (3, TRUE, 'Está caro', 'Pollo', 3, 2) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.elemento (id, completado, descripcion, nombre, cantidad, lista_id) VALUES (10, FALSE, 'Bajar al contenedor azul', 'Sacar basura (Mañana)',1, 3) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.elemento (id, completado, descripcion, nombre, cantidad, lista_id) VALUES (11, FALSE, 'Fregar azulejos', 'Limpiar Baño',1, 4) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.elemento (id, completado, descripcion, nombre, cantidad, lista_id) VALUES (12, FALSE, 'Hablar de gastos', 'Reunión de Piso',1, 5) ON CONFLICT (id) DO NOTHING;
+
 
 INSERT INTO public.opcion (id, nombre) VALUES (1, 'Opcion1') ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.opcion (id, nombre) VALUES (2, 'Opcion2') ON CONFLICT (id) DO NOTHING;
@@ -158,4 +156,3 @@ INSERT INTO public.post_it (id, lienzo_id) VALUES (3, 6) ON CONFLICT (id) DO NOT
 ALTER SEQUENCE IF EXISTS invitacion_id_seq RESTART WITH 10;
 INSERT INTO public.invitacion (id, remitente_id, destinatario_id, casa_id, fecha_creacion, estado) VALUES (1, 1, 4, 1, NOW(), 'PENDIENTE') ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO public.item (id) VALUES (1),(2),(3) ON CONFLICT (id) DO NOTHING;

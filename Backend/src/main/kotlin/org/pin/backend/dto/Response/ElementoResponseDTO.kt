@@ -5,4 +5,5 @@ data class ElementoResponseDTO(
     val nombre: String,
     val descripcion: String?,
     val completado: Boolean,
+    val cantidad: Int
 )
