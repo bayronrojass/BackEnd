@@ -22,7 +22,7 @@ INSERT INTO public.lienzo (id, bytes, width, height, last_edited, is_image) VALU
 -- 3. CASAS
 -- =================================================================================================
 ALTER SEQUENCE IF EXISTS casa_id_seq RESTART WITH 10;
-INSERT INTO public.casa (id, descripcion, fecha_creacion, nombre, ruta_imagen) VALUES (1, 'DANI MOROSO', now(), 'Escultor José Capuz 29', 'ruta1.jpg') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.casa (id, descripcion, fecha_creacion, nombre, ruta_imagen) VALUES (1, 'Dani me debes 10€', now(), 'Escultor José Capuz 29', 'ruta1.jpg') ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.casa (id, descripcion, fecha_creacion, nombre, ruta_imagen) VALUES (2, 'Prohibida la entrada a pelirrojos', now(), 'Matías Perelló 12', 'ruta2.jpg') ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.casa (id, descripcion, fecha_creacion, nombre, ruta_imagen) VALUES (3, 'La casa del terror', now(), 'Av. Dr. Waksman 33', 'ruta3.jpg') ON CONFLICT (id) DO NOTHING;
 
