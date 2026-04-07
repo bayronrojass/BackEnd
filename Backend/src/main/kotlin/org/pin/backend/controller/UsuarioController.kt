@@ -1,5 +1,7 @@
 package org.pin.backend.controller
+
 import jakarta.persistence.EntityNotFoundException
+import org.pin.backend.dto.Data.CasaDTO
 import org.pin.backend.dto.Data.UsuarioDTO
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.EventoRepository
@@ -74,67 +76,51 @@ class UsuarioController(
             tareaRepository.save(tarea)
         }
 
-        // Limpiar Eventos (Asistente) - Quitar de la lista de asistentes
+        // Limpiar Eventos
         val eventosAsistidos = eventoRepository.findByAsistentesContains(usuario)
         for (evento in eventosAsistidos) {
             evento.asistentes.remove(usuario)
             eventoRepository.save(evento)
         }
 
-        // Limpiar Eventos (Creador) - Borrar el evento completo
-        // Como 'creadoPor' es obligatorio, si el creador se va, el evento desaparece.
+        // Limpiar Eventos
         val eventosCreados = eventoRepository.findByCreadoPor(usuario)
         for (evento in eventosCreados) {
-            // A. Buscar la casa dueña del evento
             val casaPropietaria = casaRepository.findByEventosContains(evento).orElse(null)
-
-            // B. Si existe, quitar el evento de la lista de la casa
             if (casaPropietaria != null) {
                 casaPropietaria.eventos.remove(evento)
                 casaRepository.save(casaPropietaria)
             }
 
-            // Limpiar Invitaciones
             val invitacionesEnviadas = invitacionRepository.findByRemitente(usuario)
             invitacionRepository.deleteAll(invitacionesEnviadas)
 
             val invitacionesRecibidas = invitacionRepository.findByDestinatario(usuario)
             invitacionRepository.deleteAll(invitacionesRecibidas)
 
-            // Limpiar Multimedia (Imágenes, PostIts, etc.)
-            // Buscamos todo lo que el usuario ha subido y lo borramos
             val multimediaUsuario = multimediaRepository.findByUsuario(usuario)
             multimediaRepository.deleteAll(multimediaUsuario)
 
-            // C. Ahora es seguro borrar el evento
             eventoRepository.delete(evento)
         }
 
-        // Limpiar Pagos en Gastos
-        // Buscamos los gastos donde el usuario ha realizado algún pago
         val gastosConPagos = gastoRepository.findByPagosPagadoPor(usuario)
         for (gasto in gastosConPagos) {
-            // Eliminamos de la lista los pagos hechos por este usuario.
-            // Al guardar el gasto, JPA eliminará los pagos de la BD por orphanRemoval=true
             gasto.pagos.removeIf { it.pagadoPor.id == usuario.id }
             gastoRepository.save(gasto)
         }
 
         firebaseRepository.deleteAllByUsuario_Id(usuario.id!!)
 
-        // 10. NUEVO: Limpiar Votos en Encuestas
-        // Buscamos todos los votos del usuario y los eliminamos.
-        // Al no estar ya el voto en la BD, la encuesta dejará de contarlo al cargarse.
+        // Limpiar Votos en Encuestas
         val votosUsuario = votoRepository.findByVotante(usuario)
         votoRepository.deleteAll(votosUsuario)
 
-        // Finalmente, borrar usuario
         usuarioRepository.delete(usuario)
 
         return ResponseEntity.noContent().build()
     }
 
-    // 1. GET: Devolvemos UsuarioDTO, no la entidad completa
     @GetMapping("/{id}")
     fun getUsuario(
         @PathVariable id: Long,
@@ -142,12 +128,10 @@ class UsuarioController(
         usuarioRepository
             .findById(id)
             .map { usuario ->
-                // Convertimos la entidad a DTO antes de enviarla
                 val dto = UsuarioDTO(usuario.id!!, usuario.nombre, usuario.correo)
                 ResponseEntity.ok(dto)
             }.orElse(ResponseEntity.notFound().build())
 
-    // 2. PUT: Recibimos DTO y devolvemos DTO
     @PutMapping("/{id}")
     @Transactional
     fun updateUsuario(
@@ -158,13 +142,11 @@ class UsuarioController(
             usuarioRepository.findById(id).orElse(null)
                 ?: return ResponseEntity.notFound().build()
 
-        // Actualizamos los campos
         usuario.nombre = usuarioDto.nombre
         usuario.correo = usuarioDto.correo
 
         val guardado = usuarioRepository.save(usuario)
 
-        // Devolvemos el DTO actualizado
         val responseDto = UsuarioDTO(guardado.id!!, guardado.nombre, guardado.correo)
         return ResponseEntity.ok(responseDto)
     }
@@ -182,4 +164,24 @@ class UsuarioController(
         } catch (e: Exception) {
             ResponseEntity.internalServerError().build()
         }
+
+    @GetMapping("/{id}/casas")
+    fun getCasasDeUsuario(@PathVariable id: Long): ResponseEntity<List<CasaDTO>> {
+        val usuario = usuarioRepository.findById(id).orElse(null)
+            ?: return ResponseEntity.notFound().build()
+
+        val casasDelUsuario = casaRepository.findByMiembrosContains(usuario)
+
+        val casasDto = casasDelUsuario.map { casa ->
+            CasaDTO(
+                id = casa.id!!,
+                nombre = casa.nombre,
+                descripcion = casa.descripcion,
+                rutaImagen = casa.rutaImagen,
+                fechaCreacion = casa.fechaCreacion
+            )
+        }
+
+        return ResponseEntity.ok(casasDto)
+    }
 }

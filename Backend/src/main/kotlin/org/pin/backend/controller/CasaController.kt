@@ -1,5 +1,6 @@
 package org.pin.backend.controller
 
+import org.pin.backend.dto.Data.CasaDTO
 import org.pin.backend.dto.Data.ImagenDTO
 import org.pin.backend.dto.Data.PostItDTO
 import org.pin.backend.dto.Data.UsuarioDTO
@@ -373,5 +374,11 @@ class CasaController(
         }
 
         return ResponseEntity.ok("¡Unido a la casa '${casa.nombre}' exitosamente!")
+    }
+
+    @GetMapping("/usuario/{usuarioId}")
+    fun getCasasDeUsuario(@PathVariable usuarioId: Long): ResponseEntity<List<CasaDTO>> {
+        val casas = service.obtenerCasasDeUsuario(usuarioId)
+        return ResponseEntity.ok(casas)
     }
 }
