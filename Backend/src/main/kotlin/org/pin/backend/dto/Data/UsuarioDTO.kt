@@ -6,6 +6,7 @@ data class UsuarioDTO(
     val id: Long,
     val nombre: String,
     val correo: String,
+    val fotoUrl: String? = null
 )
 
 fun Usuario.toDTO(): UsuarioDTO =
@@ -13,4 +14,5 @@ fun Usuario.toDTO(): UsuarioDTO =
         id = this.id!!,
         nombre = this.nombre,
         correo = this.correo,
+        fotoUrl = this.fotoUrl
     )

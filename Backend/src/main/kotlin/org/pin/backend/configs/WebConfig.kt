@@ -9,7 +9,7 @@ class WebConfig : WebMvcConfigurer {
     // Esto hace que http://tu-servidor:8080/uploads/archivo.jpg funcione
     override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
         registry
-            .addResourceHandler("/uploads/**")
-            .addResourceLocations("file:./uploads/")
+            .addResourceHandler("/multimedia/**")
+            .addResourceLocations("file:multimedia/")
     }
 }

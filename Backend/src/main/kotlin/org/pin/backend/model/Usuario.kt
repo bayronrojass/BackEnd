@@ -19,6 +19,8 @@ class Usuario(
     var correo: String,
     @Column(nullable = false)
     var contrasena: String = "",
+    @Column(name = "foto_url")
+    var fotoUrl: String? = null,
     @ManyToMany(mappedBy = "miembros", fetch = FetchType.LAZY)
     var casas: MutableSet<Casa> = mutableSetOf(),
     @ManyToMany(mappedBy = "administradores", fetch = FetchType.LAZY)

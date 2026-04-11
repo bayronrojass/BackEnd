@@ -3,6 +3,7 @@ package org.pin.backend.controller
 import jakarta.persistence.EntityNotFoundException
 import org.pin.backend.dto.Data.CasaDTO
 import org.pin.backend.dto.Data.UsuarioDTO
+import org.pin.backend.dto.Data.toDTO
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.EventoRepository
 import org.pin.backend.repository.FirebaseTokenRepository
@@ -25,6 +26,8 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/usuarios")
@@ -40,6 +43,7 @@ class UsuarioController(
     private val votoRepository: VotoRepository,
     private val firebaseRepository: FirebaseTokenRepository,
     private val firebaseTokenService: FirebaseTokenService,
+    private val usuarioService: UsuarioService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(UsuarioController::class.java)
 
@@ -128,8 +132,7 @@ class UsuarioController(
         usuarioRepository
             .findById(id)
             .map { usuario ->
-                val dto = UsuarioDTO(usuario.id!!, usuario.nombre, usuario.correo)
-                ResponseEntity.ok(dto)
+                ResponseEntity.ok(usuario.toDTO())
             }.orElse(ResponseEntity.notFound().build())
 
     @PutMapping("/{id}")
@@ -146,9 +149,7 @@ class UsuarioController(
         usuario.correo = usuarioDto.correo
 
         val guardado = usuarioRepository.save(usuario)
-
-        val responseDto = UsuarioDTO(guardado.id!!, guardado.nombre, guardado.correo)
-        return ResponseEntity.ok(responseDto)
+        return ResponseEntity.ok(guardado.toDTO())
     }
 
     @PutMapping("/{id}/token")
@@ -183,5 +184,23 @@ class UsuarioController(
         }
 
         return ResponseEntity.ok(casasDto)
+    }
+
+    @PostMapping("/{id}/foto", consumes = ["multipart/form-data"])
+    fun subirFotoPerfil(
+        @PathVariable id: Long,
+        @RequestParam("file") file: MultipartFile
+    ): ResponseEntity<UsuarioDTO> {
+
+        val usuarioActualizado = usuarioService.actualizarFotoPerfil(id, file)
+        return ResponseEntity.ok(usuarioActualizado)
+    }
+
+    @DeleteMapping("/{id}/foto")
+    fun eliminarFotoPerfil(
+        @PathVariable id: Long
+    ): ResponseEntity<UsuarioDTO> {
+        val usuarioActualizado = usuarioService.eliminarFotoPerfil(id)
+        return ResponseEntity.ok(usuarioActualizado)
     }
 }
