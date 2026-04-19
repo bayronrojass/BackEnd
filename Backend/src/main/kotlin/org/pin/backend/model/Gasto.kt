@@ -31,4 +31,7 @@ class Gasto(
     var pagadoPor: Usuario? = null,
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
     var pagos: MutableList<Pago> = mutableListOf(),
+    @ElementCollection
+    @CollectionTable(name = "gasto_beneficiarios")
+    var beneficiarios: MutableList<String> = mutableListOf()
 )
