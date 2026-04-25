@@ -7,6 +7,7 @@ import org.pin.backend.model.Gasto
 import org.pin.backend.model.enums.CategoriaGasto
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.UsuarioRepository
+import org.pin.backend.service.FileStorageService
 import org.pin.backend.service.GastoIAService
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
@@ -21,6 +22,7 @@ class GastoController(
     private val casaRepository: CasaRepository,
     private val usuarioRepository: UsuarioRepository,
     private val gastoIAService: GastoIAService,
+    private val fileStorageService: FileStorageService,
 ) {
     @GetMapping("/{casaId}/gastos")
     @Transactional(readOnly = true)
@@ -41,7 +43,8 @@ class GastoController(
                     fecha = gasto.fechaInicio.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                     categoria = gasto.categoria.name,
                     pagadoPorNombre = gasto.pagadoPor?.nombre ?: "Desconocido",
-                    beneficiarios = gasto.beneficiarios.toMutableList()
+                    beneficiarios = gasto.beneficiarios.toMutableList(),
+                    fotoTicketUrl = gasto.fotoTicketUrl
                 )
             }
         return ResponseEntity.ok(gastosDTO)
@@ -116,6 +119,48 @@ class GastoController(
         gastoExistente.beneficiarios.clear()
         request.beneficiarios?.let { gastoExistente.beneficiarios.addAll(it) }
 
+        casaRepository.save(casa)
+
+        return ResponseEntity.ok().build()
+    }
+
+    @PostMapping("/{casaId}/gastos/{gastoId}/foto")
+    @Transactional
+    fun actualizarFotoTicket(
+        @PathVariable casaId: Long,
+        @PathVariable gastoId: Long,
+        @RequestParam("file") file: MultipartFile
+    ): ResponseEntity<String> {
+        val casa = casaRepository.findById(casaId).orElse(null)
+            ?: return ResponseEntity.notFound().build()
+
+        val gasto = casa.gastos.find { it.id == gastoId }
+            ?: return ResponseEntity.notFound().build()
+
+        val nombreArchivo = fileStorageService.save(file)
+
+        val baseUrl = org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()
+        val urlPublica = "$baseUrl/multimedia/$nombreArchivo"
+
+        gasto.fotoTicketUrl = urlPublica
+        casaRepository.save(casa)
+
+        return ResponseEntity.ok(urlPublica)
+    }
+
+    @DeleteMapping("/{casaId}/gastos/{gastoId}/foto")
+    @Transactional
+    fun eliminarFotoTicket(
+        @PathVariable casaId: Long,
+        @PathVariable gastoId: Long
+    ): ResponseEntity<Void> {
+        val casa = casaRepository.findById(casaId).orElse(null)
+            ?: return ResponseEntity.notFound().build()
+
+        val gasto = casa.gastos.find { it.id == gastoId }
+            ?: return ResponseEntity.notFound().build()
+
+        gasto.fotoTicketUrl = null
         casaRepository.save(casa)
 
         return ResponseEntity.ok().build()
