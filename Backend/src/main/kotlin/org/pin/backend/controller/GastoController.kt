@@ -105,10 +105,13 @@ class GastoController(
         gastoExistente.descripcion = request.descripcion
         gastoExistente.importe = request.importe
         gastoExistente.categoria = try {
-            org.pin.backend.model.enums.CategoriaGasto.valueOf(request.categoria)
+            CategoriaGasto.valueOf(request.categoria)
         } catch (e: Exception) {
-            org.pin.backend.model.enums.CategoriaGasto.OTROS
+            CategoriaGasto.OTROS
         }
+
+        val nuevoPagador = usuarioRepository.findById(request.pagadoPorId).orElse(null)
+        gastoExistente.pagadoPor = nuevoPagador
 
         gastoExistente.beneficiarios.clear()
         request.beneficiarios?.let { gastoExistente.beneficiarios.addAll(it) }
