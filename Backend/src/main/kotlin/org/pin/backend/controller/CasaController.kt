@@ -20,6 +20,7 @@ import org.pin.backend.repository.UsuarioRepository
 import org.pin.backend.service.CasaService
 import org.pin.backend.service.FirebaseMessagingService
 import org.pin.backend.service.ImagenService
+import org.pin.backend.service.LogroService
 import org.pin.backend.service.PostItService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -43,6 +44,7 @@ class CasaController(
     private val postItService: PostItService,
     private val imagenService: ImagenService,
     private val firebaseMessagingService: FirebaseMessagingService,
+    private val logroService: LogroService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(CasaController::class.java)
 
@@ -247,6 +249,7 @@ class CasaController(
     fun crearPostIt(
         @PathVariable id: Long,
         @PathVariable location: String,
+        @RequestParam usuarioId: Long
     ): ResponseEntity<PostItDTO> {
         val casa = service.findById(id)
         if (casa.isPresent) {
@@ -254,6 +257,9 @@ class CasaController(
             casa.get().multimedia.add(postIt)
             service.save(casa.get())
             logger.info("$postIt ${postIt.id}")
+
+            logroService.procesarPostItCreado(usuarioId)
+
             return ResponseEntity.ok(
                 PostItDTO(
                     postIt.id!!,

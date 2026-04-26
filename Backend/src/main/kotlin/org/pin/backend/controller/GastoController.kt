@@ -9,6 +9,7 @@ import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.UsuarioRepository
 import org.pin.backend.service.FileStorageService
 import org.pin.backend.service.GastoIAService
+import org.pin.backend.service.LogroService
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
@@ -23,6 +24,7 @@ class GastoController(
     private val usuarioRepository: UsuarioRepository,
     private val gastoIAService: GastoIAService,
     private val fileStorageService: FileStorageService,
+    private val logroService: LogroService,
 ) {
     @GetMapping("/{casaId}/gastos")
     @Transactional(readOnly = true)
@@ -75,11 +77,15 @@ class GastoController(
                         CategoriaGasto.OTROS
                     },
                 pagadoPor = usuarioPaga,
-                beneficiarios = request.beneficiarios?.toMutableList() ?: mutableListOf()
+                beneficiarios = request.beneficiarios?.toMutableList() ?: mutableListOf(),
+                fotoTicketUrl = request.urlTicket
             )
 
         casa.gastos.add(nuevoGasto)
         casaRepository.save(casa)
+
+        val usadoIA = !request.urlTicket.isNullOrBlank()
+        logroService.procesarGastoCreado(request.pagadoPorId, usadoIA)
 
         return ResponseEntity.ok("Gasto creado correctamente")
     }

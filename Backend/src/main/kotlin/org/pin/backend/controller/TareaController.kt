@@ -7,6 +7,7 @@ import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.TareaRepository
 import org.pin.backend.repository.UsuarioRepository
 import org.pin.backend.service.FirebaseMessagingService
+import org.pin.backend.service.LogroService
 import org.pin.backend.service.TareaService
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
@@ -22,6 +23,7 @@ class TareaController(
     private val usuarioRepository: UsuarioRepository,
     private val casaRepository: CasaRepository,
     private val firebaseMessagingService: FirebaseMessagingService,
+    private val logroService: LogroService,
 ) {
     @GetMapping
     fun getAll() = service.findAll()
@@ -36,36 +38,45 @@ class TareaController(
             tareaRepository.findById(tareaId).orElse(null)
                 ?: return ResponseEntity.notFound().build()
 
+        val estabaCompletada = tarea.completado
+
         request.nombre.let { tarea.nombre = it }
         request.descripcion?.let { tarea.descripcion = it }
         request.completado?.let { tarea.completado = it }
         tarea.fechaFin =
             when {
-                request.fechaFin == null -> tarea.fechaFin // No se actualiza si es null
-                request.fechaFin.isBlank() -> null // Se pone a null si es un string vacío
-                else -> LocalDateTime.parse(request.fechaFin, DateTimeFormatter.ISO_LOCAL_DATE_TIME) // Se parsea
+                request.fechaFin == null -> tarea.fechaFin
+                request.fechaFin.isBlank() -> null
+                else -> LocalDateTime.parse(request.fechaFin, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
             }
         request.frecuencia?.let { tarea.frecuencia = it }
         request.periodica?.let { tarea.periodica = it }
         request.prioridad?.let { tarea.prioridad = it }
 
-        // Actualiza el usuario asignado
         if (request.asignadoAId != null) {
             if (request.asignadoAId == -1L) {
-                // Si el ID es -1, desasignamos explícitamente la tarea
                 tarea.asignadoA = null
             } else {
-                // Si es un ID normal, buscamos el usuario
                 val usuarioAsignado = usuarioRepository.findById(request.asignadoAId).orElse(null)
                 tarea.asignadoA = usuarioAsignado
             }
         }
 
         val tareaGuardada = tareaRepository.save(tarea)
-        if (request.asignadoAId !=
-            request.creadoPor
-        ) {
+        if (request.asignadoAId != request.creadoPor) {
             firebaseMessagingService.enviarAUsuario(request.asignadoAId!!, "¡Nueva tarea asignada!", request.nombre)
+        }
+
+        if (request.completado == true && !estabaCompletada) {
+            val usuarioAsignadoId = tareaGuardada.asignadoA?.id
+            if (usuarioAsignadoId != null) {
+                val diasRetraso = if (tareaGuardada.fechaFin != null) {
+                    java.time.temporal.ChronoUnit.DAYS.between(tareaGuardada.fechaFin, LocalDateTime.now())
+                } else {
+                    0L
+                }
+                logroService.procesarTareaCompletada(usuarioAsignadoId, diasRetraso)
+            }
         }
 
         val responseDTO =
