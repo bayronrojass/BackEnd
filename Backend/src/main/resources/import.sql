@@ -2,10 +2,10 @@
 -- 1. USUARIOS
 -- =================================================================================================
 ALTER SEQUENCE IF EXISTS usuario_id_seq RESTART WITH 10;
-INSERT INTO public.usuario (id, correo, nombre, contrasena) VALUES (1,'u1@mail.com', 'Natalia', '1') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.usuario (id, correo, nombre, contrasena) VALUES (2,'u2@mail.com', 'Manolo', '2') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.usuario (id, correo, nombre, contrasena) VALUES (3,'u3@mail.com', 'David', '3') ON CONFLICT (id) DO NOTHING;
-INSERT INTO public.usuario (id, correo, nombre, contrasena) VALUES (4,'i4@mail.com', 'Paula', '4') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.usuario (id, correo, nombre, contrasena, puntos_convivencia) VALUES (1,'u1@mail.com', 'Natalia', '1', 0) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.usuario (id, correo, nombre, contrasena, puntos_convivencia) VALUES (2,'u2@mail.com', 'Manolo', '2', 10) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.usuario (id, correo, nombre, contrasena, puntos_convivencia) VALUES (3,'u3@mail.com', 'David', '3', 50) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.usuario (id, correo, nombre, contrasena, puntos_convivencia) VALUES (4,'i4@mail.com', 'Paula', '4', 100) ON CONFLICT (id) DO NOTHING;
 
 -- =================================================================================================
 -- 2. LIENZOS
@@ -109,6 +109,36 @@ INSERT INTO public.lista_participantes (lista_id, usuario_id) VALUES (5, 1);
 INSERT INTO public.casa_listas (casa_id, listas_id) VALUES (1, 1) ON CONFLICT DO NOTHING;
 INSERT INTO public.casa_listas (casa_id, listas_id) VALUES (1, 2) ON CONFLICT DO NOTHING;
 INSERT INTO public.casa_listas (casa_id, listas_id) VALUES (1, 3) ON CONFLICT DO NOTHING;
+
+-- =================================================================================================
+-- 8. CATÁLOGO DE LOGROS (MEDALLAS)
+-- =================================================================================================
+ALTER SEQUENCE IF EXISTS logro_id_seq RESTART WITH 100;
+
+-- TAREAS: Míster Proper
+INSERT INTO public.logro (id, codigo, nombre, descripcion, categoria, nivel, meta) VALUES (1, 'TAREAS_MISTER_PROPER_BRONCE', 'Míster Proper (Bronce)', 'Completa 10 tareas', 'TAREAS', 'BRONCE', 10) ON CONFLICT DO NOTHING;
+INSERT INTO public.logro (id, codigo, nombre, descripcion, categoria, nivel, meta) VALUES (2, 'TAREAS_MISTER_PROPER_PLATA', 'Míster Proper (Plata)', 'Completa 50 tareas', 'TAREAS', 'PLATA', 50) ON CONFLICT DO NOTHING;
+INSERT INTO public.logro (id, codigo, nombre, descripcion, categoria, nivel, meta) VALUES (3, 'TAREAS_MISTER_PROPER_ORO', 'Míster Proper (Oro)', 'Completa 100 tareas', 'TAREAS', 'ORO', 100) ON CONFLICT DO NOTHING;
+
+-- TAREAS: Reloj Suizo
+INSERT INTO public.logro (id, codigo, nombre, descripcion, categoria, nivel, meta) VALUES (4, 'TAREAS_RELOJ_SUIZO_BRONCE', 'Reloj Suizo (Bronce)', 'Completa 5 tareas a tiempo', 'TAREAS', 'BRONCE', 5) ON CONFLICT DO NOTHING;
+INSERT INTO public.logro (id, codigo, nombre, descripcion, categoria, nivel, meta) VALUES (5, 'TAREAS_RELOJ_SUIZO_PLATA', 'Reloj Suizo (Plata)', 'Completa 15 tareas a tiempo', 'TAREAS', 'PLATA', 15) ON CONFLICT DO NOTHING;
+INSERT INTO public.logro (id, codigo, nombre, descripcion, categoria, nivel, meta) VALUES (6, 'TAREAS_RELOJ_SUIZO_ORO', 'Reloj Suizo (Oro)', 'Completa 30 tareas a tiempo', 'TAREAS', 'ORO', 30) ON CONFLICT DO NOTHING;
+
+-- ECONOMÍA: El Contable
+INSERT INTO public.logro (id, codigo, nombre, descripcion, categoria, nivel, meta) VALUES (7, 'ECONOMIA_CONTABLE_BRONCE', 'El Contable (Bronce)', 'Sube 5 gastos', 'ECONOMIA', 'BRONCE', 5) ON CONFLICT DO NOTHING;
+INSERT INTO public.logro (id, codigo, nombre, descripcion, categoria, nivel, meta) VALUES (8, 'ECONOMIA_CONTABLE_PLATA', 'El Contable (Plata)', 'Sube 20 gastos', 'ECONOMIA', 'PLATA', 20) ON CONFLICT DO NOTHING;
+INSERT INTO public.logro (id, codigo, nombre, descripcion, categoria, nivel, meta) VALUES (9, 'ECONOMIA_CONTABLE_ORO', 'El Contable (Oro)', 'Sube 50 gastos', 'ECONOMIA', 'ORO', 50) ON CONFLICT DO NOTHING;
+
+-- ECONOMÍA: Moroso Cero
+INSERT INTO public.logro (id, codigo, nombre, descripcion, categoria, nivel, meta) VALUES (10, 'ECONOMIA_MOROSO_CERO_BRONCE', 'Moroso Cero (Bronce)', 'Paga 5 deudas en <24h', 'ECONOMIA', 'BRONCE', 5) ON CONFLICT DO NOTHING;
+INSERT INTO public.logro (id, codigo, nombre, descripcion, categoria, nivel, meta) VALUES (11, 'ECONOMIA_MOROSO_CERO_PLATA', 'Moroso Cero (Plata)', 'Paga 15 deudas en <24h', 'ECONOMIA', 'PLATA', 15) ON CONFLICT DO NOTHING;
+INSERT INTO public.logro (id, codigo, nombre, descripcion, categoria, nivel, meta) VALUES (12, 'ECONOMIA_MOROSO_CERO_ORO', 'Moroso Cero (Oro)', 'Paga 30 deudas en <24h', 'ECONOMIA', 'ORO', 30) ON CONFLICT DO NOTHING;
+
+-- SOCIAL: Comunicador
+INSERT INTO public.logro (id, codigo, nombre, descripcion, categoria, nivel, meta) VALUES (13, 'SOCIAL_COMUNICADOR_BRONCE', 'El Comunicador (Bronce)', 'Escribe 5 post-its', 'SOCIAL', 'BRONCE', 5) ON CONFLICT DO NOTHING;
+INSERT INTO public.logro (id, codigo, nombre, descripcion, categoria, nivel, meta) VALUES (14, 'SOCIAL_COMUNICADOR_PLATA', 'El Comunicador (Plata)', 'Escribe 20 post-its', 'SOCIAL', 'PLATA', 20) ON CONFLICT DO NOTHING;
+INSERT INTO public.logro (id, codigo, nombre, descripcion, categoria, nivel, meta) VALUES (15, 'SOCIAL_COMUNICADOR_ORO', 'El Comunicador (Oro)', 'Escribe 50 post-its', 'SOCIAL', 'ORO', 50) ON CONFLICT DO NOTHING;
 
 -- =================================================================================================
 -- 4. ELEMENTOS

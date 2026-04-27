@@ -18,7 +18,6 @@ class Gasto(
     @Column(length = 255, nullable = true)
     @field:Size(min = 0, max = 255, message = "Description length must be between 0 and 255")
     var descripcion: String? = null,
-    // [NUEVO] Necesario para el gráfico de quesitos
     @Column(nullable = false)
     var importe: Double = 0.0,
     @Column(nullable = false)
@@ -26,6 +25,8 @@ class Gasto(
     var fechaInicio: LocalDateTime,
     @Enumerated(EnumType.STRING)
     var categoria: CategoriaGasto = CategoriaGasto.OTROS,
+    @Column(length = 500, nullable = true)
+    var fotoTicketUrl: String? = null,
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pagado_por_id")
     var pagadoPor: Usuario? = null,

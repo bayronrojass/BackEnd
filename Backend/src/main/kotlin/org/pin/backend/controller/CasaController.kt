@@ -1,6 +1,5 @@
 package org.pin.backend.controller
 
-import jakarta.persistence.EntityNotFoundException // Importación necesaria
 import org.pin.backend.dto.Data.CasaDTO
 import org.pin.backend.dto.Data.ImagenDTO
 import org.pin.backend.dto.Data.PostItDTO
@@ -92,11 +91,12 @@ class CasaController(
         casaRepository
             .findById(id)
             .map { casa ->
-                val dto = CasaDetailsResponseDTO(
-                    id = casa.id!!,
-                    nombre = casa.nombre,
-                    descripcion = casa.descripcion,
-                )
+                val dto =
+                    CasaDetailsResponseDTO(
+                        id = casa.id!!,
+                        nombre = casa.nombre,
+                        descripcion = casa.descripcion,
+                    )
                 ResponseEntity.ok(dto)
             }.orElse(ResponseEntity.notFound().build())
 
@@ -105,15 +105,24 @@ class CasaController(
     fun removeMiembro(
         @PathVariable casaId: Long,
         @PathVariable usuarioId: Long,
+        // TODO: Añadir Spring Security para verificar que quien llama es un admin
     ): ResponseEntity<Unit> {
-        val casa = casaRepository.findById(casaId)
-            .orElseThrow { EntityNotFoundException("Casa no encontrada") }
+        val casa =
+            casaRepository
+                .findById(casaId)
+                .orElseThrow { Exception("Casa no encontrada") }
 
-        val usuario = usuarioRepository.findById(usuarioId)
-            .orElseThrow { EntityNotFoundException("Usuario no encontrado") }
+        val usuario =
+            usuarioRepository
+                .findById(usuarioId)
+                .orElseThrow { Exception("Usuario no encontrado") }
 
-        casa.miembros.remove(usuario)
-        casa.administradores.remove(usuario)
+        if (casa.miembros.contains(usuario)) {
+            casa.miembros.remove(usuario)
+        }
+        if (casa.administradores.contains(usuario)) {
+            casa.administradores.remove(usuario)
+        }
 
         casaRepository.save(casa)
         return ResponseEntity.ok().build()
@@ -130,7 +139,11 @@ class CasaController(
             return ResponseEntity.notFound().build()
         }
         val casa = casaOptional.get()
-        val nuevaLista = Lista(nombre = request.nombre, descripcion = request.descripcion)
+        val nuevaLista =
+            Lista(
+                nombre = request.nombre,
+                descripcion = request.descripcion,
+            )
 
         val listaGuardada = listaRepository.save(nuevaLista)
         casa.listas.add(listaGuardada)
@@ -143,22 +156,27 @@ class CasaController(
     fun getTareasByCasaId(
         @PathVariable casaId: Long,
     ): ResponseEntity<List<TareaResponseDTO>> {
-        val casa = casaRepository.findById(casaId).orElse(null)
-            ?: return ResponseEntity.notFound().build()
+        val casa =
+            casaRepository.findById(casaId).orElse(null)
+                ?: return ResponseEntity.notFound().build()
 
-        val tareasDTO = casa.tareas.map { tarea ->
-            TareaResponseDTO(
-                id = tarea.id!!,
-                nombre = tarea.nombre,
-                descripcion = tarea.descripcion,
-                completado = tarea.completado,
-                fechaFin = tarea.fechaFin?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                frecuencia = tarea.frecuencia,
-                periodica = tarea.periodica,
-                asignadoA = tarea.asignadoA?.let { UsuarioDTO(it.id!!, it.nombre, it.correo) },
-                prioridad = tarea.prioridad,
-            )
-        }
+        val tareasDTO =
+            casa.tareas.map { tarea ->
+                TareaResponseDTO(
+                    id = tarea.id!!,
+                    nombre = tarea.nombre,
+                    descripcion = tarea.descripcion,
+                    completado = tarea.completado,
+                    fechaFin = tarea.fechaFin?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                    frecuencia = tarea.frecuencia,
+                    periodica = tarea.periodica,
+                    asignadoA =
+                        tarea.asignadoA?.let {
+                            UsuarioDTO(it.id!!, it.nombre, it.correo)
+                        },
+                    prioridad = tarea.prioridad,
+                )
+            }
         return ResponseEntity.ok(tareasDTO)
     }
 
@@ -168,108 +186,171 @@ class CasaController(
         @PathVariable casaId: Long,
         @RequestBody request: TareaRequestDTO,
     ): ResponseEntity<TareaResponseDTO> {
-        val casa = casaRepository.findById(casaId).orElse(null)
-            ?: return ResponseEntity.notFound().build()
+        val casa =
+            casaRepository.findById(casaId).orElse(null)
+                ?: return ResponseEntity.notFound().build()
 
-        val usuarioAsignado = request.asignadoAId?.let { usuarioRepository.findById(it).orElse(null) }
+        val usuarioAsignado =
+            request.asignadoAId?.let {
+                usuarioRepository.findById(it).orElse(null)
+            }
 
-        val nuevaTarea = Tarea(
-            nombre = request.nombre,
-            descripcion = request.descripcion,
-            completado = request.completado ?: false,
-            fechaFin = if (request.fechaFin.isNullOrBlank()) null
-            else LocalDateTime.parse(request.fechaFin, DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-            frecuencia = request.frecuencia,
-            periodica = request.periodica ?: false,
-            asignadoA = usuarioAsignado,
-            casa = casa,
-        )
+        val nuevaTarea =
+            Tarea(
+                nombre = request.nombre,
+                descripcion = request.descripcion,
+                completado = request.completado ?: false,
+                fechaFin =
+                    if (request.fechaFin.isNullOrBlank()) {
+                        null
+                    } else {
+                        LocalDateTime.parse(
+                            request.fechaFin,
+                            DateTimeFormatter.ISO_LOCAL_DATE_TIME,
+                        )
+                    },
+                frecuencia = request.frecuencia,
+                periodica = request.periodica ?: false,
+                asignadoA = usuarioAsignado,
+                casa = casa,
+            )
 
         val tareaGuardada = tareaRepository.save(nuevaTarea)
         casa.tareas.add(tareaGuardada)
         casaRepository.save(casa)
-
-        if (request.asignadoAId != request.creadoPor) {
+        if (request.asignadoAId !=
+            request.creadoPor
+        ) {
             firebaseMessagingService.enviarAUsuario(request.asignadoAId!!, "¡Nueva tarea asignada!", request.nombre)
         }
 
-        val responseDTO = TareaResponseDTO(
-            id = tareaGuardada.id!!,
-            nombre = tareaGuardada.nombre,
-            descripcion = tareaGuardada.descripcion,
-            completado = tareaGuardada.completado,
-            fechaFin = tareaGuardada.fechaFin?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-            frecuencia = tareaGuardada.frecuencia,
-            periodica = tareaGuardada.periodica,
-            asignadoA = tareaGuardada.asignadoA?.let { UsuarioDTO(it.id!!, it.nombre, it.correo) },
-            prioridad = tareaGuardada.prioridad,
-        )
+        val responseDTO =
+            TareaResponseDTO(
+                id = tareaGuardada.id!!,
+                nombre = tareaGuardada.nombre,
+                descripcion = tareaGuardada.descripcion,
+                completado = tareaGuardada.completado,
+                fechaFin = tareaGuardada.fechaFin?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                frecuencia = tareaGuardada.frecuencia,
+                periodica = tareaGuardada.periodica,
+                asignadoA =
+                    tareaGuardada.asignadoA?.let {
+                        UsuarioDTO(it.id!!, it.nombre, it.correo)
+                    },
+                prioridad = tareaGuardada.prioridad,
+            )
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO)
     }
 
-    // --- MÉTODOS DE MULTIMEDIA ---
-
     @PostMapping("/{id}/{location}/postIt")
-    fun crearPostIt(@PathVariable id: Long, @PathVariable location: String): ResponseEntity<PostItDTO> {
+    fun crearPostIt(
+        @PathVariable id: Long,
+        @PathVariable location: String,
+    ): ResponseEntity<PostItDTO> {
         val casa = service.findById(id)
         if (casa.isPresent) {
             val postIt = postItService.new(casa.get(), location)
             casa.get().multimedia.add(postIt)
             service.save(casa.get())
-            return ResponseEntity.ok(PostItDTO(postIt.id!!, postIt.lienzo!!.id!!, 0f, 0f,
-                postIt.lienzo!!.width.toInt(), postIt.lienzo!!.height.toInt(), postIt.localizacion))
+            logger.info("$postIt ${postIt.id}")
+            return ResponseEntity.ok(
+                PostItDTO(
+                    postIt.id!!,
+                    postIt.lienzo!!.id!!,
+                    0f,
+                    0f,
+                    postIt.lienzo!!.width.toInt(),
+                    postIt.lienzo!!.height.toInt(),
+                    postIt.localizacion,
+                ),
+            )
         }
         return ResponseEntity.notFound().build()
     }
 
     @GetMapping("/{id}/{location}/postIt")
-    fun getPostIt(@PathVariable id: Long, @PathVariable location: String): ResponseEntity<List<PostItDTO>> {
+    fun getPostIt(
+        @PathVariable id: Long,
+        @PathVariable location: String,
+    ): ResponseEntity<List<PostItDTO>> {
         val casa = service.findById(id)
         if (casa.isPresent) {
-            val lista = casa.get().multimedia
-                .filter { it is PostIt && it !is Imagen }
-                .filter { it.localizacion == location }
-                .map {
-                    val p = it as PostIt
-                    PostItDTO(p.id!!, p.lienzo!!.id!!, p.posicionX, p.posicionY, p.width, p.height, p.localizacion)
-                }
+            val lista =
+                casa
+                    .get()
+                    .multimedia
+                    .filter { it is PostIt && it !is Imagen }
+                    .filter { it.localizacion == location }
+                    .map {
+                        it as PostIt
+                        PostItDTO(
+                            it.id!!,
+                            it.lienzo!!.id!!,
+                            it.posicionX,
+                            it.posicionY,
+                            it.width,
+                            it.height,
+                            it.localizacion,
+                        )
+                    }.toList()
             return ResponseEntity.ok(lista)
         }
         return ResponseEntity.notFound().build()
     }
 
     @GetMapping("/{id}/imagen")
-    fun getImagenes(@PathVariable id: Long): ResponseEntity<List<Long>> {
+    fun getImagenes(
+        @PathVariable id: Long,
+    ): ResponseEntity<List<Long>> {
         val casa = service.findById(id)
         if (casa.isPresent) {
-            val lista = casa.get().multimedia.filterIsInstance<Imagen>().map { it.id!! }
+            val lista =
+                casa
+                    .get()
+                    .multimedia
+                    .filterIsInstance<Imagen>()
+                    .map { it.id!! }
+                    .toList()
             return ResponseEntity.ok(lista)
         }
         return ResponseEntity.notFound().build()
     }
 
     @PostMapping("/{id}/imagen", consumes = ["multipart/form-data"])
-    fun crearImagenes(@PathVariable id: Long, @RequestPart("file") file: MultipartFile): ResponseEntity<ImagenDTO> {
+    fun crearImagenes(
+        @PathVariable id: Long,
+        @RequestPart("file", required = true) file: MultipartFile,
+    ): ResponseEntity<ImagenDTO> {
         val casa = service.findById(id)
         if (casa.isPresent) {
             val i = imagenService.new(casa.get(), file)
-            if (i.isEmpty) return ResponseEntity.noContent().build()
+            if (i.isEmpty) {
+                return ResponseEntity.noContent().build()
+            }
+
             val imagen = i.get()
             casa.get().multimedia.add(imagen)
             service.save(casa.get())
-            return ResponseEntity.ok(ImagenDTO(imagen.id!!, imagen.lienzo!!.id!!, 0f, 0f, imagen.width, imagen.height, imagen.localizacion))
+            return ResponseEntity.ok(
+                ImagenDTO(imagen.id!!, imagen.lienzo!!.id!!, 0f, 0f, imagen.width, imagen.height, imagen.localizacion),
+            )
         }
         return ResponseEntity.notFound().build()
     }
 
     @GetMapping("/{id}/miembros")
     @Transactional(readOnly = true)
-    fun getCasaMiembros(@PathVariable id: Long): ResponseEntity<List<UsuarioDTO>> =
-        casaRepository.findById(id).map { casa ->
-            ResponseEntity.ok(casa.miembros.map { it.toDTO() })
-        }.orElse(ResponseEntity.notFound().build())
-
+    fun getCasaMiembros(
+        @PathVariable id: Long,
+    ): ResponseEntity<List<UsuarioDTO>> =
+        casaRepository
+            .findById(id)
+            .map { casa ->
+                val miembros = casa.miembros
+                val miembrosDTO = miembros.map { it.toDTO() }
+                ResponseEntity.ok(miembrosDTO)
+            }.orElse(ResponseEntity.notFound().build())
 
     @PostMapping("/{casaId}/join")
     @Transactional
@@ -277,11 +358,15 @@ class CasaController(
         @PathVariable casaId: Long,
         @RequestBody request: JoinCasaRequest,
     ): ResponseEntity<String> {
-        val casa = casaRepository.findById(casaId)
-            .orElseThrow { EntityNotFoundException("Casa no encontrada") }
+        val casa =
+            casaRepository
+                .findById(casaId)
+                .orElseThrow { Exception("Casa no encontrada") }
 
-        val usuario = usuarioRepository.findById(request.usuarioId)
-            .orElseThrow { EntityNotFoundException("Usuario no encontrado") }
+        val usuario =
+            usuarioRepository
+                .findById(request.usuarioId)
+                .orElseThrow { Exception("Usuario no encontrado") }
 
         if (casa.miembros.none { it.id == usuario.id }) {
             casa.miembros.add(usuario)

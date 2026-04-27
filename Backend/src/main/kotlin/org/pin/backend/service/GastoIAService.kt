@@ -74,8 +74,6 @@ class GastoIAService(
                 0.0
             }
 
-            println("✅ VERYFI OK -> Comercio: $concepto | Total: $total")
-
             return BorradorGastoDTO(
                 concepto = concepto,
                 total = total,
@@ -83,7 +81,6 @@ class GastoIAService(
             )
 
         } catch (e: Exception) {
-            println("❌ ERROR VERYFI: ${e.message}")
             return BorradorGastoDTO("Ticket Manual", 0.0, urlPublica)
         }
     }

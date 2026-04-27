@@ -6,5 +6,7 @@ data class GastoRequestDTO(
     val importe: Double,
     val categoria: String,
     val pagadoPorId: Long,
-    val beneficiarios: List<String>? = emptyList()
+    val beneficiarios: List<String>? = emptyList(),
+    val urlTicket: String? = null
+
 )

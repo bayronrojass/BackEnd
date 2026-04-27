@@ -7,7 +7,9 @@ import org.pin.backend.model.Gasto
 import org.pin.backend.model.enums.CategoriaGasto
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.UsuarioRepository
+import org.pin.backend.service.FileStorageService
 import org.pin.backend.service.GastoIAService
+import org.pin.backend.service.LogroService
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
@@ -21,6 +23,8 @@ class GastoController(
     private val casaRepository: CasaRepository,
     private val usuarioRepository: UsuarioRepository,
     private val gastoIAService: GastoIAService,
+    private val fileStorageService: FileStorageService,
+    private val logroService: LogroService,
 ) {
     @GetMapping("/{casaId}/gastos")
     @Transactional(readOnly = true)
@@ -41,7 +45,8 @@ class GastoController(
                     fecha = gasto.fechaInicio.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                     categoria = gasto.categoria.name,
                     pagadoPorNombre = gasto.pagadoPor?.nombre ?: "Desconocido",
-                    beneficiarios = gasto.beneficiarios.toMutableList()
+                    beneficiarios = gasto.beneficiarios.toMutableList(),
+                    fotoTicketUrl = gasto.fotoTicketUrl
                 )
             }
         return ResponseEntity.ok(gastosDTO)
@@ -72,11 +77,15 @@ class GastoController(
                         CategoriaGasto.OTROS
                     },
                 pagadoPor = usuarioPaga,
-                beneficiarios = request.beneficiarios?.toMutableList() ?: mutableListOf()
+                beneficiarios = request.beneficiarios?.toMutableList() ?: mutableListOf(),
+                fotoTicketUrl = request.urlTicket
             )
 
         casa.gastos.add(nuevoGasto)
         casaRepository.save(casa)
+
+        val usadoIA = !request.urlTicket.isNullOrBlank()
+        logroService.procesarGastoCreado(request.pagadoPorId, usadoIA)
 
         return ResponseEntity.ok("Gasto creado correctamente")
     }
@@ -105,14 +114,59 @@ class GastoController(
         gastoExistente.descripcion = request.descripcion
         gastoExistente.importe = request.importe
         gastoExistente.categoria = try {
-            org.pin.backend.model.enums.CategoriaGasto.valueOf(request.categoria)
+            CategoriaGasto.valueOf(request.categoria)
         } catch (e: Exception) {
-            org.pin.backend.model.enums.CategoriaGasto.OTROS
+            CategoriaGasto.OTROS
         }
+
+        val nuevoPagador = usuarioRepository.findById(request.pagadoPorId).orElse(null)
+        gastoExistente.pagadoPor = nuevoPagador
 
         gastoExistente.beneficiarios.clear()
         request.beneficiarios?.let { gastoExistente.beneficiarios.addAll(it) }
 
+        casaRepository.save(casa)
+
+        return ResponseEntity.ok().build()
+    }
+
+    @PostMapping("/{casaId}/gastos/{gastoId}/foto")
+    @Transactional
+    fun actualizarFotoTicket(
+        @PathVariable casaId: Long,
+        @PathVariable gastoId: Long,
+        @RequestParam("file") file: MultipartFile
+    ): ResponseEntity<String> {
+        val casa = casaRepository.findById(casaId).orElse(null)
+            ?: return ResponseEntity.notFound().build()
+
+        val gasto = casa.gastos.find { it.id == gastoId }
+            ?: return ResponseEntity.notFound().build()
+
+        val nombreArchivo = fileStorageService.save(file)
+
+        val baseUrl = org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()
+        val urlPublica = "$baseUrl/multimedia/$nombreArchivo"
+
+        gasto.fotoTicketUrl = urlPublica
+        casaRepository.save(casa)
+
+        return ResponseEntity.ok(urlPublica)
+    }
+
+    @DeleteMapping("/{casaId}/gastos/{gastoId}/foto")
+    @Transactional
+    fun eliminarFotoTicket(
+        @PathVariable casaId: Long,
+        @PathVariable gastoId: Long
+    ): ResponseEntity<Void> {
+        val casa = casaRepository.findById(casaId).orElse(null)
+            ?: return ResponseEntity.notFound().build()
+
+        val gasto = casa.gastos.find { it.id == gastoId }
+            ?: return ResponseEntity.notFound().build()
+
+        gasto.fotoTicketUrl = null
         casaRepository.save(casa)
 
         return ResponseEntity.ok().build()

@@ -4,13 +4,17 @@ import jakarta.persistence.EntityNotFoundException
 import org.pin.backend.dto.Data.CasaDTO
 import org.pin.backend.dto.Data.UsuarioDTO
 import org.pin.backend.dto.Data.toDTO
+import org.pin.backend.dto.Response.PerfilGamificacionDTO
+import org.pin.backend.dto.Response.UsuarioLogroDTO
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.EventoRepository
 import org.pin.backend.repository.FirebaseTokenRepository
 import org.pin.backend.repository.GastoRepository
 import org.pin.backend.repository.InvitacionRepository
+import org.pin.backend.repository.LogroRepository
 import org.pin.backend.repository.MultimediaRepository
 import org.pin.backend.repository.TareaRepository
+import org.pin.backend.repository.UsuarioLogroRepository
 import org.pin.backend.repository.UsuarioRepository
 import org.pin.backend.repository.VotoRepository
 import org.pin.backend.service.FirebaseTokenService
@@ -44,6 +48,8 @@ class UsuarioController(
     private val firebaseRepository: FirebaseTokenRepository,
     private val firebaseTokenService: FirebaseTokenService,
     private val usuarioService: UsuarioService,
+    private val usuarioLogroRepository: UsuarioLogroRepository,
+    private val logroRepository: LogroRepository,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(UsuarioController::class.java)
 
@@ -202,5 +208,38 @@ class UsuarioController(
     ): ResponseEntity<UsuarioDTO> {
         val usuarioActualizado = usuarioService.eliminarFotoPerfil(id)
         return ResponseEntity.ok(usuarioActualizado)
+    }
+
+    @GetMapping("/{usuarioId}/gamificacion")
+    fun getPerfilGamificacion(@PathVariable usuarioId: Long): ResponseEntity<PerfilGamificacionDTO> {
+        val usuario = usuarioRepository.findById(usuarioId).orElse(null)
+            ?: return ResponseEntity.notFound().build()
+
+        val todosLosLogros = logroRepository.findAll()
+        val progresoUsuario = usuarioLogroRepository.findByUsuarioId(usuarioId).associateBy { it.logro.id }
+
+        val listaLogrosDTO = todosLosLogros.map { logro ->
+            val progreso = progresoUsuario[logro.id]
+            UsuarioLogroDTO(
+                logroId = logro.id!!,
+                codigo = logro.codigo,
+                nombre = logro.nombre,
+                descripcion = logro.descripcion,
+                categoria = logro.categoria.name,
+                nivel = logro.nivel.name,
+                meta = logro.meta,
+                progresoActual = progreso?.progreso ?: 0,
+                estaCompletado = progreso?.fechaCompletado != null,
+                fechaCompletado = progreso?.fechaCompletado?.toString()
+            )
+        }
+
+        return ResponseEntity.ok(
+            PerfilGamificacionDTO(
+                usuarioId = usuario.id!!,
+                puntosConvivencia = usuario.puntosConvivencia,
+                logros = listaLogrosDTO
+            )
+        )
     }
 }
