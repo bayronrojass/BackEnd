@@ -95,7 +95,6 @@ class LogroService(
                 }
 
                 usuarioLogroRepository.save(usuarioLogro)
-                break
             }
         }
     }
