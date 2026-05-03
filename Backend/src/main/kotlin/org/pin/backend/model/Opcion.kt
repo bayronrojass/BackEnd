@@ -1,17 +1,25 @@
 package org.pin.backend.model
+
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.Size
 
 @Entity
+@Table(name = "encuesta_opciones")
 class Opcion(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
-    @Column(length = 50, nullable = false)
-    @field:Size(min = 1, max = 50, message = "Name length must be between 1 and 255")
-    @field:NotBlank(message = "Name cannot be blank")
-    var nombre: String,
-    @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
-    var votos: MutableSet<Voto> = mutableSetOf(),
+    var id: Long? = null,
+
+    @Column(nullable = false)
+    @field:NotBlank(message = "El texto de la opción no puede estar vacío")
+    var texto: String,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "encuesta_id")
+    @JsonIgnore
+    var encuesta: Encuesta? = null,
+
+    @OneToMany(mappedBy = "opcion", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var votos: MutableList<Voto> = mutableListOf()
 )
