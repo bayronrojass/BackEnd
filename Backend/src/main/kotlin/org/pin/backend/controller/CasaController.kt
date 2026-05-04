@@ -12,6 +12,7 @@ import org.pin.backend.dto.Request.TareaRequestDTO
 import org.pin.backend.dto.Response.CasaDetailsResponseDTO
 import org.pin.backend.dto.Response.CasaResponseDTO
 import org.pin.backend.dto.Response.TareaResponseDTO
+import org.pin.backend.dto.Response.UsuarioRankingDTO
 import org.pin.backend.model.*
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.ListaRepository
@@ -380,5 +381,26 @@ class CasaController(
     fun getCasasDeUsuario(@PathVariable usuarioId: Long): ResponseEntity<List<CasaDTO>> {
         val casas = service.obtenerCasasDeUsuario(usuarioId)
         return ResponseEntity.ok(casas)
+    }
+
+    @GetMapping("/{casaId}/ranking")
+    @Transactional(readOnly = true)
+    fun getRankingCasa(@PathVariable casaId: Long): ResponseEntity<List<UsuarioRankingDTO>> {
+        val casa = casaRepository.findById(casaId).orElse(null)
+            ?: return ResponseEntity.notFound().build()
+
+        val miembrosOrdenados = casa.miembros.sortedByDescending { it.puntosConvivencia }
+
+        val ranking = miembrosOrdenados.mapIndexed { index, usuario ->
+            UsuarioRankingDTO(
+                posicion = index + 1,
+                usuarioId = usuario.id!!,
+                nombre = usuario.nombre,
+                fotoUrl = usuario.fotoUrl,
+                puntos = usuario.puntosConvivencia
+            )
+        }
+
+        return ResponseEntity.ok(ranking)
     }
 }
