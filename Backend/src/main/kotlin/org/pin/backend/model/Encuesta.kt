@@ -23,10 +23,9 @@ class Encuesta(
 
     var fechaCreacion: LocalDateTime = LocalDateTime.now(),
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "casa_id")
-    @JsonIgnore
-    override var casa: Casa? = null,
+    @Column(name = "color_hex", nullable = false)
+    var colorHex: String = "#2196F3",
+
 
     @OneToMany(mappedBy = "encuesta", cascade = [CascadeType.ALL], orphanRemoval = true)
     var opciones: MutableList<Opcion> = mutableListOf()

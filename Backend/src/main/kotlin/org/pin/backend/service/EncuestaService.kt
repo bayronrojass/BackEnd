@@ -30,32 +30,39 @@ class EncuestaService(
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado") }
 
         if (request.opciones.size < 2) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "La encuesta debe tener al menos 2 opciones")
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Mínimo 2 opciones")
         }
 
         val nuevaEncuesta = Encuesta(
             titulo = request.titulo,
             creador = creador,
-            casa = casa
-        )
-
-        // Mapeamos los Strings del DTO a Entidades Opcion
-        val opcionesEntidad = request.opciones.map { textoOpcion ->
-            Opcion(texto = textoOpcion, encuesta = nuevaEncuesta)
+            colorHex = request.colorHex
+        ).apply {
+            this.posicionX = 0f
+            this.posicionY = 0f
+            this.width = 0
+            this.height = 0
+            this.ruta = ""
+            this.localizacion = "Seccion Encuestas"
+            this.casa = casa
         }
 
+        val opcionesEntidad = request.opciones.map { Opcion(texto = it, encuesta = nuevaEncuesta) }
         nuevaEncuesta.opciones.addAll(opcionesEntidad)
-        val encuestaGuardada = encuestaRepository.save(nuevaEncuesta)
 
+        val encuestaGuardada = encuestaRepository.save(nuevaEncuesta)
         return mapToResponseDTO(encuestaGuardada, userId)
     }
 
     fun getEncuestasByCasa(casaId: Long, userId: Long): List<EncuestaResponseDTO> {
-        val casa = casaRepository.findById(casaId)
-            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Casa no encontrada") }
+        if (!casaRepository.existsById(casaId)) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Casa no encontrada")
+        }
 
-        return casa.encuestas.map { mapToResponseDTO(it, userId) }
-            .sortedByDescending { it.fechaCreacion } // Ordenamos de más nuevas a más antiguas
+        val encuestas = encuestaRepository.findByCasaId(casaId)
+
+        return encuestas.map { mapToResponseDTO(it, userId) }
+            .sortedByDescending { it.fechaCreacion }
     }
 
     fun votarEnEncuesta(encuestaId: Long, opcionId: Long, userId: Long) {
@@ -100,6 +107,7 @@ class EncuestaService(
     }
 
     private fun mapToResponseDTO(encuesta: Encuesta, userId: Long): EncuestaResponseDTO {
+
         val haVotado = encuesta.opciones.any { opcion ->
             opcion.votos.any { voto -> voto.votante.id == userId }
         }
@@ -119,7 +127,8 @@ class EncuestaService(
             estado = encuesta.estado,
             fechaCreacion = encuesta.fechaCreacion,
             opciones = opcionesDTO,
-            haVotado = haVotado
+            haVotado = haVotado,
+            colorHex = encuesta.colorHex
         )
     }
 }

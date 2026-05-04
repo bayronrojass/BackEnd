@@ -7,6 +7,6 @@ data class EncuestaRequestDTO(
     @field:NotBlank(message = "El título es obligatorio")
     @field:Size(max = 50)
     val titulo: String,
-
-    val opciones: List<String>
+    val opciones: List<String>,
+    val colorHex: String
 )

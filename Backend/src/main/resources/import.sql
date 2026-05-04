@@ -186,3 +186,30 @@ INSERT INTO public.post_it (id, lienzo_id) VALUES (3, 6) ON CONFLICT (id) DO NOT
 ALTER SEQUENCE IF EXISTS invitacion_id_seq RESTART WITH 10;
 INSERT INTO public.invitacion (id, remitente_id, destinatario_id, casa_id, fecha_creacion, estado) VALUES (1, 1, 4, 1, NOW(), 'PENDIENTE') ON CONFLICT (id) DO NOTHING;
 
+-- =================================================================================================
+-- 9. ENCUESTAS Y VOTOS (Heredan de Multimedia)
+-- =================================================================================================
+
+-- ---------------------------------------------------------
+-- ENCUESTA 1: Sin votos
+-- ---------------------------------------------------------
+INSERT INTO public.multimedia (id, posicionx, posiciony, width, height, ruta, usuario_id, casa_id, localizacion) VALUES (10, 0, 0, 0, 0, '', 1, 1, 'Encuestas') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.encuestas (id, titulo, creador_id, estado, fecha_creacion, color_hex) VALUES (10, '¿Qué cenamos hoy?', 1, 'ABIERTA', NOW(), '#FF9800') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.encuesta_opciones (id, texto, encuesta_id) VALUES (101, 'Pizza', 10) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.encuesta_opciones (id, texto, encuesta_id) VALUES (102, 'Sushi', 10) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.encuesta_opciones (id, texto, encuesta_id) VALUES (103, 'Ensalada', 10) ON CONFLICT (id) DO NOTHING;
+
+-- ---------------------------------------------------------
+-- ENCUESTA 2: Con votos y cerrada
+-- ---------------------------------------------------------
+INSERT INTO public.multimedia (id, posicionx, posiciony, width, height, ruta, usuario_id, casa_id, localizacion) VALUES (11, 0, 0, 0, 0, '', 2, 1, 'Encuestas') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.encuestas (id, titulo, creador_id, estado, fecha_creacion, color_hex) VALUES (11, '¿Cuándo hacemos limpieza general?', 2, 'CERRADA', NOW(), '#4CAF50') ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.encuesta_opciones (id, texto, encuesta_id) VALUES (104, 'Sábado por la mañana', 11) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.encuesta_opciones (id, texto, encuesta_id) VALUES (105, 'Domingo por la tarde', 11) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.encuesta_votos (id, votante_id, opcion_id) VALUES (101, 1, 104) ON CONFLICT (id) DO NOTHING;
+INSERT INTO public.encuesta_votos (id, votante_id, opcion_id) VALUES (102, 3, 104) ON CONFLICT (id) DO NOTHING;
+
+-- Actualizamos secuencias
+ALTER SEQUENCE IF EXISTS encuestas_id_seq RESTART WITH 100;
+ALTER SEQUENCE IF EXISTS encuesta_opciones_id_seq RESTART WITH 100;
+ALTER SEQUENCE IF EXISTS encuesta_votos_id_seq RESTART WITH 100;

@@ -10,7 +10,8 @@ data class EncuestaResponseDTO(
     val estado: EstadoEncuesta,
     val fechaCreacion: LocalDateTime,
     val opciones: List<OpcionResponseDTO>,
-    val haVotado: Boolean // Para saber si se muestran botones o resultados
+    val haVotado: Boolean,
+    val colorHex: String
 )
 
 data class OpcionResponseDTO(
