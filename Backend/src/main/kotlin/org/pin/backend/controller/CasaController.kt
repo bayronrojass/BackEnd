@@ -295,7 +295,7 @@ class CasaController(
                             width = it.width,
                             height = it.height,
                             localizacion = it.localizacion,
-                            tipo = it.tipo,
+                            tipo = it.tipo ?: "DIBUJO",
                             rutaAudio = it.rutaAudio
                         )
                     }.toList()
