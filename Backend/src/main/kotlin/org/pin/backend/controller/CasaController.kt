@@ -257,13 +257,15 @@ class CasaController(
             logger.info("$postIt ${postIt.id}")
             return ResponseEntity.ok(
                 PostItDTO(
-                    postIt.id!!,
-                    postIt.lienzo!!.id!!,
-                    0f,
-                    0f,
-                    postIt.lienzo!!.width.toInt(),
-                    postIt.lienzo!!.height.toInt(),
-                    postIt.localizacion,
+                    id = postIt.id!!,
+                    lienzoId = postIt.lienzo?.id,
+                    posicionX = postIt.posicionX,
+                    posicionY = postIt.posicionY,
+                    width = postIt.width,
+                    height = postIt.height,
+                    localizacion = postIt.localizacion,
+                    tipo = postIt.tipo,
+                    rutaAudio = postIt.rutaAudio
                 ),
             )
         }
@@ -286,13 +288,15 @@ class CasaController(
                     .map {
                         it as PostIt
                         PostItDTO(
-                            it.id!!,
-                            it.lienzo!!.id!!,
-                            it.posicionX,
-                            it.posicionY,
-                            it.width,
-                            it.height,
-                            it.localizacion,
+                            id = it.id!!,
+                            lienzoId = it.lienzo?.id,
+                            posicionX = it.posicionX,
+                            posicionY = it.posicionY,
+                            width = it.width,
+                            height = it.height,
+                            localizacion = it.localizacion,
+                            tipo = it.tipo,
+                            rutaAudio = it.rutaAudio
                         )
                     }.toList()
             return ResponseEntity.ok(lista)

@@ -5,6 +5,9 @@ import org.pin.backend.service.LienzoService
 import org.pin.backend.service.PostItService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
+import java.nio.file.Files
+import java.nio.file.Paths
 
 @RestController
 @RequestMapping("/postits")
@@ -26,12 +29,14 @@ class PostItController(
             return ResponseEntity.ok(
                 PostItDTO(
                     postIt.id!!,
-                    postIt.lienzo!!.id!!,
+                    postIt.lienzo?.id,
                     postIt.posicionX,
                     postIt.posicionY,
                     postIt.width,
                     postIt.height,
                     postIt.localizacion,
+                    postIt.tipo,
+                    postIt.rutaAudio
                 ),
             )
         }
@@ -48,7 +53,19 @@ class PostItController(
             if (multimediaIt.casa != null) {
                 multimediaIt.casa?.multimedia?.remove(multimediaIt)
                 casaService.save(multimediaIt.casa!!)
-                lienzoService.delete(multimediaIt.lienzo!!)
+
+                // Limpieza condicional según el tipo
+                if (multimediaIt.tipo == "DIBUJO" && multimediaIt.lienzo != null) {
+                    lienzoService.delete(multimediaIt.lienzo!!)
+                } else if (multimediaIt.tipo == "AUDIO" && multimediaIt.rutaAudio != null) {
+                    try {
+                        val path = Paths.get(multimediaIt.rutaAudio!!.removePrefix("/"))
+                        Files.deleteIfExists(path)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+
                 service.deleteById(id)
                 return ResponseEntity.ok(true)
             }
@@ -69,5 +86,32 @@ class PostItController(
             return ResponseEntity.ok(true)
         }
         return ResponseEntity.notFound().build()
+    }
+
+    // NUEVO ENDPOINT: Sube el audio y crea la nota en la pizarra
+    @PostMapping("/casa/{casaId}/audio", consumes = ["multipart/form-data"])
+    fun createAudioPostIt(
+        @PathVariable casaId: Long,
+        @RequestParam("location") location: String,
+        @RequestParam("file") file: MultipartFile
+    ): ResponseEntity<PostItDTO> {
+        val casaOpt = casaService.findById(casaId)
+        if (casaOpt.isEmpty) return ResponseEntity.notFound().build()
+
+        val nuevoAudio = service.newAudio(casaOpt.get(), location, file)
+
+        return ResponseEntity.ok(
+            PostItDTO(
+                nuevoAudio.id!!,
+                null,
+                nuevoAudio.posicionX,
+                nuevoAudio.posicionY,
+                nuevoAudio.width,
+                nuevoAudio.height,
+                nuevoAudio.localizacion,
+                nuevoAudio.tipo,
+                nuevoAudio.rutaAudio
+            )
+        )
     }
 }
