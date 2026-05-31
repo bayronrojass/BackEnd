@@ -122,16 +122,18 @@ class TareaController(
     fun notificarTarea(
         @PathVariable tareaId: Long,
     ): ResponseEntity<Void> {
-        val tarea =
-            tareaRepository.findById(tareaId).orElse(null)
-                ?: return ResponseEntity.notFound().build()
+        val tarea = tareaRepository.findById(tareaId).orElse(null)
+            ?: return ResponseEntity.notFound().build()
+
         if (tarea.asignadoA != null) {
+            val tituloNotificacion = "¡Recordatorio de tarea en ${tarea.casa?.nombre ?: "tu piso"}!"
+            val cuerpoNotificacion = "Por favor, no te olvides de: ${tarea.nombre}"
+
             firebaseMessagingService.enviarAUsuario(
-                tarea.asignadoA!!.id!!,
-                "¡Recordatorio de tarea!",
-                "Que no se te pase " + tarea.nombre,
+                usuarioId = tarea.asignadoA!!.id!!,
+                titulo = tituloNotificacion,
+                cuerpo = cuerpoNotificacion
             )
-            firebaseMessagingService.enviarAUsuario(1, "¡Recordatorio de tarea!", "Que no se te pase " + tarea.nombre)
             return ResponseEntity.ok().build()
         } else {
             return ResponseEntity.badRequest().build()

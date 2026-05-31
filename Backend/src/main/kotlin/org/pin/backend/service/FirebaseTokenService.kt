@@ -15,7 +15,6 @@ import java.time.Instant
 class FirebaseTokenService(
     private val usuarioRepository: UsuarioRepository,
     private val firebaseRepository: FirebaseTokenRepository,
-    private val firebaseMessagingService: FirebaseMessagingService,
 ) {
     val logger: Logger = LoggerFactory.getLogger(FirebaseTokenService::class.java)
 
@@ -44,12 +43,6 @@ class FirebaseTokenService(
             }
 
         firebaseRepository.save(tokenAGuardar)
-
-        try {
-            firebaseMessagingService.enviar(cleanToken, "Test", "Test")
-        } catch (e: Exception) {
-            logger.error("No se pudo enviar el mensaje de prueba", e)
-        }
     }
 
     private fun actualizarToken(token: FirebaseToken): FirebaseToken {

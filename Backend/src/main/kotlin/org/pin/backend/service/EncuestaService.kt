@@ -19,7 +19,8 @@ class EncuestaService(
     private val opcionRepository: OpcionRepository,
     private val votoRepository: VotoRepository,
     private val casaRepository: CasaRepository,
-    private val usuarioRepository: UsuarioRepository
+    private val usuarioRepository: UsuarioRepository,
+    private val firebaseMessagingService: FirebaseMessagingService
 ) {
 
     fun crearEncuestaParaCasa(casaId: Long, userId: Long, request: EncuestaRequestDTO): EncuestaResponseDTO {
@@ -51,6 +52,17 @@ class EncuestaService(
         nuevaEncuesta.opciones.addAll(opcionesEntidad)
 
         val encuestaGuardada = encuestaRepository.save(nuevaEncuesta)
+
+        casa.miembros.forEach { miembro ->
+            if (miembro.id != userId) {
+                firebaseMessagingService.enviarAUsuario(
+                    usuarioId = miembro.id!!,
+                    titulo = "Nueva encuesta en ${casa.nombre}",
+                    cuerpo = "${creador.nombre} pregunta: ${nuevaEncuesta.titulo}"
+                )
+            }
+        }
+
         return mapToResponseDTO(encuestaGuardada, userId)
     }
 

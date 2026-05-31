@@ -21,10 +21,9 @@ import javax.annotation.PostConstruct
 class FirebaseMessagingService {
 
     @Autowired
-    @Lazy // Rompe la dependencia circular cargando el bean solo cuando se necesita
+    @Lazy
     private lateinit var firebaseTokenService: FirebaseTokenService
 
-    // Corregido el Logger para que apunte a esta clase y no a LienzoService
     private val logger: Logger = LoggerFactory.getLogger(FirebaseMessagingService::class.java)
 
     @PostConstruct
