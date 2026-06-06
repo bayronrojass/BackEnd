@@ -18,6 +18,8 @@ class Elemento(
     var descripcion: String? = null,
     var completado: Boolean = false,
     var cantidad: Int = 1,
+    @Column(name = "icono_key", nullable = true)
+    var iconoKey: String? = null,
 
     @ManyToOne
     @JoinColumn(name = "lista_id")

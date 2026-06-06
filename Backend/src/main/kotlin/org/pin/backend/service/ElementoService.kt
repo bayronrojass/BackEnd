@@ -23,11 +23,9 @@ class ElementoService(
     @Transactional
     fun crearElemento(listaId: Long, request: ElementoRequestDTO): Elemento {
 
-        // 1. Buscar la lista padre. Si no existe, lanzamos error.
         val listaPadre = listaRepository.findById(listaId)
             .orElseThrow { RuntimeException("No existe ninguna lista con id $listaId") }
 
-        // 2. Crear el objeto Elemento
         val nuevoElemento = Elemento(
             nombre = request.nombre,
             descripcion = request.descripcion,
@@ -36,7 +34,6 @@ class ElementoService(
             lista = listaPadre
         )
 
-        // 3. Guardar y volcar a la BD inmediatamente
         return elementoRepository.saveAndFlush(nuevoElemento)
     }
 
@@ -76,7 +73,8 @@ class ElementoService(
             nombre = elemento.nombre,
             descripcion = elemento.descripcion,
             completado = elemento.completado,
-            cantidad = elemento.cantidad
+            cantidad = elemento.cantidad,
+            iconoKey = elemento.iconoKey
         )
     }
 }

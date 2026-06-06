@@ -4,5 +4,6 @@ data class ElementoRequestDTO(
     val nombre: String,
     val descripcion: String?,
     val completado: Boolean?,
-    val cantidad: Int? = 1
+    val cantidad: Int? = 1,
+    val iconoKey: String?
 )
