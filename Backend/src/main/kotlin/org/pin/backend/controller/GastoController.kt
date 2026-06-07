@@ -10,12 +10,14 @@ import org.pin.backend.repository.UsuarioRepository
 import org.pin.backend.service.FileStorageService
 import org.pin.backend.service.GastoIAService
 import org.pin.backend.service.LogroService
+import org.pin.backend.service.PdfService
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import org.springframework.http.HttpHeaders
 
 @RestController
 @RequestMapping("/casas")
@@ -25,6 +27,7 @@ class GastoController(
     private val gastoIAService: GastoIAService,
     private val fileStorageService: FileStorageService,
     private val logroService: LogroService,
+    private val pdfService: PdfService
 ) {
     @GetMapping("/{casaId}/gastos")
     @Transactional(readOnly = true)
@@ -171,4 +174,22 @@ class GastoController(
 
         return ResponseEntity.ok().build()
     }
+
+    @GetMapping("/{casaId}/gastos/pdf")
+    @Transactional(readOnly = true)
+    fun descargarPdfGastos(@PathVariable casaId: Long): ResponseEntity<ByteArray> {
+        val casa = casaRepository.findById(casaId).orElse(null)
+            ?: return ResponseEntity.notFound().build()
+
+        val pdfBytes = pdfService.generarResumenGastosPdf(casa)
+
+        val headers = HttpHeaders()
+        headers.contentType = org.springframework.http.MediaType.APPLICATION_PDF
+        headers.setContentDispositionFormData("attachment", "Resumen_Gastos_${casa.nombre}.pdf")
+
+        return ResponseEntity.ok()
+            .headers(headers)
+            .body(pdfBytes)
+    }
+
 }
