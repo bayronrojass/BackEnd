@@ -1,7 +1,9 @@
 package org.pin.backend.service
 import org.pin.backend.dto.Request.ElementoRequestDTO
 import org.pin.backend.dto.Response.ElementoResponseDTO
+import org.pin.backend.model.CatalogoProducto
 import org.pin.backend.model.Elemento
+import org.pin.backend.repository.CatalogoProductoRepository
 import org.pin.backend.repository.ElementoRepository
 import org.pin.backend.repository.ListaRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,20 +20,49 @@ class ElementoService(
     @Autowired
     lateinit var listaRepository: ListaRepository
 
+    @Autowired
+    lateinit var catalogoRepository: CatalogoProductoRepository
+
     fun findAll() = repo.findAll()
 
     @Transactional
     fun crearElemento(listaId: Long, request: ElementoRequestDTO): Elemento {
-
         val listaPadre = listaRepository.findById(listaId)
             .orElseThrow { RuntimeException("No existe ninguna lista con id $listaId") }
 
+        val nombreNormalizado = request.nombre.trim().replaceFirstChar { it.uppercase() }
+
+        val elementosDeLaLista = elementoRepository.findByListaId(listaId)
+        val elementoExistente = elementosDeLaLista.find {
+            it.nombre.equals(nombreNormalizado, ignoreCase = true) && !it.completado
+        }
+
+        if (elementoExistente != null) {
+            elementoExistente.cantidad += (request.cantidad ?: 1)
+            return elementoRepository.saveAndFlush(elementoExistente)
+        }
+
+        val productoEnCatalogo = catalogoRepository.findByNombreIgnoreCase(nombreNormalizado)
+        var iconoParaGuardar = "ic_default"
+
+        if (productoEnCatalogo == null) {
+            val nuevoProductoCatalogo = CatalogoProducto(
+                nombre = nombreNormalizado,
+                categoria = "Otros",
+                iconoKey = iconoParaGuardar
+            )
+            catalogoRepository.save(nuevoProductoCatalogo)
+        } else {
+            iconoParaGuardar = productoEnCatalogo.iconoKey
+        }
+
         val nuevoElemento = Elemento(
-            nombre = request.nombre,
+            nombre = nombreNormalizado,
             descripcion = request.descripcion,
             completado = request.completado ?: false,
             cantidad = request.cantidad ?: 1,
-            lista = listaPadre
+            lista = listaPadre,
+            iconoKey = iconoParaGuardar
         )
 
         return elementoRepository.saveAndFlush(nuevoElemento)

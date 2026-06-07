@@ -9,4 +9,6 @@ interface CatalogoProductoRepository : JpaRepository<CatalogoProducto, Long> {
     fun buscarPorNombrePredictivo(query: String): List<CatalogoProducto>
 
     fun findTop12ByOrderByIdAsc(): List<CatalogoProducto>
+
+    fun findByNombreIgnoreCase(nombre: String): CatalogoProducto?
 }

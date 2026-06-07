@@ -29,15 +29,15 @@ class CatalogoService(
         if (repository.count() == 0L) {
             val productosComunes = listOf(
                 CatalogoProducto(nombre = "Leche", categoria = "Lácteos", iconoKey = "ic_leche"),
-                CatalogoProducto(nombre = "Huevos", categoria = "Lácteos", iconoKey = "ic_huevos"),
+                CatalogoProducto(nombre = "Huevos", categoria = "Comidas", iconoKey = "ic_huevos"),
                 CatalogoProducto(nombre = "Pan", categoria = "Panadería", iconoKey = "ic_pan"),
                 CatalogoProducto(nombre = "Papel Higiénico", categoria = "Limpieza", iconoKey = "ic_papel"),
                 CatalogoProducto(nombre = "Detergente", categoria = "Limpieza", iconoKey = "ic_detergente"),
                 CatalogoProducto(nombre = "Bolsas de Basura", categoria = "Limpieza", iconoKey = "ic_bolsas"),
                 CatalogoProducto(nombre = "Aceite de Oliva", categoria = "Despensa", iconoKey = "ic_aceite"),
-                CatalogoProducto(nombre = "Pasta", categoria = "Despensa", iconoKey = "ic_pasta"),
-                CatalogoProducto(nombre = "Arroz", categoria = "Despensa", iconoKey = "ic_arroz"),
-                CatalogoProducto(nombre = "Tomate Frito", categoria = "Despensa", iconoKey = "ic_tomate"),
+                CatalogoProducto(nombre = "Pasta", categoria = "Comidas", iconoKey = "ic_pasta"),
+                CatalogoProducto(nombre = "Arroz", categoria = "Comidas", iconoKey = "ic_arroz"),
+                CatalogoProducto(nombre = "Tomate Frito", categoria = "Comidas", iconoKey = "ic_tomate"),
                 CatalogoProducto(nombre = "Cerveza", categoria = "Bebidas", iconoKey = "ic_cerveza"),
                 CatalogoProducto(nombre = "Agua", categoria = "Bebidas", iconoKey = "ic_agua")
             )
