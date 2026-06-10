@@ -93,11 +93,6 @@ class GastoController(
         return ResponseEntity.ok("Gasto creado correctamente")
     }
 
-    @PostMapping("/escanear-ticket")
-    fun escanearTicket(@RequestParam("file") file: MultipartFile): ResponseEntity<BorradorGastoDTO> {
-        val borrador = gastoIAService.processarTicket(file)
-        return ResponseEntity.ok(borrador)
-    }
 
     @PutMapping("/{casaId}/gastos/{gastoId}")
     @Transactional
@@ -131,6 +126,13 @@ class GastoController(
         casaRepository.save(casa)
 
         return ResponseEntity.ok().build()
+    }
+
+
+    @PostMapping("/escanear-ticket")
+    fun escanearTicket(@RequestParam("file") file: MultipartFile): ResponseEntity<BorradorGastoDTO> {
+        val borrador = gastoIAService.processarTicket(file)
+        return ResponseEntity.ok(borrador)
     }
 
     @PostMapping("/{casaId}/gastos/{gastoId}/foto")
