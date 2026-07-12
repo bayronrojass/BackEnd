@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 import org.pin.backend.model.enums.CategoriaGasto
+import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @Entity
@@ -18,8 +19,8 @@ class Gasto(
     @Column(length = 255, nullable = true)
     @field:Size(min = 0, max = 255, message = "Description length must be between 0 and 255")
     var descripcion: String? = null,
-    @Column(nullable = false)
-    var importe: Double = 0.0,
+    @Column(nullable = false, precision = 10, scale = 2)
+    var importe: BigDecimal = BigDecimal.ZERO,
     @Column(nullable = false)
     @field:NotNull(message = "Start date cant be null")
     var fechaInicio: LocalDateTime,
@@ -31,8 +32,8 @@ class Gasto(
     @JoinColumn(name = "pagado_por_id")
     var pagadoPor: Usuario? = null,
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
-    var pagos: MutableList<Pago> = mutableListOf(),
+    var pagos: MutableSet<Pago> = mutableSetOf(),
     @ElementCollection
     @CollectionTable(name = "gasto_beneficiarios")
-    var beneficiarios: MutableList<String> = mutableListOf(),
+    var beneficiarios: MutableSet<String> = mutableSetOf(),
 )

@@ -21,7 +21,7 @@ class Encuesta(
     @Column(name = "color_hex", nullable = false)
     var colorHex: String = "#2196F3",
     @OneToMany(mappedBy = "encuesta", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var opciones: MutableList<Opcion> = mutableListOf(),
+    var opciones: MutableSet<Opcion> = mutableSetOf(),
 ) : Multimedia()
 
 enum class EstadoEncuesta {

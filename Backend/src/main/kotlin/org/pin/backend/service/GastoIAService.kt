@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
+import java.math.BigDecimal
 import java.util.Base64
 
 @Service
@@ -72,9 +73,9 @@ class GastoIAService(
             val totalNode = rootNode.at("/total")
             val total =
                 if (!totalNode.isMissingNode && !totalNode.isNull) {
-                    totalNode.asDouble()
+                    totalNode.decimalValue()
                 } else {
-                    0.0
+                    BigDecimal.ZERO
                 }
 
             return BorradorGastoDTO(
@@ -83,7 +84,7 @@ class GastoIAService(
                 urlTicket = urlPublica,
             )
         } catch (e: Exception) {
-            return BorradorGastoDTO("Ticket Manual", 0.0, urlPublica)
+            return BorradorGastoDTO("Ticket Manual", BigDecimal.ZERO, urlPublica)
         }
     }
 }

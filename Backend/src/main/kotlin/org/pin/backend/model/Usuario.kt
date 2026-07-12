@@ -32,5 +32,5 @@ class Usuario(
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
     var tokens: MutableSet<FirebaseToken> = mutableSetOf(),
     @OneToMany(mappedBy = "usuario", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var logrosProgreso: MutableList<UsuarioLogro> = mutableListOf(),
+    var logrosProgreso: MutableSet<UsuarioLogro> = mutableSetOf(),
 )

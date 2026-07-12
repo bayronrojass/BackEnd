@@ -6,18 +6,22 @@ import org.pin.backend.model.Casa
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.UsuarioRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
 import java.util.*
 
 @Service
+@Transactional
 class CasaService(
     private val repo: CasaRepository,
     private val usuarioRepository: UsuarioRepository,
     private val fileStorageService: FileStorageService,
 ) {
+    @Transactional(readOnly = true)
     fun findAll(): MutableList<Casa> = repo.findAll()
 
+    @Transactional(readOnly = true)
     fun findById(id: Long): Optional<Casa> = repo.findById(id)
 
     fun save(casa: Casa): Casa = repo.save(casa)
@@ -51,6 +55,7 @@ class CasaService(
         return repo.save(nuevaCasa)
     }
 
+    @Transactional(readOnly = true)
     fun obtenerCasasDeUsuario(usuarioId: Long): List<CasaDTO> {
         val usuario =
             usuarioRepository

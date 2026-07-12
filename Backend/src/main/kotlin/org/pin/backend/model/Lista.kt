@@ -28,12 +28,12 @@ class Lista(
         joinColumns = [JoinColumn(name = "lista_id")],
         inverseJoinColumns = [JoinColumn(name = "usuario_id")],
     )
-    var participantes: MutableList<Usuario> = mutableListOf(),
+    var participantes: MutableSet<Usuario> = mutableSetOf(),
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "casa_id")
     var casa: Casa? = null,
     @Column(nullable = false)
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
-    var elementos: MutableList<Elemento> = mutableListOf(),
+    var elementos: MutableSet<Elemento> = mutableSetOf(),
 )

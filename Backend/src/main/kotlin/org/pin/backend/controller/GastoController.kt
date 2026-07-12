@@ -35,7 +35,7 @@ class GastoController(
         @PathVariable casaId: Long,
     ): ResponseEntity<List<GastoResponseDTO>> {
         val casa =
-            casaRepository.findById(casaId).orElse(null)
+            casaRepository.findByIdWithGastos(casaId)
                 ?: return ResponseEntity.notFound().build()
 
         val gastosDTO =
@@ -80,7 +80,7 @@ class GastoController(
                         CategoriaGasto.OTROS
                     },
                 pagadoPor = usuarioPaga,
-                beneficiarios = request.beneficiarios?.toMutableList() ?: mutableListOf(),
+                beneficiarios = request.beneficiarios?.toMutableSet() ?: mutableSetOf(),
                 fotoTicketUrl = request.urlTicket,
             )
 
@@ -193,7 +193,7 @@ class GastoController(
         @PathVariable casaId: Long,
     ): ResponseEntity<ByteArray> {
         val casa =
-            casaRepository.findById(casaId).orElse(null)
+            casaRepository.findByIdWithGastos(casaId)
                 ?: return ResponseEntity.notFound().build()
 
         val pdfBytes = pdfService.generarResumenGastosPdf(casa)

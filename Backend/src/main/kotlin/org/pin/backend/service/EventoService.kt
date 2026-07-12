@@ -33,7 +33,7 @@ class EventoService(
                 .orElseThrow { IllegalArgumentException("Usuario no encontrado con ID: ${request.creadoPor}") }
 
         val asistentes =
-            mutableListOf<Usuario>().apply {
+            mutableSetOf<Usuario>().apply {
                 add(creadoPor)
             }
 

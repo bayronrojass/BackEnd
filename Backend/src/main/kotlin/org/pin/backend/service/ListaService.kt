@@ -19,7 +19,7 @@ class ListaService(
     fun findAll() = repo.findAll()
 
     fun getListasByCasaId(casaId: Long): List<ListaResponseDTO> {
-        val listas = listaRepository.findByCasaId(casaId)
+        val listas = listaRepository.findByCasaIdWithDetails(casaId)
         return listas.map { convertirADTO(it) }
     }
 

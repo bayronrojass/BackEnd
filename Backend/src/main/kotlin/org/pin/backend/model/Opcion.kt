@@ -18,5 +18,5 @@ class Opcion(
     @JsonIgnore
     var encuesta: Encuesta? = null,
     @OneToMany(mappedBy = "opcion", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var votos: MutableList<Voto> = mutableListOf(),
+    var votos: MutableSet<Voto> = mutableSetOf(),
 )

@@ -75,13 +75,10 @@ class CasaController(
     fun getListasByCasaId(
         @PathVariable casaId: Long,
     ): ResponseEntity<List<Lista>> {
-        val casaOptional: Optional<Casa> = casaRepository.findById(casaId)
-        return if (casaOptional.isPresent) {
-            val casa = casaOptional.get()
-            ResponseEntity.ok(casa.listas.toList())
-        } else {
-            ResponseEntity.notFound().build()
-        }
+        val casa =
+            casaRepository.findByIdWithListas(casaId)
+                ?: return ResponseEntity.notFound().build()
+        return ResponseEntity.ok(casa.listas.toList())
     }
 
     @GetMapping("/{id}/details")
@@ -158,7 +155,7 @@ class CasaController(
         @PathVariable casaId: Long,
     ): ResponseEntity<List<TareaResponseDTO>> {
         val casa =
-            casaRepository.findById(casaId).orElse(null)
+            casaRepository.findByIdWithTareas(casaId)
                 ?: return ResponseEntity.notFound().build()
 
         val tareasDTO =
@@ -348,14 +345,12 @@ class CasaController(
     @Transactional(readOnly = true)
     fun getCasaMiembros(
         @PathVariable id: Long,
-    ): ResponseEntity<List<UsuarioDTO>> =
-        casaRepository
-            .findById(id)
-            .map { casa ->
-                val miembros = casa.miembros
-                val miembrosDTO = miembros.map { it.toDTO() }
-                ResponseEntity.ok(miembrosDTO)
-            }.orElse(ResponseEntity.notFound().build())
+    ): ResponseEntity<List<UsuarioDTO>> {
+        val casa =
+            casaRepository.findByIdWithMiembros(id)
+                ?: return ResponseEntity.notFound().build()
+        return ResponseEntity.ok(casa.miembros.map { it.toDTO() })
+    }
 
     @PostMapping("/{casaId}/join")
     @Transactional
@@ -395,7 +390,7 @@ class CasaController(
         @PathVariable casaId: Long,
     ): ResponseEntity<List<UsuarioRankingDTO>> {
         val casa =
-            casaRepository.findById(casaId).orElse(null)
+            casaRepository.findByIdWithMiembros(casaId)
                 ?: return ResponseEntity.notFound().build()
 
         val miembrosOrdenados = casa.miembros.sortedByDescending { it.puntosConvivencia }

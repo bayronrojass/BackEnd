@@ -35,5 +35,5 @@ class Evento(
         inverseJoinColumns = [JoinColumn(name = "usuario_id")],
     )
     @JsonIgnoreProperties("hibernateLazyInitializer", "handler")
-    var asistentes: MutableList<Usuario> = mutableListOf(),
+    var asistentes: MutableSet<Usuario> = mutableSetOf(),
 )

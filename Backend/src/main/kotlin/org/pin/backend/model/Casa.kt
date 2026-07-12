@@ -24,13 +24,13 @@ class Casa(
     @field:NotNull(message = "Date cannot be empty")
     val fechaCreacion: LocalDateTime,
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
-    var gastos: MutableList<Gasto> = mutableListOf(),
+    var gastos: MutableSet<Gasto> = mutableSetOf(),
     @OneToMany(mappedBy = "casa", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var multimedia: MutableList<Multimedia> = mutableListOf(),
+    var multimedia: MutableSet<Multimedia> = mutableSetOf(),
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
-    var listas: MutableList<Lista> = mutableListOf(),
+    var listas: MutableSet<Lista> = mutableSetOf(),
     @OneToMany(orphanRemoval = true, cascade = [CascadeType.ALL])
-    var eventos: MutableList<Evento> = mutableListOf(),
+    var eventos: MutableSet<Evento> = mutableSetOf(),
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "casa_usuarios",
@@ -51,7 +51,7 @@ class Casa(
         orphanRemoval = true,
         fetch = FetchType.LAZY,
     )
-    var tareas: MutableList<Tarea> = mutableListOf(),
+    var tareas: MutableSet<Tarea> = mutableSetOf(),
     @OneToMany(mappedBy = "casa", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var encuestas: MutableList<Encuesta> = mutableListOf(),
+    var encuestas: MutableSet<Encuesta> = mutableSetOf(),
 )

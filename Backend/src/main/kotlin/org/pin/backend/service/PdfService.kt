@@ -7,6 +7,7 @@ import com.itextpdf.text.pdf.PdfWriter
 import org.pin.backend.model.Casa
 import org.springframework.stereotype.Service
 import java.io.ByteArrayOutputStream
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -40,8 +41,8 @@ class PdfService {
         document.add(fechaGeneracion)
 
         // 2. Resumen Total
-        val totalGastado = casa.gastos.sumOf { it.importe }
-        val resumen = Paragraph("Total Gastado: ${String.format("%.2f", totalGastado)} €", fontSubtitulo)
+        val totalGastado = casa.gastos.fold(BigDecimal.ZERO) { acc, g -> acc + g.importe }
+        val resumen = Paragraph("Total Gastado: ${totalGastado.setScale(2).toPlainString()} €", fontSubtitulo)
         resumen.spacingAfter = 15f
         document.add(resumen)
 
@@ -75,7 +76,7 @@ class PdfService {
             cellPagador.horizontalAlignment = Element.ALIGN_CENTER
             table.addCell(cellPagador)
 
-            val cellImporte = PdfPCell(Phrase("${String.format("%.2f", gasto.importe)} €", fontNormal))
+            val cellImporte = PdfPCell(Phrase("${gasto.importe.setScale(2).toPlainString()} €", fontNormal))
             cellImporte.horizontalAlignment = Element.ALIGN_RIGHT
             table.addCell(cellImporte)
         }

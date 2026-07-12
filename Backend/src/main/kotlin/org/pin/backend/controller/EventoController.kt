@@ -29,10 +29,9 @@ class EventoController(
     fun getEventosByCasaId(
         @PathVariable casaId: Long,
     ): ResponseEntity<List<EventoResponseDTO>> {
-        val casa = casaRepository.findById(casaId).orElse(null)
-        if (casa == null) {
-            return ResponseEntity.notFound().build()
-        }
+        val casa =
+            casaRepository.findByIdWithEventos(casaId)
+                ?: return ResponseEntity.notFound().build()
 
         try {
             val eventosDTO =

@@ -82,7 +82,7 @@ class EncuestaService(
             throw ResponseStatusException(HttpStatus.NOT_FOUND, "Casa no encontrada")
         }
 
-        val encuestas = encuestaRepository.findByCasaId(casaId)
+        val encuestas = encuestaRepository.findByCasaIdWithDetails(casaId)
 
         return encuestas
             .map { mapToResponseDTO(it, userId) }
