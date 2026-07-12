@@ -52,8 +52,10 @@ class CasaService(
     }
 
     fun obtenerCasasDeUsuario(usuarioId: Long): List<CasaDTO> {
-        val usuario = usuarioRepository.findById(usuarioId)
-            .orElseThrow { Exception("Usuario no encontrado") }
+        val usuario =
+            usuarioRepository
+                .findById(usuarioId)
+                .orElseThrow { Exception("Usuario no encontrado") }
 
         val casas = repo.findByMiembrosContains(usuario)
 
@@ -63,9 +65,8 @@ class CasaService(
                 nombre = casa.nombre,
                 descripcion = casa.descripcion,
                 rutaImagen = casa.rutaImagen,
-                fechaCreacion = casa.fechaCreacion
+                fechaCreacion = casa.fechaCreacion,
             )
         }
     }
-
 }

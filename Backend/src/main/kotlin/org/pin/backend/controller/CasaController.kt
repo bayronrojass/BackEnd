@@ -265,7 +265,7 @@ class CasaController(
                     height = postIt.height,
                     localizacion = postIt.localizacion,
                     tipo = postIt.tipo,
-                    rutaAudio = postIt.rutaAudio
+                    rutaAudio = postIt.rutaAudio,
                 ),
             )
         }
@@ -296,7 +296,7 @@ class CasaController(
                             height = it.height,
                             localizacion = it.localizacion,
                             tipo = it.tipo ?: "DIBUJO",
-                            rutaAudio = it.rutaAudio
+                            rutaAudio = it.rutaAudio,
                         )
                     }.toList()
             return ResponseEntity.ok(lista)
@@ -382,28 +382,34 @@ class CasaController(
     }
 
     @GetMapping("/usuario/{usuarioId}")
-    fun getCasasDeUsuario(@PathVariable usuarioId: Long): ResponseEntity<List<CasaDTO>> {
+    fun getCasasDeUsuario(
+        @PathVariable usuarioId: Long,
+    ): ResponseEntity<List<CasaDTO>> {
         val casas = service.obtenerCasasDeUsuario(usuarioId)
         return ResponseEntity.ok(casas)
     }
 
     @GetMapping("/{casaId}/ranking")
     @Transactional(readOnly = true)
-    fun getRankingCasa(@PathVariable casaId: Long): ResponseEntity<List<UsuarioRankingDTO>> {
-        val casa = casaRepository.findById(casaId).orElse(null)
-            ?: return ResponseEntity.notFound().build()
+    fun getRankingCasa(
+        @PathVariable casaId: Long,
+    ): ResponseEntity<List<UsuarioRankingDTO>> {
+        val casa =
+            casaRepository.findById(casaId).orElse(null)
+                ?: return ResponseEntity.notFound().build()
 
         val miembrosOrdenados = casa.miembros.sortedByDescending { it.puntosConvivencia }
 
-        val ranking = miembrosOrdenados.mapIndexed { index, usuario ->
-            UsuarioRankingDTO(
-                posicion = index + 1,
-                usuarioId = usuario.id!!,
-                nombre = usuario.nombre,
-                fotoUrl = usuario.fotoUrl,
-                puntos = usuario.puntosConvivencia
-            )
-        }
+        val ranking =
+            miembrosOrdenados.mapIndexed { index, usuario ->
+                UsuarioRankingDTO(
+                    posicion = index + 1,
+                    usuarioId = usuario.id!!,
+                    nombre = usuario.nombre,
+                    fotoUrl = usuario.fotoUrl,
+                    puntos = usuario.puntosConvivencia,
+                )
+            }
 
         return ResponseEntity.ok(ranking)
     }

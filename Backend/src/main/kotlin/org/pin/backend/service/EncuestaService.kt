@@ -20,33 +20,41 @@ class EncuestaService(
     private val votoRepository: VotoRepository,
     private val casaRepository: CasaRepository,
     private val usuarioRepository: UsuarioRepository,
-    private val firebaseMessagingService: FirebaseMessagingService
+    private val firebaseMessagingService: FirebaseMessagingService,
 ) {
+    fun crearEncuestaParaCasa(
+        casaId: Long,
+        userId: Long,
+        request: EncuestaRequestDTO,
+    ): EncuestaResponseDTO {
+        val casa =
+            casaRepository
+                .findById(casaId)
+                .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Casa no encontrada") }
 
-    fun crearEncuestaParaCasa(casaId: Long, userId: Long, request: EncuestaRequestDTO): EncuestaResponseDTO {
-        val casa = casaRepository.findById(casaId)
-            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Casa no encontrada") }
-
-        val creador = usuarioRepository.findById(userId)
-            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado") }
+        val creador =
+            usuarioRepository
+                .findById(userId)
+                .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado") }
 
         if (request.opciones.size < 2) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Mínimo 2 opciones")
         }
 
-        val nuevaEncuesta = Encuesta(
-            titulo = request.titulo,
-            creador = creador,
-            colorHex = request.colorHex
-        ).apply {
-            this.posicionX = 0f
-            this.posicionY = 0f
-            this.width = 0
-            this.height = 0
-            this.ruta = ""
-            this.localizacion = "Seccion Encuestas"
-            this.casa = casa
-        }
+        val nuevaEncuesta =
+            Encuesta(
+                titulo = request.titulo,
+                creador = creador,
+                colorHex = request.colorHex,
+            ).apply {
+                this.posicionX = 0f
+                this.posicionY = 0f
+                this.width = 0
+                this.height = 0
+                this.ruta = ""
+                this.localizacion = "Seccion Encuestas"
+                this.casa = casa
+            }
 
         val opcionesEntidad = request.opciones.map { Opcion(texto = it, encuesta = nuevaEncuesta) }
         nuevaEncuesta.opciones.addAll(opcionesEntidad)
@@ -58,7 +66,7 @@ class EncuestaService(
                 firebaseMessagingService.enviarAUsuario(
                     usuarioId = miembro.id!!,
                     titulo = "Nueva encuesta en ${casa.nombre}",
-                    cuerpo = "${creador.nombre} pregunta: ${nuevaEncuesta.titulo}"
+                    cuerpo = "${creador.nombre} pregunta: ${nuevaEncuesta.titulo}",
                 )
             }
         }
@@ -66,39 +74,54 @@ class EncuestaService(
         return mapToResponseDTO(encuestaGuardada, userId)
     }
 
-    fun getEncuestasByCasa(casaId: Long, userId: Long): List<EncuestaResponseDTO> {
+    fun getEncuestasByCasa(
+        casaId: Long,
+        userId: Long,
+    ): List<EncuestaResponseDTO> {
         if (!casaRepository.existsById(casaId)) {
             throw ResponseStatusException(HttpStatus.NOT_FOUND, "Casa no encontrada")
         }
 
         val encuestas = encuestaRepository.findByCasaId(casaId)
 
-        return encuestas.map { mapToResponseDTO(it, userId) }
+        return encuestas
+            .map { mapToResponseDTO(it, userId) }
             .sortedByDescending { it.fechaCreacion }
     }
 
-    fun votarEnEncuesta(encuestaId: Long, opcionId: Long, userId: Long) {
-        val encuesta = encuestaRepository.findById(encuestaId)
-            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Encuesta no encontrada") }
+    fun votarEnEncuesta(
+        encuestaId: Long,
+        opcionId: Long,
+        userId: Long,
+    ) {
+        val encuesta =
+            encuestaRepository
+                .findById(encuestaId)
+                .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Encuesta no encontrada") }
 
         if (encuesta.estado == EstadoEncuesta.CERRADA) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "La encuesta ya está cerrada")
         }
 
-        val votante = usuarioRepository.findById(userId)
-            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado") }
+        val votante =
+            usuarioRepository
+                .findById(userId)
+                .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado") }
 
         // Comprobar si el usuario ya ha votado en ESTA encuesta
-        val yaVoto = encuesta.opciones.any { opcion ->
-            opcion.votos.any { voto -> voto.votante.id == userId }
-        }
+        val yaVoto =
+            encuesta.opciones.any { opcion ->
+                opcion.votos.any { voto -> voto.votante.id == userId }
+            }
 
         if (yaVoto) {
             throw ResponseStatusException(HttpStatus.CONFLICT, "Ya has votado en esta encuesta")
         }
 
-        val opcionElegida = opcionRepository.findById(opcionId)
-            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Opción no encontrada") }
+        val opcionElegida =
+            opcionRepository
+                .findById(opcionId)
+                .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Opción no encontrada") }
 
         if (opcionElegida.encuesta?.id != encuestaId) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "La opción no pertenece a esta encuesta")
@@ -108,9 +131,14 @@ class EncuestaService(
         votoRepository.save(nuevoVoto)
     }
 
-    fun cerrarEncuesta(encuestaId: Long, userId: Long) {
-        val encuesta = encuestaRepository.findById(encuestaId)
-            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Encuesta no encontrada") }
+    fun cerrarEncuesta(
+        encuestaId: Long,
+        userId: Long,
+    ) {
+        val encuesta =
+            encuestaRepository
+                .findById(encuestaId)
+                .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Encuesta no encontrada") }
 
         // Añadir aquiif (encuesta.creador.id != userId) lanzar error
 
@@ -118,19 +146,23 @@ class EncuestaService(
         encuestaRepository.save(encuesta)
     }
 
-    private fun mapToResponseDTO(encuesta: Encuesta, userId: Long): EncuestaResponseDTO {
+    private fun mapToResponseDTO(
+        encuesta: Encuesta,
+        userId: Long,
+    ): EncuestaResponseDTO {
+        val haVotado =
+            encuesta.opciones.any { opcion ->
+                opcion.votos.any { voto -> voto.votante.id == userId }
+            }
 
-        val haVotado = encuesta.opciones.any { opcion ->
-            opcion.votos.any { voto -> voto.votante.id == userId }
-        }
-
-        val opcionesDTO = encuesta.opciones.map { opcion ->
-            OpcionResponseDTO(
-                id = opcion.id!!,
-                texto = opcion.texto,
-                totalVotos = opcion.votos.size
-            )
-        }
+        val opcionesDTO =
+            encuesta.opciones.map { opcion ->
+                OpcionResponseDTO(
+                    id = opcion.id!!,
+                    texto = opcion.texto,
+                    totalVotos = opcion.votos.size,
+                )
+            }
 
         return EncuestaResponseDTO(
             id = encuesta.id!!,
@@ -140,7 +172,7 @@ class EncuestaService(
             fechaCreacion = encuesta.fechaCreacion,
             opciones = opcionesDTO,
             haVotado = haVotado,
-            colorHex = encuesta.colorHex
+            colorHex = encuesta.colorHex,
         )
     }
 }

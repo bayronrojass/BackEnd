@@ -8,5 +8,5 @@ data class EncuestaRequestDTO(
     @field:Size(max = 50)
     val titulo: String,
     val opciones: List<String>,
-    val colorHex: String
+    val colorHex: String,
 )

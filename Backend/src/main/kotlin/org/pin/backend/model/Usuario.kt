@@ -1,5 +1,6 @@
 package org.pin.backend.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
@@ -17,6 +18,7 @@ class Usuario(
     @field:Email(message = "Email must be correct")
     @field:Size(min = 0, max = 255, message = "Email length must be between 0 and 255")
     var correo: String,
+    @JsonIgnore
     @Column(nullable = false)
     var contrasena: String = "",
     @Column(name = "foto_url")
@@ -30,5 +32,5 @@ class Usuario(
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
     var tokens: MutableSet<FirebaseToken> = mutableSetOf(),
     @OneToMany(mappedBy = "usuario", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var logrosProgreso: MutableList<UsuarioLogro> = mutableListOf()
+    var logrosProgreso: MutableList<UsuarioLogro> = mutableListOf(),
 )

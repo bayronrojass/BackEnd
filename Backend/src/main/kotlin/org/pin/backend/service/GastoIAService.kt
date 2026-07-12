@@ -14,7 +14,7 @@ import java.util.Base64
 @Service
 class GastoIAService(
     private val fileStorageService: FileStorageService,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
 ) {
     // CLAVES DE VERYFI
     private val clientId = "vrfJoMPoDgBZcYPnyyzhgWZiF5JTgTfg4zMpeMd"
@@ -45,11 +45,12 @@ class GastoIAService(
             headers.set("AUTHORIZATION", "apikey $username:$apiKey")
 
             // 4. Montamos el JSON de envío
-            val bodyMap = mapOf(
-                "file_name" to (file.originalFilename ?: "ticket.jpg"),
-                "file_data" to fileData,
-                "categories" to listOf("Grocery", "Utilities", "Meals")
-            )
+            val bodyMap =
+                mapOf(
+                    "file_name" to (file.originalFilename ?: "ticket.jpg"),
+                    "file_data" to fileData,
+                    "categories" to listOf("Grocery", "Utilities", "Meals"),
+                )
             val body = objectMapper.writeValueAsString(bodyMap)
 
             val entity = HttpEntity(body, headers)
@@ -61,25 +62,26 @@ class GastoIAService(
             val rootNode = objectMapper.readTree(response)
 
             val vendorNode = rootNode.at("/vendor/name")
-            val concepto = if (!vendorNode.isMissingNode && !vendorNode.isNull && vendorNode.asText().isNotBlank()) {
-                vendorNode.asText().replaceFirstChar { it.uppercase() }
-            } else {
-                "Gasto Escaneado"
-            }
+            val concepto =
+                if (!vendorNode.isMissingNode && !vendorNode.isNull && vendorNode.asText().isNotBlank()) {
+                    vendorNode.asText().replaceFirstChar { it.uppercase() }
+                } else {
+                    "Gasto Escaneado"
+                }
 
             val totalNode = rootNode.at("/total")
-            val total = if (!totalNode.isMissingNode && !totalNode.isNull) {
-                totalNode.asDouble()
-            } else {
-                0.0
-            }
+            val total =
+                if (!totalNode.isMissingNode && !totalNode.isNull) {
+                    totalNode.asDouble()
+                } else {
+                    0.0
+                }
 
             return BorradorGastoDTO(
                 concepto = concepto,
                 total = total,
-                urlTicket = urlPublica
+                urlTicket = urlPublica,
             )
-
         } catch (e: Exception) {
             return BorradorGastoDTO("Ticket Manual", 0.0, urlPublica)
         }

@@ -6,6 +6,10 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface PreferenciaTareaRepository : JpaRepository<PreferenciaTarea, Long> {
-    fun findByTareaIdAndUsuarioId(tareaId: Long, usuarioId: Long): PreferenciaTarea?
+    fun findByTareaIdAndUsuarioId(
+        tareaId: Long,
+        usuarioId: Long,
+    ): PreferenciaTarea?
+
     fun findByTareaCasaId(casaId: Long): List<PreferenciaTarea>
 }

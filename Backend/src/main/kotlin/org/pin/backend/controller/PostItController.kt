@@ -36,7 +36,7 @@ class PostItController(
                     postIt.height,
                     postIt.localizacion,
                     postIt.tipo,
-                    postIt.rutaAudio
+                    postIt.rutaAudio,
                 ),
             )
         }
@@ -93,7 +93,7 @@ class PostItController(
     fun createAudioPostIt(
         @PathVariable casaId: Long,
         @RequestParam("location") location: String,
-        @RequestParam("file") file: MultipartFile
+        @RequestParam("file") file: MultipartFile,
     ): ResponseEntity<PostItDTO> {
         val casaOpt = casaService.findById(casaId)
         if (casaOpt.isEmpty) return ResponseEntity.notFound().build()
@@ -110,8 +110,8 @@ class PostItController(
                 nuevoAudio.height,
                 nuevoAudio.localizacion,
                 nuevoAudio.tipo,
-                nuevoAudio.rutaAudio
-            )
+                nuevoAudio.rutaAudio,
+            ),
         )
     }
 }

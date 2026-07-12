@@ -8,13 +8,18 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 @Service
 class UsuarioService(
     private val usuarioRepository: UsuarioRepository,
-    private val fileStorageService: FileStorageService
+    private val fileStorageService: FileStorageService,
 ) {
     fun findAll() = usuarioRepository.findAll()
 
-    fun actualizarFotoPerfil(id: Long, file: MultipartFile): UsuarioDTO {
-        val usuario = usuarioRepository.findById(id)
-            .orElseThrow { Exception("Usuario no encontrado") }
+    fun actualizarFotoPerfil(
+        id: Long,
+        file: MultipartFile,
+    ): UsuarioDTO {
+        val usuario =
+            usuarioRepository
+                .findById(id)
+                .orElseThrow { Exception("Usuario no encontrado") }
 
         val nombreArchivo = fileStorageService.save(file)
 
@@ -28,13 +33,15 @@ class UsuarioService(
             id = usuarioGuardado.id!!,
             nombre = usuarioGuardado.nombre,
             correo = usuarioGuardado.correo,
-            fotoUrl = usuarioGuardado.fotoUrl
+            fotoUrl = usuarioGuardado.fotoUrl,
         )
     }
 
     fun eliminarFotoPerfil(id: Long): UsuarioDTO {
-        val usuario = usuarioRepository.findById(id)
-            .orElseThrow { Exception("Usuario no encontrado") }
+        val usuario =
+            usuarioRepository
+                .findById(id)
+                .orElseThrow { Exception("Usuario no encontrado") }
 
         usuario.fotoUrl = null
         val usuarioGuardado = usuarioRepository.save(usuario)
@@ -43,7 +50,7 @@ class UsuarioService(
             id = usuarioGuardado.id!!,
             nombre = usuarioGuardado.nombre,
             correo = usuarioGuardado.correo,
-            fotoUrl = usuarioGuardado.fotoUrl
+            fotoUrl = usuarioGuardado.fotoUrl,
         )
     }
 }

@@ -12,7 +12,6 @@ import java.time.format.DateTimeFormatter
 
 @Service
 class PdfService {
-
     fun generarResumenGastosPdf(casa: Casa): ByteArray {
         val out = ByteArrayOutputStream()
         val document = Document()
@@ -31,7 +30,11 @@ class PdfService {
         titulo.alignment = Element.ALIGN_CENTER
         document.add(titulo)
 
-        val fechaGeneracion = Paragraph("Generado el: ${LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))}", fontNormal)
+        val fechaGeneracion =
+            Paragraph(
+                "Generado el: ${LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))}",
+                fontNormal,
+            )
         fechaGeneracion.alignment = Element.ALIGN_CENTER
         fechaGeneracion.spacingAfter = 20f
         document.add(fechaGeneracion)
@@ -53,7 +56,7 @@ class PdfService {
             val cell = PdfPCell(Phrase(texto, fontCabeceraTabla))
             cell.backgroundColor = BaseColor(88, 51, 127) // ColorMoradoOscuro de tu app
             cell.horizontalAlignment = Element.ALIGN_CENTER
-            //cell.padding = 8f
+            // cell.padding = 8f
             table.addCell(cell)
         }
 

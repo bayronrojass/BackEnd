@@ -9,5 +9,5 @@ data class GastoResponseDTO(
     val categoria: String,
     val pagadoPorNombre: String,
     val beneficiarios: List<String> = emptyList(),
-    val fotoTicketUrl: String? = null
+    val fotoTicketUrl: String? = null,
 )

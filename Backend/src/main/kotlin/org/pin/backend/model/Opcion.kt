@@ -10,16 +10,13 @@ class Opcion(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
-
     @Column(nullable = false)
     @field:NotBlank(message = "El texto de la opción no puede estar vacío")
     var texto: String,
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "encuesta_id")
     @JsonIgnore
     var encuesta: Encuesta? = null,
-
     @OneToMany(mappedBy = "opcion", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var votos: MutableList<Voto> = mutableListOf()
+    var votos: MutableList<Voto> = mutableListOf(),
 )

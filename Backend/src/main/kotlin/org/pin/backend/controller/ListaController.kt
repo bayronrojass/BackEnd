@@ -4,7 +4,6 @@ import org.pin.backend.dto.Request.ElementoRequestDTO
 import org.pin.backend.dto.Request.ListaRequestDTO
 import org.pin.backend.dto.Response.ListaResponseDTO
 import org.pin.backend.model.Elemento
-import org.pin.backend.model.Lista
 import org.pin.backend.repository.ListaRepository
 import org.pin.backend.repository.UsuarioRepository
 import org.pin.backend.service.ElementoService
@@ -12,7 +11,6 @@ import org.pin.backend.service.ListaService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -47,7 +45,6 @@ class ListaController(
             return ResponseEntity.notFound().build()
         }
     }
-
 
     @PostMapping("/casa/{casaId}")
     fun crearLista(

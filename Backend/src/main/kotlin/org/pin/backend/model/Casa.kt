@@ -38,7 +38,6 @@ class Casa(
         inverseJoinColumns = [JoinColumn(name = "usuarios_id")],
     )
     var miembros: MutableSet<Usuario> = mutableSetOf(),
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "casa_administradores",
@@ -46,7 +45,6 @@ class Casa(
         inverseJoinColumns = [JoinColumn(name = "admin_id")],
     )
     var administradores: MutableSet<Usuario> = mutableSetOf(),
-
     @OneToMany(
         mappedBy = "casa",
         cascade = [CascadeType.ALL],
@@ -54,8 +52,6 @@ class Casa(
         fetch = FetchType.LAZY,
     )
     var tareas: MutableList<Tarea> = mutableListOf(),
-
     @OneToMany(mappedBy = "casa", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var encuestas: MutableList<Encuesta> = mutableListOf()
-
+    var encuestas: MutableList<Encuesta> = mutableListOf(),
 )

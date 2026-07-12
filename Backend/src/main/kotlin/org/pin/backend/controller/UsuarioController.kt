@@ -23,6 +23,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -30,7 +31,6 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
@@ -173,21 +173,25 @@ class UsuarioController(
         }
 
     @GetMapping("/{id}/casas")
-    fun getCasasDeUsuario(@PathVariable id: Long): ResponseEntity<List<CasaDTO>> {
-        val usuario = usuarioRepository.findById(id).orElse(null)
-            ?: return ResponseEntity.notFound().build()
+    fun getCasasDeUsuario(
+        @PathVariable id: Long,
+    ): ResponseEntity<List<CasaDTO>> {
+        val usuario =
+            usuarioRepository.findById(id).orElse(null)
+                ?: return ResponseEntity.notFound().build()
 
         val casasDelUsuario = casaRepository.findByMiembrosContains(usuario)
 
-        val casasDto = casasDelUsuario.map { casa ->
-            CasaDTO(
-                id = casa.id!!,
-                nombre = casa.nombre,
-                descripcion = casa.descripcion,
-                rutaImagen = casa.rutaImagen,
-                fechaCreacion = casa.fechaCreacion
-            )
-        }
+        val casasDto =
+            casasDelUsuario.map { casa ->
+                CasaDTO(
+                    id = casa.id!!,
+                    nombre = casa.nombre,
+                    descripcion = casa.descripcion,
+                    rutaImagen = casa.rutaImagen,
+                    fechaCreacion = casa.fechaCreacion,
+                )
+            }
 
         return ResponseEntity.ok(casasDto)
     }
@@ -195,51 +199,54 @@ class UsuarioController(
     @PostMapping("/{id}/foto", consumes = ["multipart/form-data"])
     fun subirFotoPerfil(
         @PathVariable id: Long,
-        @RequestParam("file") file: MultipartFile
+        @RequestParam("file") file: MultipartFile,
     ): ResponseEntity<UsuarioDTO> {
-
         val usuarioActualizado = usuarioService.actualizarFotoPerfil(id, file)
         return ResponseEntity.ok(usuarioActualizado)
     }
 
     @DeleteMapping("/{id}/foto")
     fun eliminarFotoPerfil(
-        @PathVariable id: Long
+        @PathVariable id: Long,
     ): ResponseEntity<UsuarioDTO> {
         val usuarioActualizado = usuarioService.eliminarFotoPerfil(id)
         return ResponseEntity.ok(usuarioActualizado)
     }
 
     @GetMapping("/{usuarioId}/gamificacion")
-    fun getPerfilGamificacion(@PathVariable usuarioId: Long): ResponseEntity<PerfilGamificacionDTO> {
-        val usuario = usuarioRepository.findById(usuarioId).orElse(null)
-            ?: return ResponseEntity.notFound().build()
+    fun getPerfilGamificacion(
+        @PathVariable usuarioId: Long,
+    ): ResponseEntity<PerfilGamificacionDTO> {
+        val usuario =
+            usuarioRepository.findById(usuarioId).orElse(null)
+                ?: return ResponseEntity.notFound().build()
 
         val todosLosLogros = logroRepository.findAll()
         val progresoUsuario = usuarioLogroRepository.findByUsuarioId(usuarioId).associateBy { it.logro.id }
 
-        val listaLogrosDTO = todosLosLogros.map { logro ->
-            val progreso = progresoUsuario[logro.id]
-            UsuarioLogroDTO(
-                logroId = logro.id!!,
-                codigo = logro.codigo,
-                nombre = logro.nombre,
-                descripcion = logro.descripcion,
-                categoria = logro.categoria.name,
-                nivel = logro.nivel.name,
-                meta = logro.meta,
-                progresoActual = progreso?.progreso ?: 0,
-                estaCompletado = progreso?.fechaCompletado != null,
-                fechaCompletado = progreso?.fechaCompletado?.toString()
-            )
-        }
+        val listaLogrosDTO =
+            todosLosLogros.map { logro ->
+                val progreso = progresoUsuario[logro.id]
+                UsuarioLogroDTO(
+                    logroId = logro.id!!,
+                    codigo = logro.codigo,
+                    nombre = logro.nombre,
+                    descripcion = logro.descripcion,
+                    categoria = logro.categoria.name,
+                    nivel = logro.nivel.name,
+                    meta = logro.meta,
+                    progresoActual = progreso?.progreso ?: 0,
+                    estaCompletado = progreso?.fechaCompletado != null,
+                    fechaCompletado = progreso?.fechaCompletado?.toString(),
+                )
+            }
 
         return ResponseEntity.ok(
             PerfilGamificacionDTO(
                 usuarioId = usuario.id!!,
                 puntosConvivencia = usuario.puntosConvivencia,
-                logros = listaLogrosDTO
-            )
+                logros = listaLogrosDTO,
+            ),
         )
     }
 }

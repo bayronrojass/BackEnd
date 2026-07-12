@@ -11,11 +11,11 @@ data class EncuestaResponseDTO(
     val fechaCreacion: LocalDateTime,
     val opciones: List<OpcionResponseDTO>,
     val haVotado: Boolean,
-    val colorHex: String
+    val colorHex: String,
 )
 
 data class OpcionResponseDTO(
     val id: Long,
     val texto: String,
-    val totalVotos: Int
+    val totalVotos: Int,
 )

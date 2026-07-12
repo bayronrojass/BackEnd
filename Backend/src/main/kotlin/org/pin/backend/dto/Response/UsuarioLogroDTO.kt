@@ -10,11 +10,11 @@ data class UsuarioLogroDTO(
     val meta: Int,
     val progresoActual: Int,
     val estaCompletado: Boolean,
-    val fechaCompletado: String?
+    val fechaCompletado: String?,
 )
 
 data class PerfilGamificacionDTO(
     val usuarioId: Long,
     val puntosConvivencia: Int,
-    val logros: List<UsuarioLogroDTO>
+    val logros: List<UsuarioLogroDTO>,
 )

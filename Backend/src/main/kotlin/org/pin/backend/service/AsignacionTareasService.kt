@@ -1,18 +1,19 @@
 package org.pin.backend.service
-import org.pin.backend.repository.TareaRepository
-import org.pin.backend.repository.CasaRepository
 import org.pin.backend.model.PreferenciaTarea
 import org.pin.backend.model.Usuario
+import org.pin.backend.repository.CasaRepository
+import org.pin.backend.repository.TareaRepository
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-
 
 @Service
 class AsignacionTareasService(
     private val tareaRepository: TareaRepository,
-    private val casaRepository: CasaRepository
+    private val casaRepository: CasaRepository,
 ) {
-    fun repartirTareas(casaId: Long, preferencias: List<PreferenciaTarea>) {
+    fun repartirTareas(
+        casaId: Long,
+        preferencias: List<PreferenciaTarea>,
+    ) {
         val casa = casaRepository.findById(casaId).orElseThrow()
         val tareas = casa.tareas.filter { !it.completado }
         val miembros = casa.miembros.toList()
@@ -29,13 +30,15 @@ class AsignacionTareasService(
 
             // Ordenar los miembros primero por su voto (de mayor a menor)
             // y luego por su carga de trabajo (de menor a mayor) para desempatar
-            val mejorMiembro = miembros.sortedWith(
-                compareByDescending<Usuario> { miembro ->
-                    votosTarea.find { it.usuario?.id == miembro.id }?.puntuacion ?: 0
-                }.thenBy { miembro ->
-                    cargaTrabajo[miembro] ?: 0
-                }
-            ).first()
+            val mejorMiembro =
+                miembros
+                    .sortedWith(
+                        compareByDescending<Usuario> { miembro ->
+                            votosTarea.find { it.usuario?.id == miembro.id }?.puntuacion ?: 0
+                        }.thenBy { miembro ->
+                            cargaTrabajo[miembro] ?: 0
+                        },
+                    ).first()
 
             // Asignar tarea y sumar carga de trabajo
             tarea.asignadoA = mejorMiembro

@@ -5,5 +5,5 @@ data class UsuarioRankingDTO(
     val usuarioId: Long,
     val nombre: String,
     val fotoUrl: String?,
-    val puntos: Int
+    val puntos: Int,
 )

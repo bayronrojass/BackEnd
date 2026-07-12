@@ -34,5 +34,5 @@ class Gasto(
     var pagos: MutableList<Pago> = mutableListOf(),
     @ElementCollection
     @CollectionTable(name = "gasto_beneficiarios")
-    var beneficiarios: MutableList<String> = mutableListOf()
+    var beneficiarios: MutableList<String> = mutableListOf(),
 )

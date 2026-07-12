@@ -11,13 +11,13 @@ import org.pin.backend.service.FileStorageService
 import org.pin.backend.service.GastoIAService
 import org.pin.backend.service.LogroService
 import org.pin.backend.service.PdfService
+import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import org.springframework.http.HttpHeaders
 
 @RestController
 @RequestMapping("/casas")
@@ -27,7 +27,7 @@ class GastoController(
     private val gastoIAService: GastoIAService,
     private val fileStorageService: FileStorageService,
     private val logroService: LogroService,
-    private val pdfService: PdfService
+    private val pdfService: PdfService,
 ) {
     @GetMapping("/{casaId}/gastos")
     @Transactional(readOnly = true)
@@ -49,7 +49,7 @@ class GastoController(
                     categoria = gasto.categoria.name,
                     pagadoPorNombre = gasto.pagadoPor?.nombre ?: "Desconocido",
                     beneficiarios = gasto.beneficiarios.toMutableList(),
-                    fotoTicketUrl = gasto.fotoTicketUrl
+                    fotoTicketUrl = gasto.fotoTicketUrl,
                 )
             }
         return ResponseEntity.ok(gastosDTO)
@@ -81,7 +81,7 @@ class GastoController(
                     },
                 pagadoPor = usuarioPaga,
                 beneficiarios = request.beneficiarios?.toMutableList() ?: mutableListOf(),
-                fotoTicketUrl = request.urlTicket
+                fotoTicketUrl = request.urlTicket,
             )
 
         casa.gastos.add(nuevoGasto)
@@ -93,29 +93,30 @@ class GastoController(
         return ResponseEntity.ok("Gasto creado correctamente")
     }
 
-
     @PutMapping("/{casaId}/gastos/{gastoId}")
     @Transactional
     fun editarGasto(
         @PathVariable casaId: Long,
         @PathVariable gastoId: Long,
-        @RequestBody request: GastoRequestDTO
+        @RequestBody request: GastoRequestDTO,
     ): ResponseEntity<Void> {
+        val casa =
+            casaRepository.findById(casaId).orElse(null)
+                ?: return ResponseEntity.notFound().build()
 
-        val casa = casaRepository.findById(casaId).orElse(null)
-            ?: return ResponseEntity.notFound().build()
-
-        val gastoExistente = casa.gastos.find { it.id == gastoId }
-            ?: return ResponseEntity.notFound().build()
+        val gastoExistente =
+            casa.gastos.find { it.id == gastoId }
+                ?: return ResponseEntity.notFound().build()
 
         gastoExistente.nombre = request.nombre
         gastoExistente.descripcion = request.descripcion
         gastoExistente.importe = request.importe
-        gastoExistente.categoria = try {
-            CategoriaGasto.valueOf(request.categoria)
-        } catch (e: Exception) {
-            CategoriaGasto.OTROS
-        }
+        gastoExistente.categoria =
+            try {
+                CategoriaGasto.valueOf(request.categoria)
+            } catch (e: Exception) {
+                CategoriaGasto.OTROS
+            }
 
         val nuevoPagador = usuarioRepository.findById(request.pagadoPorId).orElse(null)
         gastoExistente.pagadoPor = nuevoPagador
@@ -128,9 +129,10 @@ class GastoController(
         return ResponseEntity.ok().build()
     }
 
-
     @PostMapping("/escanear-ticket")
-    fun escanearTicket(@RequestParam("file") file: MultipartFile): ResponseEntity<BorradorGastoDTO> {
+    fun escanearTicket(
+        @RequestParam("file") file: MultipartFile,
+    ): ResponseEntity<BorradorGastoDTO> {
         val borrador = gastoIAService.processarTicket(file)
         return ResponseEntity.ok(borrador)
     }
@@ -140,17 +142,23 @@ class GastoController(
     fun actualizarFotoTicket(
         @PathVariable casaId: Long,
         @PathVariable gastoId: Long,
-        @RequestParam("file") file: MultipartFile
+        @RequestParam("file") file: MultipartFile,
     ): ResponseEntity<String> {
-        val casa = casaRepository.findById(casaId).orElse(null)
-            ?: return ResponseEntity.notFound().build()
+        val casa =
+            casaRepository.findById(casaId).orElse(null)
+                ?: return ResponseEntity.notFound().build()
 
-        val gasto = casa.gastos.find { it.id == gastoId }
-            ?: return ResponseEntity.notFound().build()
+        val gasto =
+            casa.gastos.find { it.id == gastoId }
+                ?: return ResponseEntity.notFound().build()
 
         val nombreArchivo = fileStorageService.save(file)
 
-        val baseUrl = org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString()
+        val baseUrl =
+            org.springframework.web.servlet.support.ServletUriComponentsBuilder
+                .fromCurrentContextPath()
+                .build()
+                .toUriString()
         val urlPublica = "$baseUrl/multimedia/$nombreArchivo"
 
         gasto.fotoTicketUrl = urlPublica
@@ -163,13 +171,15 @@ class GastoController(
     @Transactional
     fun eliminarFotoTicket(
         @PathVariable casaId: Long,
-        @PathVariable gastoId: Long
+        @PathVariable gastoId: Long,
     ): ResponseEntity<Void> {
-        val casa = casaRepository.findById(casaId).orElse(null)
-            ?: return ResponseEntity.notFound().build()
+        val casa =
+            casaRepository.findById(casaId).orElse(null)
+                ?: return ResponseEntity.notFound().build()
 
-        val gasto = casa.gastos.find { it.id == gastoId }
-            ?: return ResponseEntity.notFound().build()
+        val gasto =
+            casa.gastos.find { it.id == gastoId }
+                ?: return ResponseEntity.notFound().build()
 
         gasto.fotoTicketUrl = null
         casaRepository.save(casa)
@@ -179,9 +189,12 @@ class GastoController(
 
     @GetMapping("/{casaId}/gastos/pdf")
     @Transactional(readOnly = true)
-    fun descargarPdfGastos(@PathVariable casaId: Long): ResponseEntity<ByteArray> {
-        val casa = casaRepository.findById(casaId).orElse(null)
-            ?: return ResponseEntity.notFound().build()
+    fun descargarPdfGastos(
+        @PathVariable casaId: Long,
+    ): ResponseEntity<ByteArray> {
+        val casa =
+            casaRepository.findById(casaId).orElse(null)
+                ?: return ResponseEntity.notFound().build()
 
         val pdfBytes = pdfService.generarResumenGastosPdf(casa)
 
@@ -189,9 +202,9 @@ class GastoController(
         headers.contentType = org.springframework.http.MediaType.APPLICATION_PDF
         headers.setContentDispositionFormData("attachment", "Resumen_Gastos_${casa.nombre}.pdf")
 
-        return ResponseEntity.ok()
+        return ResponseEntity
+            .ok()
             .headers(headers)
             .body(pdfBytes)
     }
-
 }

@@ -9,5 +9,5 @@ open class PostItDTO(
     val height: Int,
     val localizacion: String,
     val tipo: String = "DIBUJO",
-    val rutaAudio: String? = null
+    val rutaAudio: String? = null,
 )

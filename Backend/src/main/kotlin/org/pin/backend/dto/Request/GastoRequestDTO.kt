@@ -7,6 +7,5 @@ data class GastoRequestDTO(
     val categoria: String,
     val pagadoPorId: Long,
     val beneficiarios: List<String>? = emptyList(),
-    val urlTicket: String? = null
-
+    val urlTicket: String? = null,
 )

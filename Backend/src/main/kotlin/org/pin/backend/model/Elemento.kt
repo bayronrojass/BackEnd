@@ -20,9 +20,8 @@ class Elemento(
     var cantidad: Int = 1,
     @Column(name = "icono_key", nullable = true)
     var iconoKey: String? = null,
-
     @ManyToOne
     @JoinColumn(name = "lista_id")
     @JsonIgnore
-    var lista: Lista? = null
+    var lista: Lista? = null,
 )

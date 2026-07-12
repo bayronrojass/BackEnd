@@ -8,5 +8,5 @@ class PostIt(
     @OneToOne(orphanRemoval = true, cascade = [CascadeType.ALL])
     var lienzo: Lienzo? = null,
     var tipo: String = "DIBUJO",
-    var rutaAudio: String? = null
+    var rutaAudio: String? = null,
 ) : Multimedia()

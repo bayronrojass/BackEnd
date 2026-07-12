@@ -12,12 +12,14 @@ import java.time.LocalDateTime
 class LogroService(
     private val usuarioRepository: UsuarioRepository,
     private val logroRepository: LogroRepository,
-    private val usuarioLogroRepository: UsuarioLogroRepository
+    private val usuarioLogroRepository: UsuarioLogroRepository,
 ) {
-
     // SISTEMA DE PUNTOS
     @Transactional
-    fun sumarPuntos(usuarioId: Long, puntos: Int) {
+    fun sumarPuntos(
+        usuarioId: Long,
+        puntos: Int,
+    ) {
         val usuario = usuarioRepository.findById(usuarioId).orElse(null) ?: return
         usuario.puntosConvivencia += puntos
         usuarioRepository.save(usuario)
@@ -25,14 +27,18 @@ class LogroService(
 
     // EVALUACIÓN DE ACCIONES
     @Transactional
-    fun procesarTareaCompletada(usuarioId: Long, diasRetraso: Long) {
+    fun procesarTareaCompletada(
+        usuarioId: Long,
+        diasRetraso: Long,
+    ) {
         // Asignar puntos por la tarea según el retraso
-        val puntos = when {
-            diasRetraso <= 0 -> 50
-            diasRetraso == 1L -> 30
-            diasRetraso in 2..3 -> 15
-            else -> 5
-        }
+        val puntos =
+            when {
+                diasRetraso <= 0 -> 50
+                diasRetraso == 1L -> 30
+                diasRetraso in 2..3 -> 15
+                else -> 5
+            }
         sumarPuntos(usuarioId, puntos)
 
         // Avanzar progresos de medallas
@@ -43,13 +49,17 @@ class LogroService(
     }
 
     @Transactional
-    fun procesarPagoBizum(usuarioId: Long, horasRetraso: Long) {
-        val puntos = when {
-            horasRetraso <= 24 -> 40
-            horasRetraso <= 72 -> 20
-            horasRetraso <= 168 -> 10 // 1 semana
-            else -> 2
-        }
+    fun procesarPagoBizum(
+        usuarioId: Long,
+        horasRetraso: Long,
+    ) {
+        val puntos =
+            when {
+                horasRetraso <= 24 -> 40
+                horasRetraso <= 72 -> 20
+                horasRetraso <= 168 -> 10 // 1 semana
+                else -> 2
+            }
         sumarPuntos(usuarioId, puntos)
 
         if (horasRetraso <= 24) {
@@ -58,7 +68,10 @@ class LogroService(
     }
 
     @Transactional
-    fun procesarGastoCreado(usuarioId: Long, usadoIA: Boolean) {
+    fun procesarGastoCreado(
+        usuarioId: Long,
+        usadoIA: Boolean,
+    ) {
         sumarPuntos(usuarioId, if (usadoIA) 15 else 10)
         avanzarLogro(usuarioId, "ECONOMIA_CONTABLE")
         if (usadoIA) {
@@ -73,10 +86,14 @@ class LogroService(
     }
 
     // LÓGICA INTERNA DE MEDALLAS
+
     /**
      * Busca el nivel actual del usuario en un logro (Bronce, Plata u Oro) y le suma 1 al progreso.
      */
-    private fun avanzarLogro(usuarioId: Long, prefijoCodigo: String) {
+    private fun avanzarLogro(
+        usuarioId: Long,
+        prefijoCodigo: String,
+    ) {
         val usuario = usuarioRepository.findById(usuarioId).orElse(null) ?: return
         val nivelesLogro = logroRepository.findByCodigoStartingWithOrderByMetaAsc(prefijoCodigo)
 

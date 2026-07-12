@@ -19,7 +19,6 @@ import javax.annotation.PostConstruct
 
 @Service
 class FirebaseMessagingService {
-
     @Autowired
     @Lazy
     private lateinit var firebaseTokenService: FirebaseTokenService
@@ -62,18 +61,21 @@ class FirebaseMessagingService {
 
             // Si falla todo, lanzar error
             if (serviceAccountStream == null) {
-                throw RuntimeException("No se encontró el archivo $nombreArchivo. Ponlo en la raíz del proyecto o en src/main/resources.")
+                throw RuntimeException(
+                    "No se encontró el archivo $nombreArchivo. Ponlo en la raíz del proyecto o en src/main/resources.",
+                )
             }
 
-            val options = FirebaseOptions.builder()
-                .setCredentials(GoogleCredentials.fromStream(serviceAccountStream))
-                .build()
+            val options =
+                FirebaseOptions
+                    .builder()
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccountStream))
+                    .build()
 
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options)
                 logger.info("Firebase inicializado correctamente.")
             }
-
         } catch (e: Exception) {
             logger.error("Error crítico al inicializar Firebase: ${e.message}")
             throw e // Relanzar para que Spring se detenga si esto falla
@@ -105,15 +107,17 @@ class FirebaseMessagingService {
         titulo: String,
         cuerpo: String,
     ) {
-        val message = Message.builder()
-            .setNotification(
-                Notification.builder()
-                    .setTitle(titulo)
-                    .setBody(cuerpo)
-                    .build(),
-            )
-            .setToken(tokenDestino)
-            .build()
+        val message =
+            Message
+                .builder()
+                .setNotification(
+                    Notification
+                        .builder()
+                        .setTitle(titulo)
+                        .setBody(cuerpo)
+                        .build(),
+                ).setToken(tokenDestino)
+                .build()
 
         try {
             val response = FirebaseMessaging.getInstance().send(message)

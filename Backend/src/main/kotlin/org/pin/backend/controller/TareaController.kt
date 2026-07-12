@@ -5,7 +5,6 @@ import org.pin.backend.dto.Request.TareaRequestDTO
 import org.pin.backend.dto.Response.TareaResponseDTO
 import org.pin.backend.model.Casa
 import org.pin.backend.model.PreferenciaTarea
-import org.pin.backend.model.Tarea
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.PreferenciaTareaRepository
 import org.pin.backend.repository.TareaRepository
@@ -30,7 +29,7 @@ class TareaController(
     private val firebaseMessagingService: FirebaseMessagingService,
     private val logroService: LogroService,
     private val preferenciaTareaRepository: PreferenciaTareaRepository,
-    private val asignacionTareasService: AsignacionTareasService
+    private val asignacionTareasService: AsignacionTareasService,
 ) {
     @GetMapping
     fun getAll() = service.findAll()
@@ -77,11 +76,13 @@ class TareaController(
         if (request.completado == true && !estabaCompletada) {
             val usuarioAsignadoId = tareaGuardada.asignadoA?.id
             if (usuarioAsignadoId != null) {
-                val diasRetraso = if (tareaGuardada.fechaFin != null) {
-                    java.time.temporal.ChronoUnit.DAYS.between(tareaGuardada.fechaFin, LocalDateTime.now())
-                } else {
-                    0L
-                }
+                val diasRetraso =
+                    if (tareaGuardada.fechaFin != null) {
+                        java.time.temporal.ChronoUnit.DAYS
+                            .between(tareaGuardada.fechaFin, LocalDateTime.now())
+                    } else {
+                        0L
+                    }
                 logroService.procesarTareaCompletada(usuarioAsignadoId, diasRetraso)
             }
         }
@@ -129,8 +130,9 @@ class TareaController(
     fun notificarTarea(
         @PathVariable tareaId: Long,
     ): ResponseEntity<Void> {
-        val tarea = tareaRepository.findById(tareaId).orElse(null)
-            ?: return ResponseEntity.notFound().build()
+        val tarea =
+            tareaRepository.findById(tareaId).orElse(null)
+                ?: return ResponseEntity.notFound().build()
 
         if (tarea.asignadoA != null) {
             val tituloNotificacion = "¡Recordatorio de tarea en ${tarea.casa?.nombre ?: "tu piso"}!"
@@ -139,7 +141,7 @@ class TareaController(
             firebaseMessagingService.enviarAUsuario(
                 usuarioId = tarea.asignadoA!!.id!!,
                 titulo = tituloNotificacion,
-                cuerpo = cuerpoNotificacion
+                cuerpo = cuerpoNotificacion,
             )
             return ResponseEntity.ok().build()
         } else {
@@ -152,7 +154,7 @@ class TareaController(
     fun votarTarea(
         @PathVariable tareaId: Long,
         @RequestParam usuarioId: Long,
-        @RequestParam puntuacion: Int // 1 (Like), -1 (Dislike)
+        @RequestParam puntuacion: Int, // 1 (Like), -1 (Dislike)
     ): ResponseEntity<Void> {
         val tarea = tareaRepository.findById(tareaId).orElse(null) ?: return ResponseEntity.notFound().build()
         val usuario = usuarioRepository.findById(usuarioId).orElse(null) ?: return ResponseEntity.notFound().build()
@@ -172,17 +174,22 @@ class TareaController(
 
     @PostMapping("/repartir/casa/{casaId}")
     @Transactional
-    fun ejecutarRepartoInteligente(@PathVariable casaId: Long): ResponseEntity<String> {
+    fun ejecutarRepartoInteligente(
+        @PathVariable casaId: Long,
+    ): ResponseEntity<String> {
         val preferencias = preferenciaTareaRepository.findByTareaCasaId(casaId)
-        val casa = casaRepository.findById(casaId).orElse(null)
-            ?: return ResponseEntity.badRequest().body("Casa no encontrada")
+        val casa =
+            casaRepository.findById(casaId).orElse(null)
+                ?: return ResponseEntity.badRequest().body("Casa no encontrada")
 
         // Contamos cuántos usuarios distintos han participado en la votación
         val usuariosVotantes = preferencias.mapNotNull { it.usuario?.id }.distinct()
 
         // Si hay más de 1 miembro en la casa, exigimos al menos 2 votantes
         if (casa.miembros.size > 1 && usuariosVotantes.size < 1) {
-            return ResponseEntity.badRequest().body("Faltan votos. Al menos 2 personas deben deslizar antes de repartir las tareas.")
+            return ResponseEntity.badRequest().body(
+                "Faltan votos. Al menos 2 personas deben deslizar antes de repartir las tareas.",
+            )
         }
 
         try {
@@ -198,7 +205,9 @@ class TareaController(
 
     @PutMapping("/{tareaId}/completar")
     @Transactional
-    fun completarTarea(@PathVariable tareaId: Long): ResponseEntity<TareaResponseDTO> {
+    fun completarTarea(
+        @PathVariable tareaId: Long,
+    ): ResponseEntity<TareaResponseDTO> {
         val tarea = tareaRepository.findById(tareaId).orElse(null) ?: return ResponseEntity.notFound().build()
 
         if (tarea.periodica) {
@@ -218,19 +227,18 @@ class TareaController(
 
         val tareaGuardada = tareaRepository.save(tarea)
 
-        val response = TareaResponseDTO(
-            id = tareaGuardada.id!!,
-            nombre = tareaGuardada.nombre,
-            descripcion = tareaGuardada.descripcion,
-            completado = tareaGuardada.completado,
-            fechaFin = tareaGuardada.fechaFin?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-            frecuencia = tareaGuardada.frecuencia,
-            periodica = tareaGuardada.periodica,
-            asignadoA = tareaGuardada.asignadoA?.let { UsuarioDTO(it.id!!, it.nombre, it.correo) },
-            prioridad = tareaGuardada.prioridad
-        )
+        val response =
+            TareaResponseDTO(
+                id = tareaGuardada.id!!,
+                nombre = tareaGuardada.nombre,
+                descripcion = tareaGuardada.descripcion,
+                completado = tareaGuardada.completado,
+                fechaFin = tareaGuardada.fechaFin?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                frecuencia = tareaGuardada.frecuencia,
+                periodica = tareaGuardada.periodica,
+                asignadoA = tareaGuardada.asignadoA?.let { UsuarioDTO(it.id!!, it.nombre, it.correo) },
+                prioridad = tareaGuardada.prioridad,
+            )
         return ResponseEntity.ok(response)
     }
-
-
 }

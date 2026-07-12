@@ -26,16 +26,22 @@ class ElementoService(
     fun findAll() = repo.findAll()
 
     @Transactional
-    fun crearElemento(listaId: Long, request: ElementoRequestDTO): Elemento {
-        val listaPadre = listaRepository.findById(listaId)
-            .orElseThrow { RuntimeException("No existe ninguna lista con id $listaId") }
+    fun crearElemento(
+        listaId: Long,
+        request: ElementoRequestDTO,
+    ): Elemento {
+        val listaPadre =
+            listaRepository
+                .findById(listaId)
+                .orElseThrow { RuntimeException("No existe ninguna lista con id $listaId") }
 
         val nombreNormalizado = request.nombre.trim().replaceFirstChar { it.uppercase() }
 
         val elementosDeLaLista = elementoRepository.findByListaId(listaId)
-        val elementoExistente = elementosDeLaLista.find {
-            it.nombre.equals(nombreNormalizado, ignoreCase = true) && !it.completado
-        }
+        val elementoExistente =
+            elementosDeLaLista.find {
+                it.nombre.equals(nombreNormalizado, ignoreCase = true) && !it.completado
+            }
 
         if (elementoExistente != null) {
             elementoExistente.cantidad += (request.cantidad ?: 1)
@@ -46,31 +52,38 @@ class ElementoService(
         var iconoParaGuardar = "ic_default"
 
         if (productoEnCatalogo == null) {
-            val nuevoProductoCatalogo = CatalogoProducto(
-                nombre = nombreNormalizado,
-                categoria = "Otros",
-                iconoKey = iconoParaGuardar
-            )
+            val nuevoProductoCatalogo =
+                CatalogoProducto(
+                    nombre = nombreNormalizado,
+                    categoria = "Otros",
+                    iconoKey = iconoParaGuardar,
+                )
             catalogoRepository.save(nuevoProductoCatalogo)
         } else {
             iconoParaGuardar = productoEnCatalogo.iconoKey
         }
 
-        val nuevoElemento = Elemento(
-            nombre = nombreNormalizado,
-            descripcion = request.descripcion,
-            completado = request.completado ?: false,
-            cantidad = request.cantidad ?: 1,
-            lista = listaPadre,
-            iconoKey = iconoParaGuardar
-        )
+        val nuevoElemento =
+            Elemento(
+                nombre = nombreNormalizado,
+                descripcion = request.descripcion,
+                completado = request.completado ?: false,
+                cantidad = request.cantidad ?: 1,
+                lista = listaPadre,
+                iconoKey = iconoParaGuardar,
+            )
 
         return elementoRepository.saveAndFlush(nuevoElemento)
     }
 
-    fun actualizarElemento(id: Long, request: ElementoRequestDTO): Elemento {
-        val elemento = elementoRepository.findById(id)
-            .orElseThrow { RuntimeException("Elemento no encontrado") }
+    fun actualizarElemento(
+        id: Long,
+        request: ElementoRequestDTO,
+    ): Elemento {
+        val elemento =
+            elementoRepository
+                .findById(id)
+                .orElseThrow { RuntimeException("Elemento no encontrado") }
 
         elemento.nombre = request.nombre
         elemento.descripcion = request.descripcion
@@ -98,14 +111,13 @@ class ElementoService(
         return elementos.map { convertirADTO(it) }
     }
 
-    fun convertirADTO(elemento: Elemento): ElementoResponseDTO {
-        return ElementoResponseDTO(
+    fun convertirADTO(elemento: Elemento): ElementoResponseDTO =
+        ElementoResponseDTO(
             id = elemento.id ?: 0,
             nombre = elemento.nombre,
             descripcion = elemento.descripcion,
             completado = elemento.completado,
             cantidad = elemento.cantidad,
-            iconoKey = elemento.iconoKey
+            iconoKey = elemento.iconoKey,
         )
-    }
 }

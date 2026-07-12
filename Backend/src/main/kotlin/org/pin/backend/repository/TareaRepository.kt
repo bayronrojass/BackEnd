@@ -5,5 +5,4 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface TareaRepository : JpaRepository<Tarea, Long> {
     fun findByAsignadoA(usuario: Usuario): List<Tarea>
-
 }

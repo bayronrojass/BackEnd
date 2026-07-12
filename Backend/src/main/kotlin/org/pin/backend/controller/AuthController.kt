@@ -5,8 +5,10 @@ import org.pin.backend.dto.Data.UsuarioDTO
 import org.pin.backend.dto.Request.LoginRequest
 import org.pin.backend.dto.Response.LoginResponse
 import org.pin.backend.repository.UsuarioRepository
+import org.pin.backend.security.JwtService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -14,33 +16,29 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping() // Base de la API
+@RequestMapping()
 class AuthController(
-    private val usuarioRepository: UsuarioRepository, // Inyecta el repositorio
+    private val usuarioRepository: UsuarioRepository,
+    private val passwordEncoder: PasswordEncoder,
+    private val jwtService: JwtService,
 ) {
-    @PostMapping("/login") // Endpoint que busca el frontend
+    @PostMapping("/login")
     @Transactional(readOnly = true)
     fun login(
         @RequestBody request: LoginRequest,
     ): ResponseEntity<LoginResponse> {
-        // 1. Buscar usuario por correo
         val usuario =
             usuarioRepository
                 .findByCorreo(request.correo)
-                .orElseThrow { Exception("No existe un usuario con el email: $request.correo") }
-        // val usuario: Usuario? = usuarioRepository.findByCorreo(request.correo)
+                .orElse(null)
 
-        // 2. Verificar contraseña (!! USAR HASH EN PRODUCCIÓN !!)
-        // Aquí deberías comparar con un hash (ej. BCrypt)
-        if (usuario == null || usuario.contrasena != request.contrasena) {
-            // Error 401 si no coincide
+        if (usuario == null || !passwordEncoder.matches(request.contrasena, usuario.contrasena)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
 
-        // 3. Mapear datos a DTOs para la respuesta
         val usuarioDTO =
             UsuarioDTO(
-                id = usuario.id!!, // El ID no será nulo si lo encontramos
+                id = usuario.id!!,
                 nombre = usuario.nombre,
                 correo = usuario.correo,
             )
@@ -56,10 +54,8 @@ class AuthController(
                 )
             }
 
-        // 4. Generar Token (!! USAR JWT EN PRODUCCIÓN !!)
-        val token = "token_falso_para_${usuario.id}" // Placeholder
+        val token = jwtService.generateToken(usuario.id!!, usuario.correo)
 
-        // 5. Construir la respuesta
         val response =
             LoginResponse(
                 authToken = token,
@@ -67,7 +63,6 @@ class AuthController(
                 user = usuarioDTO,
             )
 
-        // 6. Enviar respuesta OK (200)
         return ResponseEntity.ok(response)
     }
 }

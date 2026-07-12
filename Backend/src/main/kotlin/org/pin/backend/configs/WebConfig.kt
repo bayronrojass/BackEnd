@@ -8,7 +8,12 @@ import java.nio.file.Paths
 @Configuration
 class WebConfig : WebMvcConfigurer {
     override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
-        val rutaURI = Paths.get("multimedia").toAbsolutePath().toUri().toString()
+        val rutaURI =
+            Paths
+                .get("multimedia")
+                .toAbsolutePath()
+                .toUri()
+                .toString()
 
         registry
             .addResourceHandler("/multimedia/**")

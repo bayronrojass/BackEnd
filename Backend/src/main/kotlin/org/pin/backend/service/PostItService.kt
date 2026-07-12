@@ -21,7 +21,6 @@ class PostItService(
 
     fun save(postIt: PostIt): PostIt = repo.save(postIt)
 
-
     fun new(
         casa: Casa,
         location: String,
@@ -41,7 +40,7 @@ class PostItService(
     fun newAudio(
         casa: Casa,
         location: String,
-        file: MultipartFile
+        file: MultipartFile,
     ): PostIt {
         val p = PostIt()
         p.tipo = "AUDIO"
