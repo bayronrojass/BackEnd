@@ -10,6 +10,14 @@ import org.springframework.data.jpa.repository.Query
 import java.util.*
 
 interface CasaRepository : JpaRepository<Casa, Long> {
+    @Query(
+        "SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM Casa c JOIN c.miembros m WHERE c.id = :casaId AND m.id = :userId",
+    )
+    fun isUserMember(
+        casaId: Long,
+        userId: Long,
+    ): Boolean
+
     fun findByListasContains(lista: Lista): Optional<Casa>
 
     fun findByTareasContains(tarea: Tarea): Optional<Casa>

@@ -1,5 +1,6 @@
 package org.pin.backend.controller
 import org.pin.backend.dto.Data.PostItDTO
+import org.pin.backend.security.CasaMembershipValidator
 import org.pin.backend.service.CasaService
 import org.pin.backend.service.LienzoService
 import org.pin.backend.service.PostItService
@@ -15,6 +16,7 @@ class PostItController(
     private val service: PostItService,
     private val casaService: CasaService,
     private val lienzoService: LienzoService,
+    private val membershipValidator: CasaMembershipValidator,
 ) {
     @GetMapping
     fun getAll() = service.findAll()
@@ -95,6 +97,7 @@ class PostItController(
         @RequestParam("location") location: String,
         @RequestParam("file") file: MultipartFile,
     ): ResponseEntity<PostItDTO> {
+        membershipValidator.validateMembership(casaId)
         val casaOpt = casaService.findById(casaId)
         if (casaOpt.isEmpty) return ResponseEntity.notFound().build()
 

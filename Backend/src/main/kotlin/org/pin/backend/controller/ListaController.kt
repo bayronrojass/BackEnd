@@ -6,6 +6,7 @@ import org.pin.backend.dto.Response.ListaResponseDTO
 import org.pin.backend.model.Elemento
 import org.pin.backend.repository.ListaRepository
 import org.pin.backend.repository.UsuarioRepository
+import org.pin.backend.security.CasaMembershipValidator
 import org.pin.backend.service.ElementoService
 import org.pin.backend.service.ListaService
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,6 +21,7 @@ class ListaController(
     private val listaRepository: ListaRepository,
     private var listaService: ListaService,
     private var usuarioRepository: UsuarioRepository,
+    private val membershipValidator: CasaMembershipValidator,
 ) {
     @Autowired
     lateinit var elementoService: ElementoService
@@ -30,7 +32,10 @@ class ListaController(
     @GetMapping("/casa/{casaId}")
     fun getListasByCasaId(
         @PathVariable casaId: Long,
-    ): List<ListaResponseDTO> = listaService.getListasByCasaId(casaId)
+    ): List<ListaResponseDTO> {
+        membershipValidator.validateMembership(casaId)
+        return listaService.getListasByCasaId(casaId)
+    }
 
     @PostMapping("/{listaId}/elementos")
     fun crearElementoEnLista(
@@ -51,7 +56,7 @@ class ListaController(
         @PathVariable casaId: Long,
         @RequestBody listaDTO: ListaRequestDTO,
     ): ResponseEntity<ListaResponseDTO> {
-        // 1. Buscamos al dueño por el ID que nos manda la app (sin seguridad)
+        membershipValidator.validateMembership(casaId)
         val propietario =
             usuarioRepository
                 .findById(listaDTO.propietarioId)

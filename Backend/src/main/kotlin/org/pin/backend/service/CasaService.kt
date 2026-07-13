@@ -2,6 +2,7 @@ package org.pin.backend.service
 
 import org.pin.backend.dto.Data.CasaDTO
 import org.pin.backend.dto.Request.CasaRequestDTO
+import org.pin.backend.dto.Response.UsuarioRankingDTO
 import org.pin.backend.model.Casa
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.UsuarioRepository
@@ -73,5 +74,35 @@ class CasaService(
                 fechaCreacion = casa.fechaCreacion,
             )
         }
+    }
+
+    fun removeMiembro(
+        casaId: Long,
+        usuarioId: Long,
+    ): Boolean {
+        val casa = repo.findById(casaId).orElse(null) ?: return false
+        val usuario = usuarioRepository.findById(usuarioId).orElse(null) ?: return false
+
+        casa.miembros.remove(usuario)
+        casa.administradores.remove(usuario)
+        repo.save(casa)
+        return true
+    }
+
+    @Transactional(readOnly = true)
+    fun getRankingCasa(casaId: Long): List<UsuarioRankingDTO>? {
+        val casa = repo.findByIdWithMiembros(casaId) ?: return null
+
+        return casa.miembros
+            .sortedByDescending { it.puntosConvivencia }
+            .mapIndexed { index, usuario ->
+                UsuarioRankingDTO(
+                    posicion = index + 1,
+                    usuarioId = usuario.id!!,
+                    nombre = usuario.nombre,
+                    fotoUrl = usuario.fotoUrl,
+                    puntos = usuario.puntosConvivencia,
+                )
+            }
     }
 }

@@ -3,56 +3,37 @@ package org.pin.backend.controller
 import org.pin.backend.dto.Data.BorradorGastoDTO
 import org.pin.backend.dto.Request.GastoRequestDTO
 import org.pin.backend.dto.Response.GastoResponseDTO
-import org.pin.backend.model.Gasto
-import org.pin.backend.model.enums.CategoriaGasto
 import org.pin.backend.repository.CasaRepository
-import org.pin.backend.repository.UsuarioRepository
-import org.pin.backend.service.FileStorageService
+import org.pin.backend.security.CasaMembershipValidator
 import org.pin.backend.service.GastoIAService
-import org.pin.backend.service.LogroService
+import org.pin.backend.service.GastoService
 import org.pin.backend.service.PdfService
 import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @RestController
 @RequestMapping("/casas")
 class GastoController(
-    private val casaRepository: CasaRepository,
-    private val usuarioRepository: UsuarioRepository,
+    private val gastoService: GastoService,
     private val gastoIAService: GastoIAService,
-    private val fileStorageService: FileStorageService,
-    private val logroService: LogroService,
+    private val casaRepository: CasaRepository,
     private val pdfService: PdfService,
+    private val membershipValidator: CasaMembershipValidator,
 ) {
     @GetMapping("/{casaId}/gastos")
     @Transactional(readOnly = true)
     fun getGastosByCasaId(
         @PathVariable casaId: Long,
     ): ResponseEntity<List<GastoResponseDTO>> {
-        val casa =
-            casaRepository.findByIdWithGastos(casaId)
+        membershipValidator.validateMembership(casaId)
+        val gastos =
+            gastoService.getGastosByCasaId(casaId)
                 ?: return ResponseEntity.notFound().build()
-
-        val gastosDTO =
-            casa.gastos.map { gasto ->
-                GastoResponseDTO(
-                    id = gasto.id!!,
-                    nombre = gasto.nombre,
-                    descripcion = gasto.descripcion,
-                    importe = gasto.importe,
-                    fecha = gasto.fechaInicio.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                    categoria = gasto.categoria.name,
-                    pagadoPorNombre = gasto.pagadoPor?.nombre ?: "Desconocido",
-                    beneficiarios = gasto.beneficiarios.toMutableList(),
-                    fotoTicketUrl = gasto.fotoTicketUrl,
-                )
-            }
-        return ResponseEntity.ok(gastosDTO)
+        return ResponseEntity.ok(gastos)
     }
 
     @PostMapping("/{casaId}/crearGasto")
@@ -61,35 +42,10 @@ class GastoController(
         @PathVariable casaId: Long,
         @RequestBody request: GastoRequestDTO,
     ): ResponseEntity<String> {
-        val casa =
-            casaRepository.findById(casaId).orElse(null)
-                ?: return ResponseEntity.notFound().build()
-
-        val usuarioPaga = usuarioRepository.findById(request.pagadoPorId).orElse(null)
-
-        val nuevoGasto =
-            Gasto(
-                nombre = request.nombre,
-                descripcion = request.descripcion,
-                importe = request.importe,
-                fechaInicio = LocalDateTime.now(),
-                categoria =
-                    try {
-                        CategoriaGasto.valueOf(request.categoria)
-                    } catch (e: Exception) {
-                        CategoriaGasto.OTROS
-                    },
-                pagadoPor = usuarioPaga,
-                beneficiarios = request.beneficiarios?.toMutableSet() ?: mutableSetOf(),
-                fotoTicketUrl = request.urlTicket,
-            )
-
-        casa.gastos.add(nuevoGasto)
-        casaRepository.save(casa)
-
-        val usadoIA = !request.urlTicket.isNullOrBlank()
-        logroService.procesarGastoCreado(request.pagadoPorId, usadoIA)
-
+        membershipValidator.validateMembership(casaId)
+        if (!gastoService.crearGasto(casaId, request)) {
+            return ResponseEntity.notFound().build()
+        }
         return ResponseEntity.ok("Gasto creado correctamente")
     }
 
@@ -100,32 +56,10 @@ class GastoController(
         @PathVariable gastoId: Long,
         @RequestBody request: GastoRequestDTO,
     ): ResponseEntity<Void> {
-        val casa =
-            casaRepository.findById(casaId).orElse(null)
-                ?: return ResponseEntity.notFound().build()
-
-        val gastoExistente =
-            casa.gastos.find { it.id == gastoId }
-                ?: return ResponseEntity.notFound().build()
-
-        gastoExistente.nombre = request.nombre
-        gastoExistente.descripcion = request.descripcion
-        gastoExistente.importe = request.importe
-        gastoExistente.categoria =
-            try {
-                CategoriaGasto.valueOf(request.categoria)
-            } catch (e: Exception) {
-                CategoriaGasto.OTROS
-            }
-
-        val nuevoPagador = usuarioRepository.findById(request.pagadoPorId).orElse(null)
-        gastoExistente.pagadoPor = nuevoPagador
-
-        gastoExistente.beneficiarios.clear()
-        request.beneficiarios?.let { gastoExistente.beneficiarios.addAll(it) }
-
-        casaRepository.save(casa)
-
+        membershipValidator.validateMembership(casaId)
+        if (!gastoService.editarGasto(casaId, gastoId, request)) {
+            return ResponseEntity.notFound().build()
+        }
         return ResponseEntity.ok().build()
     }
 
@@ -144,27 +78,11 @@ class GastoController(
         @PathVariable gastoId: Long,
         @RequestParam("file") file: MultipartFile,
     ): ResponseEntity<String> {
-        val casa =
-            casaRepository.findById(casaId).orElse(null)
+        membershipValidator.validateMembership(casaId)
+        val url =
+            gastoService.actualizarFotoTicket(casaId, gastoId, file)
                 ?: return ResponseEntity.notFound().build()
-
-        val gasto =
-            casa.gastos.find { it.id == gastoId }
-                ?: return ResponseEntity.notFound().build()
-
-        val nombreArchivo = fileStorageService.save(file)
-
-        val baseUrl =
-            org.springframework.web.servlet.support.ServletUriComponentsBuilder
-                .fromCurrentContextPath()
-                .build()
-                .toUriString()
-        val urlPublica = "$baseUrl/multimedia/$nombreArchivo"
-
-        gasto.fotoTicketUrl = urlPublica
-        casaRepository.save(casa)
-
-        return ResponseEntity.ok(urlPublica)
+        return ResponseEntity.ok(url)
     }
 
     @DeleteMapping("/{casaId}/gastos/{gastoId}/foto")
@@ -173,17 +91,10 @@ class GastoController(
         @PathVariable casaId: Long,
         @PathVariable gastoId: Long,
     ): ResponseEntity<Void> {
-        val casa =
-            casaRepository.findById(casaId).orElse(null)
-                ?: return ResponseEntity.notFound().build()
-
-        val gasto =
-            casa.gastos.find { it.id == gastoId }
-                ?: return ResponseEntity.notFound().build()
-
-        gasto.fotoTicketUrl = null
-        casaRepository.save(casa)
-
+        membershipValidator.validateMembership(casaId)
+        if (!gastoService.eliminarFotoTicket(casaId, gastoId)) {
+            return ResponseEntity.notFound().build()
+        }
         return ResponseEntity.ok().build()
     }
 
@@ -192,6 +103,7 @@ class GastoController(
     fun descargarPdfGastos(
         @PathVariable casaId: Long,
     ): ResponseEntity<ByteArray> {
+        membershipValidator.validateMembership(casaId)
         val casa =
             casaRepository.findByIdWithGastos(casaId)
                 ?: return ResponseEntity.notFound().build()
@@ -199,12 +111,9 @@ class GastoController(
         val pdfBytes = pdfService.generarResumenGastosPdf(casa)
 
         val headers = HttpHeaders()
-        headers.contentType = org.springframework.http.MediaType.APPLICATION_PDF
+        headers.contentType = MediaType.APPLICATION_PDF
         headers.setContentDispositionFormData("attachment", "Resumen_Gastos_${casa.nombre}.pdf")
 
-        return ResponseEntity
-            .ok()
-            .headers(headers)
-            .body(pdfBytes)
+        return ResponseEntity.ok().headers(headers).body(pdfBytes)
     }
 }

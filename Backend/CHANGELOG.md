@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-12
+
+### Security
+
+- **Externalized Veryfi OCR credentials**: Removed hardcoded `clientId`, `username`, and `apiKey` from `GastoIAService.kt`. Credentials are now injected via `@Value` from `application.properties` with environment variable placeholders (`VERYFI_CLIENT_ID`, `VERYFI_USERNAME`, `VERYFI_API_KEY`). Empty defaults ensure the app starts safely without the vars set (OCR gracefully falls back to "Ticket Manual").
+- **IDOR Protection (resource ownership enforcement)**: Created `CasaMembershipValidator` component that verifies the authenticated user (from JWT/SecurityContext) is a member of the target casa before any operation proceeds. Uses an efficient `EXISTS` query (`CasaRepository.isUserMember`) — no entity loading. Throws Spring Security `AccessDeniedException` (HTTP 403) on unauthorized access. Applied across all casa-scoped endpoints:
+  - `GastoController`: 6 endpoints (list, create, edit, foto upload, foto delete, PDF)
+  - `CasaController`: 12 endpoints (listas, details, remove member, create lista, tareas, create tarea, postIt CRUD, imagenes, miembros, ranking)
+  - `EventoController`: 2 endpoints (list, create)
+  - `EncuestaController`: 2 endpoints (list, create)
+  - `ListaController`: 2 endpoints (list, create)
+  - `PostItController`: 1 endpoint (audio upload)
+  - `TareaController`: 1 endpoint (reparto inteligente)
+  - Deliberately excluded: `joinCasa` (user is joining, not yet a member)
+
+### Changed
+
+- **GastoIAService**: Refactored from body-level hardcoded fields to constructor-injected `@Value` properties, following the same externalization pattern used by JWT and datasource config.
+- **Service-layer refactoring (thin controllers, fat services)**: Extracted all business logic from controllers into dedicated `@Service` classes, enforcing clean separation of concerns and enabling unit-testable domain logic:
+  - `GastoService` (NEW): Extracted entity creation, category validation, DTO mapping, beneficiarios management, and photo URL construction from `GastoController`. Controller reduced from 218 LOC to 117 LOC.
+  - `TareaService` (EXPANDED): Extracted task update/delete/complete/notify/vote/reparto logic from `TareaController`. Includes periodic rotation, assignment rules (`-1L` = unassign), delay calculation for logro processing, and Firebase notifications. Controller reduced from 247 LOC to 89 LOC.
+  - `EventoService` (EXPANDED): Extracted DTO mapping, event deletion (replaced catastrophic `findAll().find{}` scan with `findByEventosContains` query), and event update from `EventoController`. Controller reduced from 168 LOC to 79 LOC.
+  - `CasaService` (EXPANDED): Extracted `removeMiembro` and `getRankingCasa` business logic from `CasaController`.
+  - `CasaController` now delegates `getTareasByCasaId` and `crearTareaEnCasa` to `TareaService`, removing direct repository access and inline DTO mapping.
+
+### Fixed
+
+- **EventoController.borrarEvento performance bug**: Replaced `casaRepository.findAll().find { casa -> casa.eventos.any { it.id == eventoId } }` (full table scan loading ALL casas into memory) with `casaRepository.findByEventosContains(evento)` (single indexed query). This was a latent O(n) scan that would degrade linearly with the number of casas in the system.
+
 ## [0.2.0] - 2026-07-12
 
 ### Changed

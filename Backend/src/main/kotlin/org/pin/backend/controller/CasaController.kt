@@ -16,36 +16,32 @@ import org.pin.backend.dto.Response.UsuarioRankingDTO
 import org.pin.backend.model.*
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.ListaRepository
-import org.pin.backend.repository.TareaRepository
 import org.pin.backend.repository.UsuarioRepository
+import org.pin.backend.security.CasaMembershipValidator
 import org.pin.backend.service.CasaService
-import org.pin.backend.service.FirebaseMessagingService
 import org.pin.backend.service.ImagenService
 import org.pin.backend.service.PostItService
-import org.slf4j.Logger
+import org.pin.backend.service.TareaService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.*
 
 @RestController
 @RequestMapping("/casas")
 class CasaController(
     private val service: CasaService,
+    private val tareaService: TareaService,
     private val casaRepository: CasaRepository,
     private val usuarioRepository: UsuarioRepository,
     private val listaRepository: ListaRepository,
-    private val tareaRepository: TareaRepository,
     private val postItService: PostItService,
     private val imagenService: ImagenService,
-    private val firebaseMessagingService: FirebaseMessagingService,
+    private val membershipValidator: CasaMembershipValidator,
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(CasaController::class.java)
+    private val logger = LoggerFactory.getLogger(CasaController::class.java)
 
     @GetMapping
     fun getAll() = service.findAll()
@@ -75,6 +71,7 @@ class CasaController(
     fun getListasByCasaId(
         @PathVariable casaId: Long,
     ): ResponseEntity<List<Lista>> {
+        membershipValidator.validateMembership(casaId)
         val casa =
             casaRepository.findByIdWithListas(casaId)
                 ?: return ResponseEntity.notFound().build()
@@ -85,44 +82,31 @@ class CasaController(
     @Transactional(readOnly = true)
     fun getCasaDetails(
         @PathVariable id: Long,
-    ): ResponseEntity<CasaDetailsResponseDTO> =
-        casaRepository
+    ): ResponseEntity<CasaDetailsResponseDTO> {
+        membershipValidator.validateMembership(id)
+        return casaRepository
             .findById(id)
             .map { casa ->
-                val dto =
+                ResponseEntity.ok(
                     CasaDetailsResponseDTO(
                         id = casa.id!!,
                         nombre = casa.nombre,
                         descripcion = casa.descripcion,
-                    )
-                ResponseEntity.ok(dto)
+                    ),
+                )
             }.orElse(ResponseEntity.notFound().build())
+    }
 
     @DeleteMapping("/{casaId}/miembros/{usuarioId}")
     @Transactional
     fun removeMiembro(
         @PathVariable casaId: Long,
         @PathVariable usuarioId: Long,
-        // TODO: Añadir Spring Security para verificar que quien llama es un admin
     ): ResponseEntity<Unit> {
-        val casa =
-            casaRepository
-                .findById(casaId)
-                .orElseThrow { Exception("Casa no encontrada") }
-
-        val usuario =
-            usuarioRepository
-                .findById(usuarioId)
-                .orElseThrow { Exception("Usuario no encontrado") }
-
-        if (casa.miembros.contains(usuario)) {
-            casa.miembros.remove(usuario)
+        membershipValidator.validateMembership(casaId)
+        if (!service.removeMiembro(casaId, usuarioId)) {
+            return ResponseEntity.notFound().build()
         }
-        if (casa.administradores.contains(usuario)) {
-            casa.administradores.remove(usuario)
-        }
-
-        casaRepository.save(casa)
         return ResponseEntity.ok().build()
     }
 
@@ -132,11 +116,11 @@ class CasaController(
         @PathVariable casaId: Long,
         @RequestBody request: ListaRequestDTO,
     ): ResponseEntity<Lista> {
-        val casaOptional: Optional<Casa> = casaRepository.findById(casaId)
-        if (casaOptional.isEmpty) {
-            return ResponseEntity.notFound().build()
-        }
-        val casa = casaOptional.get()
+        membershipValidator.validateMembership(casaId)
+        val casa =
+            casaRepository.findById(casaId).orElse(null)
+                ?: return ResponseEntity.notFound().build()
+
         val nuevaLista =
             Lista(
                 nombre = request.nombre,
@@ -154,28 +138,11 @@ class CasaController(
     fun getTareasByCasaId(
         @PathVariable casaId: Long,
     ): ResponseEntity<List<TareaResponseDTO>> {
-        val casa =
-            casaRepository.findByIdWithTareas(casaId)
+        membershipValidator.validateMembership(casaId)
+        val tareas =
+            tareaService.getTareasByCasaId(casaId)
                 ?: return ResponseEntity.notFound().build()
-
-        val tareasDTO =
-            casa.tareas.map { tarea ->
-                TareaResponseDTO(
-                    id = tarea.id!!,
-                    nombre = tarea.nombre,
-                    descripcion = tarea.descripcion,
-                    completado = tarea.completado,
-                    fechaFin = tarea.fechaFin?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                    frecuencia = tarea.frecuencia,
-                    periodica = tarea.periodica,
-                    asignadoA =
-                        tarea.asignadoA?.let {
-                            UsuarioDTO(it.id!!, it.nombre, it.correo)
-                        },
-                    prioridad = tarea.prioridad,
-                )
-            }
-        return ResponseEntity.ok(tareasDTO)
+        return ResponseEntity.ok(tareas)
     }
 
     @PostMapping("/{casaId}/tareas")
@@ -184,61 +151,11 @@ class CasaController(
         @PathVariable casaId: Long,
         @RequestBody request: TareaRequestDTO,
     ): ResponseEntity<TareaResponseDTO> {
-        val casa =
-            casaRepository.findById(casaId).orElse(null)
+        membershipValidator.validateMembership(casaId)
+        val response =
+            tareaService.crearTareaEnCasa(casaId, request)
                 ?: return ResponseEntity.notFound().build()
-
-        val usuarioAsignado =
-            request.asignadoAId?.let {
-                usuarioRepository.findById(it).orElse(null)
-            }
-
-        val nuevaTarea =
-            Tarea(
-                nombre = request.nombre,
-                descripcion = request.descripcion,
-                completado = request.completado ?: false,
-                fechaFin =
-                    if (request.fechaFin.isNullOrBlank()) {
-                        null
-                    } else {
-                        LocalDateTime.parse(
-                            request.fechaFin,
-                            DateTimeFormatter.ISO_LOCAL_DATE_TIME,
-                        )
-                    },
-                frecuencia = request.frecuencia,
-                periodica = request.periodica ?: false,
-                asignadoA = usuarioAsignado,
-                casa = casa,
-            )
-
-        val tareaGuardada = tareaRepository.save(nuevaTarea)
-        casa.tareas.add(tareaGuardada)
-        casaRepository.save(casa)
-        if (request.asignadoAId !=
-            request.creadoPor
-        ) {
-            firebaseMessagingService.enviarAUsuario(request.asignadoAId!!, "¡Nueva tarea asignada!", request.nombre)
-        }
-
-        val responseDTO =
-            TareaResponseDTO(
-                id = tareaGuardada.id!!,
-                nombre = tareaGuardada.nombre,
-                descripcion = tareaGuardada.descripcion,
-                completado = tareaGuardada.completado,
-                fechaFin = tareaGuardada.fechaFin?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                frecuencia = tareaGuardada.frecuencia,
-                periodica = tareaGuardada.periodica,
-                asignadoA =
-                    tareaGuardada.asignadoA?.let {
-                        UsuarioDTO(it.id!!, it.nombre, it.correo)
-                    },
-                prioridad = tareaGuardada.prioridad,
-            )
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO)
+        return ResponseEntity.status(HttpStatus.CREATED).body(response)
     }
 
     @PostMapping("/{id}/{location}/postIt")
@@ -246,6 +163,7 @@ class CasaController(
         @PathVariable id: Long,
         @PathVariable location: String,
     ): ResponseEntity<PostItDTO> {
+        membershipValidator.validateMembership(id)
         val casa = service.findById(id)
         if (casa.isPresent) {
             val postIt = postItService.new(casa.get(), location)
@@ -274,6 +192,7 @@ class CasaController(
         @PathVariable id: Long,
         @PathVariable location: String,
     ): ResponseEntity<List<PostItDTO>> {
+        membershipValidator.validateMembership(id)
         val casa = service.findById(id)
         if (casa.isPresent) {
             val lista =
@@ -305,6 +224,7 @@ class CasaController(
     fun getImagenes(
         @PathVariable id: Long,
     ): ResponseEntity<List<Long>> {
+        membershipValidator.validateMembership(id)
         val casa = service.findById(id)
         if (casa.isPresent) {
             val lista =
@@ -324,6 +244,7 @@ class CasaController(
         @PathVariable id: Long,
         @RequestPart("file", required = true) file: MultipartFile,
     ): ResponseEntity<ImagenDTO> {
+        membershipValidator.validateMembership(id)
         val casa = service.findById(id)
         if (casa.isPresent) {
             val i = imagenService.new(casa.get(), file)
@@ -346,6 +267,7 @@ class CasaController(
     fun getCasaMiembros(
         @PathVariable id: Long,
     ): ResponseEntity<List<UsuarioDTO>> {
+        membershipValidator.validateMembership(id)
         val casa =
             casaRepository.findByIdWithMiembros(id)
                 ?: return ResponseEntity.notFound().build()
@@ -389,23 +311,10 @@ class CasaController(
     fun getRankingCasa(
         @PathVariable casaId: Long,
     ): ResponseEntity<List<UsuarioRankingDTO>> {
-        val casa =
-            casaRepository.findByIdWithMiembros(casaId)
-                ?: return ResponseEntity.notFound().build()
-
-        val miembrosOrdenados = casa.miembros.sortedByDescending { it.puntosConvivencia }
-
+        membershipValidator.validateMembership(casaId)
         val ranking =
-            miembrosOrdenados.mapIndexed { index, usuario ->
-                UsuarioRankingDTO(
-                    posicion = index + 1,
-                    usuarioId = usuario.id!!,
-                    nombre = usuario.nombre,
-                    fotoUrl = usuario.fotoUrl,
-                    puntos = usuario.puntosConvivencia,
-                )
-            }
-
+            service.getRankingCasa(casaId)
+                ?: return ResponseEntity.notFound().build()
         return ResponseEntity.ok(ranking)
     }
 }

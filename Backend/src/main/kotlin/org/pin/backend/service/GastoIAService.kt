@@ -2,6 +2,7 @@ package org.pin.backend.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.pin.backend.dto.Data.BorradorGastoDTO
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -16,12 +17,10 @@ import java.util.Base64
 class GastoIAService(
     private val fileStorageService: FileStorageService,
     private val objectMapper: ObjectMapper,
+    @Value("\${veryfi.client-id}") private val clientId: String,
+    @Value("\${veryfi.username}") private val username: String,
+    @Value("\${veryfi.api-key}") private val apiKey: String,
 ) {
-    // CLAVES DE VERYFI
-    private val clientId = "vrfJoMPoDgBZcYPnyyzhgWZiF5JTgTfg4zMpeMd"
-    private val username = "bayronrojas30"
-    private val apiKey = "0a42d0555296f17bb09de470eee81283"
-
     fun processarTicket(file: MultipartFile): BorradorGastoDTO {
         // 1. Guardar la foto
         val nombreArchivo = fileStorageService.save(file)

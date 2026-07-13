@@ -1,38 +1,21 @@
 package org.pin.backend.controller
 
-import org.pin.backend.dto.Data.UsuarioDTO
 import org.pin.backend.dto.Request.TareaRequestDTO
 import org.pin.backend.dto.Response.TareaResponseDTO
-import org.pin.backend.model.Casa
-import org.pin.backend.model.PreferenciaTarea
-import org.pin.backend.repository.CasaRepository
-import org.pin.backend.repository.PreferenciaTareaRepository
-import org.pin.backend.repository.TareaRepository
-import org.pin.backend.repository.UsuarioRepository
-import org.pin.backend.service.AsignacionTareasService
-import org.pin.backend.service.FirebaseMessagingService
-import org.pin.backend.service.LogroService
+import org.pin.backend.security.CasaMembershipValidator
 import org.pin.backend.service.TareaService
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @RestController
 @RequestMapping("tareas")
 class TareaController(
-    private val service: TareaService,
-    private val tareaRepository: TareaRepository,
-    private val usuarioRepository: UsuarioRepository,
-    private val casaRepository: CasaRepository,
-    private val firebaseMessagingService: FirebaseMessagingService,
-    private val logroService: LogroService,
-    private val preferenciaTareaRepository: PreferenciaTareaRepository,
-    private val asignacionTareasService: AsignacionTareasService,
+    private val tareaService: TareaService,
+    private val membershipValidator: CasaMembershipValidator,
 ) {
     @GetMapping
-    fun getAll() = service.findAll()
+    fun getAll() = tareaService.findAll()
 
     @PutMapping("/{tareaId}")
     @Transactional
@@ -40,69 +23,10 @@ class TareaController(
         @PathVariable tareaId: Long,
         @RequestBody request: TareaRequestDTO,
     ): ResponseEntity<TareaResponseDTO> {
-        val tarea =
-            tareaRepository.findById(tareaId).orElse(null)
+        val response =
+            tareaService.actualizarTarea(tareaId, request)
                 ?: return ResponseEntity.notFound().build()
-
-        val estabaCompletada = tarea.completado
-
-        request.nombre.let { tarea.nombre = it }
-        request.descripcion?.let { tarea.descripcion = it }
-        request.completado?.let { tarea.completado = it }
-        tarea.fechaFin =
-            when {
-                request.fechaFin == null -> tarea.fechaFin
-                request.fechaFin.isBlank() -> null
-                else -> LocalDateTime.parse(request.fechaFin, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-            }
-        request.frecuencia?.let { tarea.frecuencia = it }
-        request.periodica?.let { tarea.periodica = it }
-        request.prioridad?.let { tarea.prioridad = it }
-
-        if (request.asignadoAId != null) {
-            if (request.asignadoAId == -1L) {
-                tarea.asignadoA = null
-            } else {
-                val usuarioAsignado = usuarioRepository.findById(request.asignadoAId).orElse(null)
-                tarea.asignadoA = usuarioAsignado
-            }
-        }
-
-        val tareaGuardada = tareaRepository.save(tarea)
-        if (request.asignadoAId != request.creadoPor) {
-            firebaseMessagingService.enviarAUsuario(request.asignadoAId!!, "¡Nueva tarea asignada!", request.nombre)
-        }
-
-        if (request.completado == true && !estabaCompletada) {
-            val usuarioAsignadoId = tareaGuardada.asignadoA?.id
-            if (usuarioAsignadoId != null) {
-                val diasRetraso =
-                    if (tareaGuardada.fechaFin != null) {
-                        java.time.temporal.ChronoUnit.DAYS
-                            .between(tareaGuardada.fechaFin, LocalDateTime.now())
-                    } else {
-                        0L
-                    }
-                logroService.procesarTareaCompletada(usuarioAsignadoId, diasRetraso)
-            }
-        }
-
-        val responseDTO =
-            TareaResponseDTO(
-                id = tareaGuardada.id!!,
-                nombre = tareaGuardada.nombre,
-                descripcion = tareaGuardada.descripcion,
-                completado = tareaGuardada.completado,
-                fechaFin = tareaGuardada.fechaFin?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                frecuencia = tareaGuardada.frecuencia,
-                periodica = tareaGuardada.periodica,
-                asignadoA =
-                    tareaGuardada.asignadoA?.let {
-                        UsuarioDTO(it.id!!, it.nombre, it.correo)
-                    },
-                prioridad = tareaGuardada.prioridad,
-            )
-        return ResponseEntity.ok(responseDTO)
+        return ResponseEntity.ok(response)
     }
 
     @DeleteMapping("/{tareaId}")
@@ -110,18 +34,9 @@ class TareaController(
     fun borrarTarea(
         @PathVariable tareaId: Long,
     ): ResponseEntity<Void> {
-        val tarea =
-            tareaRepository.findById(tareaId).orElse(null)
-                ?: return ResponseEntity.notFound().build()
-
-        val casa: Casa? = casaRepository.findByTareasContains(tarea).orElse(null)
-        if (casa != null) {
-            casa.tareas.remove(tarea)
-            casaRepository.save(casa)
-        } else {
-            tareaRepository.delete(tarea)
+        if (!tareaService.borrarTarea(tareaId)) {
+            return ResponseEntity.notFound().build()
         }
-
         return ResponseEntity.noContent().build()
     }
 
@@ -130,23 +45,10 @@ class TareaController(
     fun notificarTarea(
         @PathVariable tareaId: Long,
     ): ResponseEntity<Void> {
-        val tarea =
-            tareaRepository.findById(tareaId).orElse(null)
-                ?: return ResponseEntity.notFound().build()
-
-        if (tarea.asignadoA != null) {
-            val tituloNotificacion = "¡Recordatorio de tarea en ${tarea.casa?.nombre ?: "tu piso"}!"
-            val cuerpoNotificacion = "Por favor, no te olvides de: ${tarea.nombre}"
-
-            firebaseMessagingService.enviarAUsuario(
-                usuarioId = tarea.asignadoA!!.id!!,
-                titulo = tituloNotificacion,
-                cuerpo = cuerpoNotificacion,
-            )
-            return ResponseEntity.ok().build()
-        } else {
+        if (!tareaService.notificarTarea(tareaId)) {
             return ResponseEntity.badRequest().build()
         }
+        return ResponseEntity.ok().build()
     }
 
     @PostMapping("/{tareaId}/votar")
@@ -154,21 +56,11 @@ class TareaController(
     fun votarTarea(
         @PathVariable tareaId: Long,
         @RequestParam usuarioId: Long,
-        @RequestParam puntuacion: Int, // 1 (Like), -1 (Dislike)
+        @RequestParam puntuacion: Int,
     ): ResponseEntity<Void> {
-        val tarea = tareaRepository.findById(tareaId).orElse(null) ?: return ResponseEntity.notFound().build()
-        val usuario = usuarioRepository.findById(usuarioId).orElse(null) ?: return ResponseEntity.notFound().build()
-
-        // Buscar si ya había votado antes
-        var preferencia = preferenciaTareaRepository.findByTareaIdAndUsuarioId(tareaId, usuarioId)
-
-        if (preferencia == null) {
-            preferencia = PreferenciaTarea(tarea = tarea, usuario = usuario, puntuacion = puntuacion)
-        } else {
-            preferencia.puntuacion = puntuacion
+        if (!tareaService.votarTarea(tareaId, usuarioId, puntuacion)) {
+            return ResponseEntity.notFound().build()
         }
-
-        preferenciaTareaRepository.save(preferencia)
         return ResponseEntity.ok().build()
     }
 
@@ -177,30 +69,12 @@ class TareaController(
     fun ejecutarRepartoInteligente(
         @PathVariable casaId: Long,
     ): ResponseEntity<String> {
-        val preferencias = preferenciaTareaRepository.findByTareaCasaId(casaId)
-        val casa =
-            casaRepository.findById(casaId).orElse(null)
-                ?: return ResponseEntity.badRequest().body("Casa no encontrada")
-
-        // Contamos cuántos usuarios distintos han participado en la votación
-        val usuariosVotantes = preferencias.mapNotNull { it.usuario?.id }.distinct()
-
-        // Si hay más de 1 miembro en la casa, exigimos al menos 2 votantes
-        if (casa.miembros.size > 1 && usuariosVotantes.size < 1) {
-            return ResponseEntity.badRequest().body(
-                "Faltan votos. Al menos 2 personas deben deslizar antes de repartir las tareas.",
-            )
+        membershipValidator.validateMembership(casaId)
+        val result = tareaService.ejecutarRepartoInteligente(casaId)
+        if (result != "OK") {
+            return ResponseEntity.badRequest().body(result)
         }
-
-        try {
-            asignacionTareasService.repartirTareas(casaId, preferencias)
-
-            preferenciaTareaRepository.deleteAll(preferencias)
-
-            return ResponseEntity.ok("Tareas repartidas con éxito según las preferencias.")
-        } catch (e: Exception) {
-            return ResponseEntity.internalServerError().body("Error al repartir: ${e.message}")
-        }
+        return ResponseEntity.ok("Tareas repartidas con éxito según las preferencias.")
     }
 
     @PutMapping("/{tareaId}/completar")
@@ -208,37 +82,9 @@ class TareaController(
     fun completarTarea(
         @PathVariable tareaId: Long,
     ): ResponseEntity<TareaResponseDTO> {
-        val tarea = tareaRepository.findById(tareaId).orElse(null) ?: return ResponseEntity.notFound().build()
-
-        if (tarea.periodica) {
-            val miembros = tarea.casa?.miembros?.toList() ?: emptyList()
-            if (miembros.isNotEmpty()) {
-                val indexActual = miembros.indexOfFirst { it.id == tarea.asignadoA?.id }
-                val siguienteIndex = (indexActual + 1) % miembros.size
-
-                // Rotamos la tarea (sigue estando incompleta para la próxima semana/turno)
-                tarea.asignadoA = miembros[siguienteIndex]
-                tarea.fechaFin = tarea.fechaFin?.plusDays(7) // rotación semanal
-            }
-        } else {
-            tarea.completado = true
-            // Aquí llamar a logroService.procesarTareaCompletada
-        }
-
-        val tareaGuardada = tareaRepository.save(tarea)
-
         val response =
-            TareaResponseDTO(
-                id = tareaGuardada.id!!,
-                nombre = tareaGuardada.nombre,
-                descripcion = tareaGuardada.descripcion,
-                completado = tareaGuardada.completado,
-                fechaFin = tareaGuardada.fechaFin?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                frecuencia = tareaGuardada.frecuencia,
-                periodica = tareaGuardada.periodica,
-                asignadoA = tareaGuardada.asignadoA?.let { UsuarioDTO(it.id!!, it.nombre, it.correo) },
-                prioridad = tareaGuardada.prioridad,
-            )
+            tareaService.completarTarea(tareaId)
+                ?: return ResponseEntity.notFound().build()
         return ResponseEntity.ok(response)
     }
 }
