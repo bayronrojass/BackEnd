@@ -70,11 +70,11 @@ class ListaService(
             fechaEdicion = lista.fechaEdicion?.toString(),
             propietario =
                 lista.propietario?.let {
-                    UsuarioDTO(it.id ?: 0, it.nombre, it.correo)
+                    UsuarioDTO(it.id ?: 0, it.nombre, it.correo, it.fotoUrl)
                 },
             participantes =
                 lista.participantes.map {
-                    UsuarioDTO(it.id ?: 0, it.nombre, it.correo)
+                    UsuarioDTO(it.id ?: 0, it.nombre, it.correo, it.fotoUrl)
                 },
         )
 }

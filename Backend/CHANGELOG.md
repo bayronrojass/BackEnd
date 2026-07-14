@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-07-13
+
+### Added
+
+- **Cursor-safe pagination on high-traffic list endpoints**: Introduced Spring Data `Pageable` across the read paths that previously returned unbounded collections. Repository methods now use JPQL with explicit `countQuery` for accurate `totalElements` / `totalPages`, and JOIN FETCH is restricted to single-valued (`@ManyToOne`) associations so Hibernate can push `LIMIT`/`OFFSET` to the database (no `HHH000104` in-memory paging).
+  - `GET /casas/{casaId}/gastos` — expense history. Default: page size 20, sorted by `fechaInicio DESC` (newest first). Repo: `GastoRepository.findByCasaIdPaged(casaId, pageable)` — paged via `Casa.gastos` collection join since `Gasto` has no direct `casa` back-reference.
+  - `GET /casas/{casaId}/tareas` — tasks board. Default: page size 20, sorted by `fechaFin ASC` (upcoming first). Optional `?completado=true|false` filter for the "completed tasks board" view. Repos: `TareaRepository.findByCasaIdPaged` and `findByCasaIdAndCompletadoPaged`.
+- **Standard `Page<T>` response contract**: Both endpoints now return Spring's `Page<T>` JSON shape (`content`, `totalElements`, `totalPages`, `size`, `number`, `first`, `last`, `numberOfElements`, `empty`) instead of a bare JSON array. Consumers can drive infinite-scroll or classic pagination off `number` + `totalPages`.
+- **Query parameters accepted by Spring**: `?page=N&size=N&sort=field,DIR` (repeat `sort` for multi-field). Defaults kick in when omitted, so existing frontend calls that pass no params still work — they just receive page 0.
+
+### Changed
+
+- **`Gasto.beneficiarios` — `@BatchSize(size = 30)`**: Added Hibernate batch loading on the `@ElementCollection` of beneficiary strings. Without this, a page of 20 gastos triggers 20 extra queries to hydrate beneficiarios (N+1 within the page); with it, Hibernate collapses those into a single `IN (…)` fetch. Keeps DB round-trips flat regardless of page size.
+- **`GastoService.getGastosByCasaId(casaId, pageable)`**: New paginated overload replacing the unbounded list variant. Returns `Page<GastoResponseDTO>` via `Page.map` (streams the transform without materializing the full result set).
+- **`TareaService.getTareasByCasaId(casaId, completado, pageable)`**: New paginated overload with optional completion filter. Delegates to the appropriate repo method based on whether `completado` is supplied.
+
+### Fixed
+
+- **`GastoRepository.findByCasaIdPaged` — wrong sort alias (400 Bad Request)**: The initial JPQL query `SELECT g FROM Casa c JOIN c.gastos g …` put `Casa` as the first FROM alias, so Spring Data attached the `Pageable` sort to `c` and generated `ORDER BY c.fechaInicio DESC` — but `fechaInicio` lives on `Gasto`, not `Casa`. Rewrote as `SELECT g FROM Gasto g LEFT JOIN FETCH g.pagadoPor WHERE g IN (SELECT gc FROM Casa c JOIN c.gastos gc WHERE c.id = :casaId)` so `Gasto` is the primary root and the sort correctly targets `g.fechaInicio`. Same restructure applied to the `countQuery`.
+- **Jackson infinite recursion on `GET /casas/{casaId}/listas` (Max Nesting Depth Exceeded)**: The response returns `List<Lista>` directly and Jackson followed the cycle `Lista.propietario (Usuario) → Usuario.casas (Set<Casa>) → Casa.listas → Lista → …`. `Lista.casa` already carried `@JsonIgnore`, but the inverse-side collections on `Usuario` were unprotected. Annotated the four back-reference collections on `Usuario` with `@JsonIgnore`:
+  - `Usuario.casas` — breaks the primary reported cycle
+  - `Usuario.casasAdministradas` — breaks the parallel admin cycle via `Casa.administradores`
+  - `Usuario.tokens` — Firebase tokens are internal auth state, never belong in list responses
+  - `Usuario.logrosProgreso` — achievements are served by a dedicated endpoint and should not leak into every Usuario serialization
+  - JPA fetch semantics are unchanged; only the JSON view is filtered. Endpoints that intentionally expose these collections (if any) must switch to explicit DTO mapping.
+- **Profile / ranking avatars silently 401 (`SecurityConfig`)**: The `/multimedia/**` resource handler (which serves user photos and ticket images) was falling through the `.anyRequest().authenticated()` catch-all in `SecurityConfig`. Coil, on Android, fires its own HTTP requests entirely outside Retrofit — it never passes through `AuthInterceptor` and never attaches the `Bearer` token — so every image GET was returning `401 Unauthorized` and rendering as the fallback letter placeholder. Added an explicit `.requestMatchers("/multimedia/**").permitAll()` rule ahead of the catch-all. Public read access is intended for these files: they are user-uploaded avatars and expense tickets referenced by opaque UUID filenames.
+- **`UsuarioService` query redundancy on photo update (3 SELECTs collapsed to 1)**: The service had no `@Transactional`, so `findById(id)` opened and closed its own tx, and the returned entity became **detached**. The subsequent `usuarioRepository.save(usuario)` then opened a *second* tx, ran `merge()` — which fires an extra SELECT to load the current row before UPDATE — and closed. That produced the log's redundant `select … from usuario where id=?` pattern. Annotated `UsuarioService` `@Transactional` (class-level) with `@Transactional(readOnly = true)` on `findAll` for the query-only path. Removed the now-unnecessary explicit `save()` call — the entity is managed inside the transaction, so field mutation is dirty-tracked and a single `UPDATE` fires on commit. Applied to both `actualizarFotoPerfil` and `eliminarFotoPerfil`. Result: 1 SELECT (findById) + 1 UPDATE — plus the unavoidable auth-filter SELECT that Spring Security itself performs to hydrate the principal.
+- **`fotoUrl` silently dropped from Tarea / Lista responses**: Multiple service DTO builders were constructing `UsuarioDTO(it.id!!, it.nombre, it.correo)` with the 3-arg constructor — which is legal Kotlin because `UsuarioDTO.fotoUrl` has a `null` default — but it meant every task assignee and every list participant landed on the client with `fotoUrl = null`, so the Android app fell back to the initial-letter placeholder even after the `/multimedia/**` permitAll fix. Fixed the call sites so the `fotoUrl` propagates end-to-end:
+  - `TareaService.toResponseDTO` — routes `tarea.asignadoA` through the existing `Usuario.toDTO()` extension (which was already correct), covering every read path that emits `TareaResponseDTO` (list, create, update, complete, paged, etc.).
+  - `ListaService.convertirADTO` — both `propietario` and each `participante` now pass `it.fotoUrl` explicitly to the 4-arg `UsuarioDTO` constructor.
+
+### Notes
+
+- **Frontend contract change (breaking)**: Response shape for the two endpoints changes from `[…]` to `{ content: […], totalElements, totalPages, size, number, … }`. Android `RepositoryGasto` and task board Repositories must be updated to unwrap `.content` (follow-up frontend task, not included in this backend release).
+- **`CasaRepository.findByIdWithGastos` retained**: Still used by `PdfService.generarResumenGastosPdf` to load the full expense list for the summary PDF (a one-off, admin-triggered export where full materialization is intentional).
+
 ## [0.3.0] - 2026-07-12
 
 ### Security

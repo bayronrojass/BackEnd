@@ -4,6 +4,7 @@ import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
+import org.hibernate.annotations.BatchSize
 import org.pin.backend.model.enums.CategoriaGasto
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -35,5 +36,6 @@ class Gasto(
     var pagos: MutableSet<Pago> = mutableSetOf(),
     @ElementCollection
     @CollectionTable(name = "gasto_beneficiarios")
+    @BatchSize(size = 30)
     var beneficiarios: MutableSet<String> = mutableSetOf(),
 )

@@ -1,6 +1,6 @@
 package org.pin.backend.service
 
-import org.pin.backend.dto.Data.UsuarioDTO
+import org.pin.backend.dto.Data.toDTO
 import org.pin.backend.dto.Request.TareaRequestDTO
 import org.pin.backend.dto.Response.TareaResponseDTO
 import org.pin.backend.model.PreferenciaTarea
@@ -9,6 +9,8 @@ import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.PreferenciaTareaRepository
 import org.pin.backend.repository.TareaRepository
 import org.pin.backend.repository.UsuarioRepository
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -29,12 +31,18 @@ class TareaService(
     fun findAll() = repo.findAll()
 
     @Transactional(readOnly = true)
-    fun getTareasByCasaId(casaId: Long): List<TareaResponseDTO>? {
-        val casa = casaRepository.findByIdWithTareas(casaId) ?: return null
-
-        return casa.tareas.map { tarea ->
-            toResponseDTO(tarea)
-        }
+    fun getTareasByCasaId(
+        casaId: Long,
+        completado: Boolean?,
+        pageable: Pageable,
+    ): Page<TareaResponseDTO> {
+        val page =
+            if (completado != null) {
+                repo.findByCasaIdAndCompletadoPaged(casaId, completado, pageable)
+            } else {
+                repo.findByCasaIdPaged(casaId, pageable)
+            }
+        return page.map(::toResponseDTO)
     }
 
     fun crearTareaEnCasa(
@@ -219,7 +227,7 @@ class TareaService(
             fechaFin = tarea.fechaFin?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             frecuencia = tarea.frecuencia,
             periodica = tarea.periodica,
-            asignadoA = tarea.asignadoA?.let { UsuarioDTO(it.id!!, it.nombre, it.correo) },
+            asignadoA = tarea.asignadoA?.toDTO(),
             prioridad = tarea.prioridad,
         )
 }

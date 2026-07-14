@@ -8,6 +8,10 @@ import org.pin.backend.security.CasaMembershipValidator
 import org.pin.backend.service.GastoIAService
 import org.pin.backend.service.GastoService
 import org.pin.backend.service.PdfService
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
+import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -28,12 +32,11 @@ class GastoController(
     @Transactional(readOnly = true)
     fun getGastosByCasaId(
         @PathVariable casaId: Long,
-    ): ResponseEntity<List<GastoResponseDTO>> {
+        @PageableDefault(size = 20, sort = ["fechaInicio"], direction = Sort.Direction.DESC)
+        pageable: Pageable,
+    ): ResponseEntity<Page<GastoResponseDTO>> {
         membershipValidator.validateMembership(casaId)
-        val gastos =
-            gastoService.getGastosByCasaId(casaId)
-                ?: return ResponseEntity.notFound().build()
-        return ResponseEntity.ok(gastos)
+        return ResponseEntity.ok(gastoService.getGastosByCasaId(casaId, pageable))
     }
 
     @PostMapping("/{casaId}/crearGasto")

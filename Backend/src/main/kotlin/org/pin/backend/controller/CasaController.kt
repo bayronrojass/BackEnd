@@ -23,6 +23,10 @@ import org.pin.backend.service.ImagenService
 import org.pin.backend.service.PostItService
 import org.pin.backend.service.TareaService
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
+import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
@@ -137,12 +141,12 @@ class CasaController(
     @Transactional(readOnly = true)
     fun getTareasByCasaId(
         @PathVariable casaId: Long,
-    ): ResponseEntity<List<TareaResponseDTO>> {
+        @RequestParam(required = false) completado: Boolean?,
+        @PageableDefault(size = 20, sort = ["fechaFin"], direction = Sort.Direction.ASC)
+        pageable: Pageable,
+    ): ResponseEntity<Page<TareaResponseDTO>> {
         membershipValidator.validateMembership(casaId)
-        val tareas =
-            tareaService.getTareasByCasaId(casaId)
-                ?: return ResponseEntity.notFound().build()
-        return ResponseEntity.ok(tareas)
+        return ResponseEntity.ok(tareaService.getTareasByCasaId(casaId, completado, pageable))
     }
 
     @PostMapping("/{casaId}/tareas")

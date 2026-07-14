@@ -25,12 +25,16 @@ class Usuario(
     var fotoUrl: String? = null,
     @Column(nullable = false)
     var puntosConvivencia: Int = 0,
+    @JsonIgnore
     @ManyToMany(mappedBy = "miembros", fetch = FetchType.LAZY)
     var casas: MutableSet<Casa> = mutableSetOf(),
+    @JsonIgnore
     @ManyToMany(mappedBy = "administradores", fetch = FetchType.LAZY)
     var casasAdministradas: MutableSet<Casa> = mutableSetOf(),
+    @JsonIgnore
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
     var tokens: MutableSet<FirebaseToken> = mutableSetOf(),
+    @JsonIgnore
     @OneToMany(mappedBy = "usuario", cascade = [CascadeType.ALL], orphanRemoval = true)
     var logrosProgreso: MutableSet<UsuarioLogro> = mutableSetOf(),
 )

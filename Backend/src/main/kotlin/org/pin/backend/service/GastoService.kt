@@ -7,6 +7,8 @@ import org.pin.backend.model.enums.CategoriaGasto
 import org.pin.backend.repository.CasaRepository
 import org.pin.backend.repository.GastoRepository
 import org.pin.backend.repository.UsuarioRepository
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
@@ -26,23 +28,23 @@ class GastoService(
     fun findAll() = repo.findAll()
 
     @Transactional(readOnly = true)
-    fun getGastosByCasaId(casaId: Long): List<GastoResponseDTO>? {
-        val casa = casaRepository.findByIdWithGastos(casaId) ?: return null
+    fun getGastosByCasaId(
+        casaId: Long,
+        pageable: Pageable,
+    ): Page<GastoResponseDTO> = repo.findByCasaIdPaged(casaId, pageable).map(::toResponseDTO)
 
-        return casa.gastos.map { gasto ->
-            GastoResponseDTO(
-                id = gasto.id!!,
-                nombre = gasto.nombre,
-                descripcion = gasto.descripcion,
-                importe = gasto.importe,
-                fecha = gasto.fechaInicio.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                categoria = gasto.categoria.name,
-                pagadoPorNombre = gasto.pagadoPor?.nombre ?: "Desconocido",
-                beneficiarios = gasto.beneficiarios.toMutableList(),
-                fotoTicketUrl = gasto.fotoTicketUrl,
-            )
-        }
-    }
+    private fun toResponseDTO(gasto: Gasto): GastoResponseDTO =
+        GastoResponseDTO(
+            id = gasto.id!!,
+            nombre = gasto.nombre,
+            descripcion = gasto.descripcion,
+            importe = gasto.importe,
+            fecha = gasto.fechaInicio.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            categoria = gasto.categoria.name,
+            pagadoPorNombre = gasto.pagadoPor?.nombre ?: "Desconocido",
+            beneficiarios = gasto.beneficiarios.toMutableList(),
+            fotoTicketUrl = gasto.fotoTicketUrl,
+        )
 
     fun crearGasto(
         casaId: Long,
