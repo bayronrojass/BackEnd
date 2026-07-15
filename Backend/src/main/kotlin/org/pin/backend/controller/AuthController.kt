@@ -1,9 +1,11 @@
 package org.pin.backend.controller
 
 import org.pin.backend.dto.Data.CasaDTO
-import org.pin.backend.dto.Data.UsuarioDTO
+import org.pin.backend.dto.Data.toDTO
 import org.pin.backend.dto.Request.LoginRequest
+import org.pin.backend.dto.Request.RegistroRequest
 import org.pin.backend.dto.Response.LoginResponse
+import org.pin.backend.model.Usuario
 import org.pin.backend.repository.UsuarioRepository
 import org.pin.backend.security.JwtService
 import org.springframework.http.HttpStatus
@@ -36,13 +38,6 @@ class AuthController(
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
 
-        val usuarioDTO =
-            UsuarioDTO(
-                id = usuario.id!!,
-                nombre = usuario.nombre,
-                correo = usuario.correo,
-            )
-
         val casasDTO =
             usuario.casas.map { casa ->
                 CasaDTO(
@@ -56,13 +51,46 @@ class AuthController(
 
         val token = jwtService.generateToken(usuario.id!!, usuario.correo)
 
-        val response =
+        return ResponseEntity.ok(
             LoginResponse(
                 authToken = token,
                 flats = casasDTO,
-                user = usuarioDTO,
+                user = usuario.toDTO(),
+            ),
+        )
+    }
+
+    @PostMapping("/api/auth/register")
+    @Transactional
+    fun register(
+        @RequestBody request: RegistroRequest,
+    ): ResponseEntity<LoginResponse> {
+        if (request.nombre.isBlank() || request.correo.isBlank() || request.contrasena.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
+        }
+
+        if (usuarioRepository.findByCorreo(request.correo).isPresent) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build()
+        }
+
+        val nuevoUsuario =
+            Usuario(
+                nombre = request.nombre.trim(),
+                correo = request.correo.trim(),
+                contrasena = passwordEncoder.encode(request.contrasena),
+                fotoUrl = request.fotoUrl,
+                puntosConvivencia = 0,
             )
 
-        return ResponseEntity.ok(response)
+        val guardado = usuarioRepository.save(nuevoUsuario)
+        val token = jwtService.generateToken(guardado.id!!, guardado.correo)
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            LoginResponse(
+                authToken = token,
+                flats = emptyList(),
+                user = guardado.toDTO(),
+            ),
+        )
     }
 }

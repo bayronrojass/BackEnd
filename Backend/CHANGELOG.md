@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-07-14 - Phase 4: Registration & UI consistency
+
+### Added
+
+- **`POST /api/auth/register` — new registration endpoint (`AuthController`)**: Accepts `RegistroRequest(nombre, correo, contrasena, fotoUrl?)` and returns the same `LoginResponse(authToken, flats, user)` shape as `/login` so the frontend can share auth-flow handling and auto-log-in on success. Password is hashed with the existing `BCryptPasswordEncoder` bean before persistence — plaintext never touches the DB. Validation:
+  - Blank `nombre` / `correo` / `contrasena` → `400 Bad Request`.
+  - Duplicate email (`usuarioRepository.findByCorreo(...).isPresent`) → `409 Conflict`.
+  - New user starts with `puntosConvivencia = 0` and `flats = emptyList()` (they'll create or join a casa afterwards).
+  - JWT minted via the existing `JwtService.generateToken(userId, email)` — same signing key + expiration as login.
+- **`RegistroRequest` DTO** (`dto/Request/RegistroRequest.kt`) — 4-field data class matching the endpoint.
+
+### Fixed
+
+- **Login response was silently dropping `fotoUrl` (`AuthController.login`)**: Same category of bug we fixed in `TareaService` / `ListaService` under `[0.4.0]`. The login handler built `UsuarioDTO(id, nombre, correo)` (3-arg constructor, `fotoUrl` defaults to `null`), so a freshly-logged-in user never saw their own photo on the home screen — only after a subsequent `GET /usuarios/{id}` refresh. Replaced with the `Usuario.toDTO()` extension (which passes `fotoUrl` through). Drive-by fix while adding the register endpoint.
+
+### Notes
+
+- **`SecurityConfig` — no change needed**: `/api/auth/**` was already on `.permitAll()` from Phase 2's IDOR-hardening pass. The new endpoint drops straight through the security filter without any config change.
+- **`AuthController.@RequestMapping()`**: Kept the class-level mapping empty (rather than migrating to `@RequestMapping("/api/auth")`) so the existing `POST /login` endpoint — which the current frontend and any external integrations hit at the wire root — stays unchanged. The new register handler carries its own full `/api/auth/register` path.
+
 ## [0.4.0] - 2026-07-13
 
 ### Added
