@@ -39,6 +39,7 @@ class PostItController(
                     postIt.localizacion,
                     postIt.tipo,
                     postIt.rutaAudio,
+                    postIt.colorNota,
                 ),
             )
         }
@@ -90,6 +91,26 @@ class PostItController(
         return ResponseEntity.notFound().build()
     }
 
+    /**
+     * Persist the pastel background color chosen from the "Color de la nota" selector
+     * in the expanded drawing view. Body is the raw hex string (`#FFF9C4`). Nullable
+     * on the entity, so passing an empty string clears it (client falls back to yellow).
+     */
+    @PutMapping("/{id}/color-nota")
+    fun updateColorNota(
+        @PathVariable id: Long,
+        @RequestBody color: String,
+    ): ResponseEntity<Boolean> {
+        val opt = service.getById(id)
+        if (opt.isEmpty) return ResponseEntity.notFound().build()
+        val postIt =
+            opt.get() as? org.pin.backend.model.PostIt
+                ?: return ResponseEntity.badRequest().build()
+        postIt.colorNota = color.takeIf { it.isNotBlank() }
+        service.save(postIt)
+        return ResponseEntity.ok(true)
+    }
+
     // NUEVO ENDPOINT: Sube el audio y crea la nota en la pizarra
     @PostMapping("/casa/{casaId}/audio", consumes = ["multipart/form-data"])
     fun createAudioPostIt(
@@ -114,6 +135,7 @@ class PostItController(
                 nuevoAudio.localizacion,
                 nuevoAudio.tipo,
                 nuevoAudio.rutaAudio,
+                nuevoAudio.colorNota,
             ),
         )
     }

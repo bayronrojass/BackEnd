@@ -94,6 +94,36 @@ class LienzoService(
         return save(lienzo)
     }
 
+    /**
+     * Overwrite an existing lienzo's byte array with a blank white bitmap of its current
+     * dimensions and re-stamp `lastEdited = Instant.now()` so the next `isUpdated` poll
+     * on any client sees the change and re-fetches. Called by the frontend "Borrar"
+     * button so the clear is truly permanent — no ghost strokes resurrect on next stroke
+     * (server-composited canvas is truly empty) or on reopen (fetch returns blank).
+     *
+     * Uses WHITE fill to match the Android client's local `clearCanvas()` behavior (see
+     * `PizarraView.clearCanvas` — `eraseColor(Color.WHITE)`). Any subsequent strokes
+     * composite onto that white canvas, matching what the user expects visually.
+     */
+    fun clearLienzo(id: Long): ResponseEntity<Boolean> {
+        val lienzo = repo.findById(id).orElse(null) ?: return ResponseEntity.notFound().build()
+        val width = lienzo.width.toInt()
+        val height = lienzo.height.toInt()
+
+        val bufferedImage = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
+        val graphics = bufferedImage.createGraphics()
+        graphics.color = Color.WHITE
+        graphics.fillRect(0, 0, width, height)
+        graphics.dispose()
+
+        lienzo.bytes = Lienzo4bpp.encodeImage(bufferedImage)
+        lienzo.lastEdited = Instant.now()
+        lienzo.comprimirBytes()
+        save(lienzo)
+        logger.info("Lienzo $id cleared to blank white")
+        return ResponseEntity.ok(true)
+    }
+
     @OptIn(ExperimentalTime::class)
     fun applyDelta(
         id: Long,

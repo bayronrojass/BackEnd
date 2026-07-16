@@ -185,6 +185,7 @@ class CasaController(
                     localizacion = postIt.localizacion,
                     tipo = postIt.tipo,
                     rutaAudio = postIt.rutaAudio,
+                    colorNota = postIt.colorNota,
                 ),
             )
         }
@@ -217,6 +218,7 @@ class CasaController(
                             localizacion = it.localizacion,
                             tipo = it.tipo ?: "DIBUJO",
                             rutaAudio = it.rutaAudio,
+                            colorNota = it.colorNota,
                         )
                     }.toList()
             return ResponseEntity.ok(lista)

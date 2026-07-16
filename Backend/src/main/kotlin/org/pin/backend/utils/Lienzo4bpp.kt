@@ -8,17 +8,30 @@ class Lienzo4bpp(
     val bytes: ByteArray,
 ) {
     companion object {
+        /**
+         * Palette must match `PizarraView.createPaint` on the Android client EXACTLY —
+         * strokes come in on the wire as `PointDeltaDTO.color: Byte`, and that byte is
+         * used as a direct index into this array (see `LienzoService.applyDelta`). Any
+         * drift between client-brush byte and this palette slot silently repaints
+         * strokes in the wrong color when the server-composited bitmap is fetched.
+         *
+         * Order matches the "Color del pincel" selector in the mockup:
+         *   1=Yellow, 2=Green, 3=Blue, 4=Purple, 5=Fuchsia, 6=Black, 7=White.
+         * Index 0 stays transparent for pixel fills that never draw. Index 8 is a
+         * white-duplicate padding slot kept only to preserve the 9-entry array size
+         * used by the compact 4bpp encoding.
+         */
         val palette =
             arrayOf(
-                0x00000000.toInt(), // transparente
-                0xFF000000.toInt(), // negro
-                0xFFFF0000.toInt(), // rojo
-                0xFF00FF00.toInt(), // verde
-                0xFF0000FF.toInt(), // azul
-                0xFFFFFF00.toInt(), // amarillo
-                0xFFFF00FF.toInt(), // magenta
-                0xFF00FFFF.toInt(), // cyan
-                0xFFFFFFFF.toInt(), // blanco
+                0x00000000.toInt(), // 0: transparente
+                0xFFFBC02D.toInt(), // 1: yellow  — client brush 1
+                0xFF388E3C.toInt(), // 2: green   — client brush 2
+                0xFF1976D2.toInt(), // 3: blue    — client brush 3
+                0xFF673AB7.toInt(), // 4: purple  — client brush 4
+                0xFFE91E63.toInt(), // 5: fuchsia — client brush 5
+                0xFF000000.toInt(), // 6: black   — client brush 6
+                0xFFFFFFFF.toInt(), // 7: white   — client brush 7
+                0xFFFFFFFF.toInt(), // 8: (padding — unused index, kept for array size)
             )
 
         fun encodeImage(image: BufferedImage): ByteArray {

@@ -10,4 +10,7 @@ open class PostItDTO(
     val localizacion: String,
     val tipo: String = "DIBUJO",
     val rutaAudio: String? = null,
+    // Hex-string background color of the note ("#FFF9C4"). Nullable — omitted for
+    // legacy post-its (client defaults to yellow) and for AUDIO/IMAGEN types.
+    val colorNota: String? = null,
 )

@@ -79,4 +79,15 @@ class LienzoController(
         @PathVariable id: Long,
         @RequestBody delta: List<PointDeltaDTO>,
     ): ResponseEntity<Boolean> = service.applyDelta(id, delta)
+
+    /**
+     * Wipe the server-side composited bitmap for this lienzo to a blank white surface.
+     * Frontend calls this from the "Borrar" control-panel button so pre-clear strokes
+     * don't resurrect on the next `applyDelta` (server had been compositing new deltas
+     * onto the old bitmap) or on the next poll fetch (server was returning old bytes).
+     */
+    @PutMapping("/{id}/clear")
+    fun clearLienzo(
+        @PathVariable id: Long,
+    ): ResponseEntity<Boolean> = service.clearLienzo(id)
 }
